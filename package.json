@@ -1,0 +1,40 @@
+{
+  "dependencies": {
+    "@types/source-map-support": "^0.5.6",
+    "bcryptjs": "^2.4.3",
+    "bson": "latest",
+    "crypto": "latest",
+    "dgram": "latest",
+    "mongodb": "^5.1.0",
+    "net": "latest",
+    "nodemon": "^2.0.22",
+    "pkg": "^5.8.0",
+    "source-map-support": "^0.5.21",
+    "ws": "latest"
+  },
+  "scripts": {
+    "start:dev": "npx nodemon",
+    "build": "rimraf ./build && tsc -sourcemap",
+    "start": "npm run build && node build/server.js"
+  },
+  "name": "epicgameserver",
+  "version": "1.0.0",
+  "main": "server.js",
+  "bin": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KateOnBush/EpicGameServer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KateOnBush/EpicGameServer/issues"
+  },
+  "homepage": "https://github.com/KateOnBush/EpicGameServer#readme",
+  "description": "",
+  "devDependencies": {
+    "@types/ws": "^8.5.4",
+    "rimraf": "^5.0.0"
+  }
+}
