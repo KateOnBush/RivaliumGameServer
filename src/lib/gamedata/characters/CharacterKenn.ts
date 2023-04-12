@@ -1,10 +1,10 @@
 import Lag from "../../tools/Lag";
 import Ability from "../../components/Ability";
-import { ABILITY_TYPE } from "../../enums/EAbilityType";
+import EAbilityType from "../../enums/EAbilityType";
 import Character from "../../components/Character";
 import Player, { EFFECT } from "../../components/Player";
 import { ActiveAbilityData, NoAbilityData } from "../../components/sub/AbilityData";
-import { EMPTY_METHOD } from "../../../constants";
+import { EMPTY_METHOD } from "../../Macros";
 
 export default Character.builder(
 
@@ -14,7 +14,7 @@ export default Character.builder(
 
     [
     
-        new Ability(ABILITY_TYPE.ONETIME, [0.3, 2], NoAbilityData, function(n: number, player: Player) {
+        new Ability(EAbilityType.ONETIME, [0.3, 2], NoAbilityData, function(n: number, player: Player) {
             if (!player.game) return;
             var pred = Lag.predictNextPosition(player);
             let inUlt = player.char.abilities[3].data.active;
@@ -36,15 +36,15 @@ export default Character.builder(
             }
         }),
 
-        new Ability(ABILITY_TYPE.ACTIVE, [18], new ActiveAbilityData(12), EMPTY_METHOD),
+        new Ability(EAbilityType.ACTIVE, [18], new ActiveAbilityData(12), EMPTY_METHOD),
 
-        new Ability(ABILITY_TYPE.ACTIVE, [13], new ActiveAbilityData(8), function(n: number, player: Player){
+        new Ability(EAbilityType.ACTIVE, [13], new ActiveAbilityData(8), function(n: number, player: Player){
 
             player.addEffect(EFFECT.ACCELERATE, 8, {multiplier: 1.45});
 
         }),
 
-        new Ability(ABILITY_TYPE.ACTIVE, [60], new ActiveAbilityData(25), EMPTY_METHOD)
+        new Ability(EAbilityType.ACTIVE, [60], new ActiveAbilityData(25), EMPTY_METHOD)
 
     ]
 

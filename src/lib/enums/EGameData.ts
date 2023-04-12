@@ -1,11 +1,15 @@
-export enum GameType {
+export enum EGameType {
+
     NORMAL,
     RANKED,
     EXCLUSIVE
+
 }
 
-export enum GameState {
+export enum EGameState {
+
     STARTING,
     ONGOING,
     ENDING
+
 }

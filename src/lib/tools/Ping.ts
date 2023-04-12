@@ -1,24 +1,25 @@
-import { dataSize } from "../../constants";
-import { RESPONSE } from "../enums/EPacketTypes";
+import { dataSize } from "../Macros";
+import { EServerResponse } from "../enums/EPacketTypes";
 import IPlayerSocket from "../interfaces/IPlayerSocket";
+import Game from '../components/Game';
+import GMBuffer from "./GMBuffer";
+import EBufferType from "../enums/EBufferType";
 
 
 export default class Ping {
 
 	static ping(clients: IPlayerSocket[]) {
 
-		clients.forEach(c=>{
+		let b = GMBuffer.allocate(dataSize);
+		b.write(EServerResponse.PING, EBufferType.UInt8);
+		b.write(0, EBufferType.UInt8);
 
-			c.sentPing = performance.now();
-	
-			let b = Buffer.alloc(dataSize);
-	
-			b.writeUInt8(RESPONSE.PING, 0);
-			b.writeUInt8(0, 1);
-	
-			c.send(b);
-	
+		clients.forEach(c=>{
+			if (!c.player) return;
+			c.player.ping.lastSent = performance.now();
+			c.player.send(b);
 		})
+	
 	}
 
 }

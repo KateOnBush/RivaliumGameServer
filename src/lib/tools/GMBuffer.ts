@@ -1,4 +1,4 @@
-import { BType } from "../enums/EBufferValueType";
+import EBufferType from "../enums/EBufferType";
 
 export default class GMBuffer {
 
@@ -22,45 +22,45 @@ export default class GMBuffer {
 
     private constructor(){}
 
-    write(value: any, type: BType){
+    write(value: any, type: EBufferType){
 
         switch(type){
 
-            case BType.UInt8: {
+            case EBufferType.UInt8: {
                 this.buffer.writeUInt8(value, this.index);
                 this.index++;
                 break;
             }
-            case BType.SInt8: {
+            case EBufferType.SInt8: {
                 this.buffer.writeInt8(value, this.index);
                 this.index++;
                 break;
             }
 
-            case BType.UInt16: {
+            case EBufferType.UInt16: {
                 this.buffer.writeUInt16LE(value, this.index);
                 this.index+=2;
                 break;
             }
-            case BType.SInt16: {
+            case EBufferType.SInt16: {
                 this.buffer.writeInt16LE(value, this.index);
                 this.index+=2;
                 break;
             }
             
-            case BType.UInt32: {
+            case EBufferType.UInt32: {
                 this.buffer.writeUInt32LE(value, this.index);
                 this.index+=4;
                 break;
             }
-            case BType.SInt32: {
+            case EBufferType.SInt32: {
                 this.buffer.writeInt32LE(value, this.index);
                 this.index+=4;
                 break;
             }
 
 
-            case BType.Float32: {
+            case EBufferType.Float32: {
                 this.buffer.writeFloatLE(value, this.index);
                 this.index+=4;
                 break;
@@ -74,45 +74,45 @@ export default class GMBuffer {
 
     }
 
-    read(type: BType){
+    read(type: EBufferType){
 
         switch(type){
 
-            case BType.UInt8: {
+            case EBufferType.UInt8: {
                 let value = this.buffer.readUInt8(this.index);
                 this.index++;
                 return value;
             }
-            case BType.SInt8: {
+            case EBufferType.SInt8: {
                 let value = this.buffer.readInt8(this.index);
                 this.index++;
                 return value;
             }
 
-            case BType.UInt16: {
+            case EBufferType.UInt16: {
                 let value = this.buffer.readUInt16LE(this.index);
                 this.index+=2;
                 return value;
             }
-            case BType.SInt16: {
+            case EBufferType.SInt16: {
                 let value = this.buffer.readInt16LE(this.index);
                 this.index+=2;
                 return value;
             }
             
-            case BType.UInt32: {
+            case EBufferType.UInt32: {
                 let value = this.buffer.readUInt32LE(this.index);
                 this.index+=4;
                 return value;
             }
-            case BType.SInt32: {
+            case EBufferType.SInt32: {
                 let value = this.buffer.readInt32LE(this.index);
                 this.index+=4;
                 return value;
             }
 
 
-            case BType.Float32: {
+            case EBufferType.Float32: {
                 let value = this.buffer.readFloatLE(this.index);
                 this.index+=4;
                 return value;
@@ -134,7 +134,7 @@ export default class GMBuffer {
         return this.index;
     }
 
-    peek(type: BType, index: number){
+    peek(type: EBufferType, index: number){
         let lastIndex = this.index;
         this.seek(index);
         let val = this.read(type);
@@ -142,7 +142,7 @@ export default class GMBuffer {
         return val;
     }
 
-    poke(value: any, type: BType, index: number){
+    poke(value: any, type: EBufferType, index: number){
         let lastIndex = this.index;
         this.seek(index);
         let val = this.write(value, type);

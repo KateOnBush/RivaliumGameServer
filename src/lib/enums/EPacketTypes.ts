@@ -1,4 +1,4 @@
-export enum REQUEST {
+export enum EServerRequest {
 
     POSITION_UPDATE = 2,
     GRAPPLING_POSITION,
@@ -13,20 +13,25 @@ export enum REQUEST {
 
 }
 
-export enum RESPONSE {
+export enum EServerResponse {
 
     PLAYER_JOIN = 1,
     PLAYER_UPDATE,
     PLAYER_GRAPPLE,
     PLAYER_FLIP,
+	PLAYER_HIT,
+	PLAYER_ABILITY_CAST,
+	
+	EFFECT_ADD,
+	
     PING,
     PROJECTILE_CREATE,
-    PLAYER_HIT,
-    PROJECTILE_DESTROY,
-    PLAYER_ABILITY_CAST,
-    EFFECT_ADD,
-    EXPLOSION_CREATE,
     PROJECTILE_UPDATE,
+    PROJECTILE_DESTROY,
+    
+    EXPLOSION_CREATE,
+    
+	ENTITY_CREATE,
     ENTITY_UPDATE,
     ENTITY_DESTROY
 

@@ -1,6 +1,6 @@
-import CharacterGramin from "./game/characters/CharacterGramin";
-import CharacterKenn from "./game/characters/CharacterKenn";
-import CharacterLenya from "./game/characters/CharacterLenya";
+import CharacterGramin from "./characters/CharacterGramin";
+import CharacterKenn from "./characters/CharacterKenn";
+import CharacterLenya from "./characters/CharacterLenya";
 
 export default class CharacterRepository {
 

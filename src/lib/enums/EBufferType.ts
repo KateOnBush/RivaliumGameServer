@@ -1,4 +1,4 @@
-export enum BType {
+enum EBufferType {
 
     UInt8,
     UInt16,
@@ -11,3 +11,5 @@ export enum BType {
     Float32
 
 }
+
+export default EBufferType;

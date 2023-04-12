@@ -1,4 +1,4 @@
-import Vector2 from "./lib/tools/vector/Vector2";
+import Vector2 from "./tools/vector/Vector2";
 
 export const serverPort = 2003;
 

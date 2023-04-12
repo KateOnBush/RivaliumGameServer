@@ -24,7 +24,7 @@ export default class Explosion extends GameElement implements ILifetimedElement,
         this.radius = radius;
         this.damage = damage;
 
-        this.lifespanTimeout = setTimeout(()=>this.destroy(), this.lifespan);
+        this.lifespanTimeout = setTimeout(()=>this.destroy(), this.lifespan * 1000);
 
     }
     

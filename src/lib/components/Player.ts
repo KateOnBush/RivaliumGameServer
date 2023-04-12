@@ -1,6 +1,6 @@
-import CharacterRepository from "../CharacterRepository";
-import { dataSize } from "../../constants";
-import { RESPONSE } from "../enums/EPacketTypes";
+import CharacterRepository from "../gamedata/CharacterRepository";
+import { dataSize } from "../Macros";
+import { EServerResponse } from "../enums/EPacketTypes";
 import ICharacter from "../interfaces/ICharacter";
 import PlayerSocket from "../interfaces/IPlayerSocket";
 import GMBuffer from "../tools/GMBuffer";
@@ -23,7 +23,6 @@ export enum EFFECT {
 export default class Player extends GamePhysicalElement {
 
     socket: PlayerSocket;
-    id: number;
     charid: number;
 
     mouse: Vector2 = new Vector2();
@@ -31,8 +30,6 @@ export default class Player extends GamePhysicalElement {
 
     char: ICharacter;
     ping: PlayerPing = new PlayerPing();
-
-    game?: Game = undefined;
 
     effectTimeouts: NodeJS.Timeout[] = [];
 
@@ -66,7 +63,7 @@ export default class Player extends GamePhysicalElement {
         }
 
         var hitbuff = Buffer.alloc(dataSize);
-		hitbuff.writeUInt8(RESPONSE.PLAYER_HIT, 0)
+		hitbuff.writeUInt8(EServerResponse.PLAYER_HIT, 0)
 		hitbuff.writeUInt16LE(this.id, 1);
 		hitbuff.writeUInt16LE(attacker.id, 3);
 
@@ -80,7 +77,7 @@ export default class Player extends GamePhysicalElement {
 
     get mouseDirection(){
 
-        return this.mouse.direction();
+        return GM.point_direction(this.x, this.y, this.mouse.x, this.mouse.y);
         
     }
 
@@ -137,7 +134,7 @@ export default class Player extends GamePhysicalElement {
     addEffect(type: EFFECT, duration: number, data: EffectData = {}){
 
         let _b = Buffer.alloc(dataSize);
-		_b.writeUInt8(RESPONSE.EFFECT_ADD, 0);
+		_b.writeUInt8(EServerResponse.EFFECT_ADD, 0);
 		_b.writeUInt16LE(this.id, 1)
 		_b.writeUInt8(type, 3);
 		_b.writeUInt16LE(duration * 100, 4);

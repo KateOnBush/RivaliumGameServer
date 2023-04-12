@@ -1,5 +1,5 @@
 import Player from "../components/Player";
-import { fps, gravityVec } from "../../constants";
+import { fps, gravityVec } from "../Macros";
 import Vector2 from "./vector/Vector2";
 
 let fpsms = 1000/fps;

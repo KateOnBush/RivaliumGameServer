@@ -1,8 +1,9 @@
-import { dataSize } from "../../constants";
-import { BType } from "../enums/EBufferValueType";
-import { RESPONSE } from "../enums/EPacketTypes";
+import { dataSize } from "../Macros";
+import EBufferType from "../enums/EBufferType";
+import { EServerResponse } from "../enums/EPacketTypes";
 import ILifetimedElement from "../interfaces/ILifetimedElement";
 import GMBuffer from "../tools/GMBuffer";
+import Logger from "../tools/Logger";
 import Player from "./Player";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
 
@@ -12,12 +13,11 @@ export default class Entity extends GamePhysicalElement implements ILifetimedEle
     index: number;
     health: number;
     armor: number;
-    lifetime: number;
     parameters: number[];
     lifespan: number;
     lifespanTimeout: NodeJS.Timeout;
 
-    constructor(owner: Player, id: number, index: number, x: number, y: number, health: number, armor: number, lifetime: number = 10, entityParameters: number[] = []){
+    constructor(owner: Player, id: number, index: number, x: number, y: number, health: number, armor: number, lifespan: number = 10, entityParameters: number[] = []){
 
         super();
         this.owner = owner;
@@ -27,9 +27,9 @@ export default class Entity extends GamePhysicalElement implements ILifetimedEle
         this.health = health;
         this.armor = armor;
         this.parameters = entityParameters;
-        this.lifetime = lifetime;
+        this.lifespan = lifespan;
 
-        this.lifespanTimeout = setTimeout(()=>this.destroy(), this.lifespan);
+        this.lifespanTimeout = setTimeout(()=>this.destroy(), this.lifespan * 1000);
 
     }
     
@@ -47,6 +47,21 @@ export default class Entity extends GamePhysicalElement implements ILifetimedEle
 
     update(){
 
+        let buffer = GMBuffer.allocate(dataSize);
+        buffer.write(EServerResponse.ENTITY_UPDATE, EBufferType.UInt8);
+        buffer.write(this.owner.id, EBufferType.UInt16);
+        buffer.write(this.id, EBufferType.UInt16);
+        buffer.write(this.x * 100|0, EBufferType.SInt32);
+        buffer.write(this.y * 100|0, EBufferType.SInt32);
+        buffer.write(this.mx * 100|0, EBufferType.SInt32);
+        buffer.write(this.my * 100|0, EBufferType.SInt32);
+        buffer.write(this.health, EBufferType.UInt32);
+        buffer.write(this.armor * 100 | 0, EBufferType.UInt8);
+        for(const par of this.parameters){
+            buffer.write(par * 100 | 0, EBufferType.SInt32);
+        }
+        this.game?.broadcast(buffer);
+
     }
 
     destroy(){
@@ -54,8 +69,8 @@ export default class Entity extends GamePhysicalElement implements ILifetimedEle
         if (!this.game) return;
 
         var buffer = GMBuffer.allocate(dataSize);
-        buffer.write(RESPONSE.ENTITY_DESTROY, BType.UInt8);
-        buffer.write(this.id, BType.UInt16);
+        buffer.write(EServerResponse.ENTITY_DESTROY, EBufferType.UInt8);
+        buffer.write(this.id, EBufferType.UInt16);
 
         this.game.broadcast(buffer);
 

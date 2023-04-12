@@ -1,22 +1,22 @@
 import { WebSocketServer } from "ws"
 import Logger from "./lib/tools/Logger";
-import { dataSize, serverPort } from "./constants";
+import { dataSize, serverPort } from "./lib/Macros";
 import PlayerSocket from "./lib/interfaces/IPlayerSocket";
 import GMBuffer from "./lib/tools/GMBuffer";
-import { BType } from "./lib/enums/EBufferValueType";
-import { RESPONSE } from "./lib/enums/EPacketTypes";
+import EBufferType from "./lib/enums/EBufferType";
+import { EServerResponse } from "./lib/enums/EPacketTypes";
 import GameProcessor from "./lib/GameProcessor";
 import Ping from "./lib/tools/Ping";
 import Game from "./lib/components/Game";
 import PacketHandler from "./lib/PacketHandler";
-import { GameType } from "./lib/enums/EGameData";
+import { EGameType } from "./lib/enums/EGameData";
 import { LOGO } from "./logo";
 
 import 'source-map-support/register'
 
 var clients : PlayerSocket[] = [];
 
-let game = new Game(GameType.NORMAL);
+let game = new Game(EGameType.NORMAL);
 let lastDelta = performance.now();
 
 setInterval(()=>{
@@ -52,20 +52,20 @@ wsServer.on('connection', function(socket: PlayerSocket, req) {
 
 	/// Telling the client who he is
 	var buff = GMBuffer.allocate(dataSize);
-	buff.write(RESPONSE.PLAYER_JOIN, BType.UInt8);
-	buff.write(player.id, BType.UInt16);
-	buff.write(1, BType.UInt8); //1: Connected, 0: Disconnected
-	buff.write(0, BType.UInt8); //0: Not you, 1: You
-	buff.write(player.char.id, BType.UInt8);
-	buff.write(player.char.healthmax, BType.UInt16);
-	buff.write(player.char.ultimatechargemax, BType.UInt16);
-	buff.write(70000, BType.SInt32);
-	buff.write(50000, BType.SInt32);
+	buff.write(EServerResponse.PLAYER_JOIN, 	EBufferType.UInt8);
+	buff.write(player.id, 						EBufferType.UInt16);
+	buff.write(1, 								EBufferType.UInt8); //1: Connected, 0: Disconnected
+	buff.write(0, 								EBufferType.UInt8); //0: Not you, 1: You
+	buff.write(player.char.id, 					EBufferType.UInt8);
+	buff.write(player.char.healthmax, 			EBufferType.UInt16);
+	buff.write(player.char.ultimatechargemax, 	EBufferType.UInt16);
+	buff.write(70000, 							EBufferType.SInt32);
+	buff.write(50000, 							EBufferType.SInt32);
 
 	player.game?.broadcastExcept(buff, player);
 
 	let selfBuff = GMBuffer.from(buff.getBuffer());
-	selfBuff.poke(1, BType.UInt8, 4);
+	selfBuff.poke(1, EBufferType.UInt8, 4);
 	player.send(selfBuff);
 
 	socket.on('message', function(data) {

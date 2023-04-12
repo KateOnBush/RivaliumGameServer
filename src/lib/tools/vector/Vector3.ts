@@ -1,3 +1,5 @@
+import Vector2 from "./Vector2";
+
 export default class Vector3 {
 
     x: number = 0;
@@ -87,6 +89,12 @@ export default class Vector3 {
 		var k = a.x * b.y - a.y * b.x;
 		
 		return Vector3.cartesian(i, j, k);
+    }
+
+    project2d() {
+
+        return Vector2.cartesian(this.x, this.y);
+
     }
 
 }

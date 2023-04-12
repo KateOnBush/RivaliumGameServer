@@ -3,9 +3,9 @@ import Vector3 from "./Vector3";
 
 export default class Vector2 extends Vector3 {
 
-    z = 0;
+    override z = 0;
 
-    static cartesian(x: number, y: number){
+    static override cartesian(x: number, y: number){
 
         let v = new Vector2();
         v.x = x;

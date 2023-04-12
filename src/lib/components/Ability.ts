@@ -1,12 +1,12 @@
 import Logger from "../tools/Logger";
-import { ABILITY_TYPE } from "../enums/EAbilityType";
+import EAbilityType from "../enums/EAbilityType";
 import Player from "./Player";
 import Projectile from "./Projectile";
 import { AbilityData } from "./sub/AbilityData";
 
 export default class Ability {
 
-    type: ABILITY_TYPE;
+    type: EAbilityType;
     maxCooldown: number[];
     cannotCast: boolean;
     data: AbilityData;
@@ -16,7 +16,7 @@ export default class Ability {
 
     createdProjectile?: Projectile;
 
-    constructor(type: ABILITY_TYPE, cooldowns: number[], abilitydata: AbilityData, castMethod: (n: number, p: Player, a: Ability) => void){
+    constructor(type: EAbilityType, cooldowns: number[], abilitydata: AbilityData, castMethod: (n: number, p: Player, a: Ability) => void){
         
         this.type = type;
         this.maxCooldown = cooldowns;

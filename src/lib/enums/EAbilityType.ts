@@ -1,4 +1,4 @@
-export enum ABILITY_TYPE {
+enum EAbilityType {
 
     ONETIME,
     ACTIVE,
@@ -6,3 +6,5 @@ export enum ABILITY_TYPE {
     ACTIVECHARGES
     
 }
+
+export default EAbilityType;

@@ -5,20 +5,20 @@ import Entity from "./Entity";
 import Explosion from "./Explosion";
 import IPlayerSocket from "../interfaces/IPlayerSocket";
 import { NumericBoolean } from "../types/GameTypes";
-import { dataSize } from "../../constants";
+import { dataSize } from "../Macros";
 import Lag from "../tools/Lag";
 import GMBuffer from "../tools/GMBuffer";
 import { randomUUID } from "crypto";
-import { RESPONSE } from "../enums/EPacketTypes";
-import { BType } from "../enums/EBufferValueType";
-import { GameState, GameType } from "../enums/EGameData";
+import { EServerResponse } from "../enums/EPacketTypes";
+import EBufferType from "../enums/EBufferType";
+import { EGameState, EGameType } from "../enums/EGameData";
 
 export default class Game {
 
     id: UUID = new UUID(randomUUID());
 
-    type: GameType = GameType.NORMAL;
-    state: GameState = GameState.ONGOING;
+    type: EGameType = EGameType.NORMAL;
+    state: EGameState = EGameState.ONGOING;
 
     players: Player[] = [];
     projectiles: Projectile[] = [];
@@ -26,7 +26,7 @@ export default class Game {
     explosions: Explosion[] = [];
     
 
-    constructor(type?: GameType) {
+    constructor(type?: EGameType) {
 
         if (type) this.type = type;
 
@@ -78,26 +78,26 @@ export default class Game {
 
             var buf = GMBuffer.allocate(dataSize);
 
-            buf.write(RESPONSE.PROJECTILE_CREATE, BType.UInt8);
-            buf.write(p.owner.id, BType.UInt16);
-            buf.write(p.index, BType.UInt16);
+            buf.write(EServerResponse.PROJECTILE_CREATE, EBufferType.UInt8);
+            buf.write(p.owner.id, EBufferType.UInt16);
+            buf.write(p.index, EBufferType.UInt16);
             let pred = Lag.predictPosition(p.pos, p.mov, Lag.compensateCloseProjectile(player.ping.ms));
-            buf.write(pred.pos.x*100|0, BType.SInt32);
-            buf.write(pred.pos.y*100|0, BType.SInt32);
+            buf.write(pred.pos.x*100|0, EBufferType.SInt32);
+            buf.write(pred.pos.y*100|0, EBufferType.SInt32);
             let newspd = pred.mov.magnitude()
             let newdir = pred.mov.direction();
-            buf.write(newspd*100|0, BType.SInt32);
-            buf.write(newdir*10|0, BType.SInt16);
-            buf.write(p.collision, BType.UInt8);
-            buf.write(p.dieOnCol, BType.UInt8);
-            buf.write(p.lifespan, BType.UInt8);
-            buf.write(p.damage, BType.UInt16);
-            buf.write(p.bleed, BType.UInt16);
-            buf.write(p.heal, BType.UInt16);
-            buf.write(p.id, BType.UInt16);
-            buf.write(p.bounce, BType.UInt8);
-            buf.write(p.pos.x*100|0, BType.SInt32);
-            buf.write(p.pos.y*100|0, BType.SInt32);
+            buf.write(newspd*100|0, EBufferType.SInt32);
+            buf.write(newdir*10|0, EBufferType.SInt16);
+            buf.write(p.collision, EBufferType.UInt8);
+            buf.write(p.dieOnCol, EBufferType.UInt8);
+            buf.write(p.lifespan, EBufferType.UInt8);
+            buf.write(p.damage, EBufferType.UInt16);
+            buf.write(p.bleed, EBufferType.UInt16);
+            buf.write(p.heal, EBufferType.UInt16);
+            buf.write(p.id, EBufferType.UInt16);
+            buf.write(p.bounce, EBufferType.UInt8);
+            buf.write(p.pos.x*100|0, EBufferType.SInt32);
+            buf.write(p.pos.y*100|0, EBufferType.SInt32);
 
             player.send(buf);
 
@@ -122,16 +122,19 @@ export default class Game {
     declareEntity(entity: Entity){
 
         let buffer = GMBuffer.allocate(dataSize);
-        buffer.write(RESPONSE.ENTITY_UPDATE, BType.UInt8);
-        buffer.write(entity.index, BType.UInt16);
-        buffer.write(entity.owner.id, BType.UInt16);
-        buffer.write(entity.id, BType.UInt16);
-        buffer.write(entity.x * 100|0, BType.SInt32);
-        buffer.write(entity.y * 100|0, BType.SInt32);
-        buffer.write(entity.health, BType.UInt32);
-        buffer.write(entity.armor * 100 | 0, BType.UInt8);
+        buffer.write(EServerResponse.ENTITY_CREATE, EBufferType.UInt8);
+        buffer.write(entity.index, EBufferType.UInt16);
+        buffer.write(entity.owner.id, EBufferType.UInt16);
+        buffer.write(entity.id, EBufferType.UInt16);
+        buffer.write(entity.x * 100|0, EBufferType.SInt32);
+        buffer.write(entity.y * 100|0, EBufferType.SInt32);
+        buffer.write(entity.mx * 100|0, EBufferType.SInt32);    
+        buffer.write(entity.my * 100|0, EBufferType.SInt32);
+        buffer.write(entity.health, EBufferType.UInt32);
+        buffer.write(entity.armor * 100 | 0, EBufferType.UInt8);
+        buffer.write(entity.lifespan, EBufferType.UInt8);
         for(const par of entity.parameters){
-            buffer.write(par * 100 | 0, BType.SInt32);
+            buffer.write(par * 100 | 0, EBufferType.SInt32);
         }
         this.broadcast(buffer);
     }
@@ -151,13 +154,13 @@ export default class Game {
 
         let buff = GMBuffer.allocate(dataSize);
 
-        buff.write(RESPONSE.EXPLOSION_CREATE, BType.UInt8);
-        buff.write(explosion.owner.id, BType.UInt16);
-        buff.write(explosion.index, BType.UInt16);
-        buff.write(explosion.x * 100|0, BType.SInt32);
-        buff.write(explosion.y * 100|0, BType.SInt32);
-        buff.write(explosion.radius, BType.UInt16);
-        buff.write(explosion.damage, BType.UInt16);
+        buff.write(EServerResponse.EXPLOSION_CREATE, EBufferType.UInt8);
+        buff.write(explosion.owner.id, EBufferType.UInt16);
+        buff.write(explosion.index, EBufferType.UInt16);
+        buff.write(explosion.x * 100|0, EBufferType.SInt32);
+        buff.write(explosion.y * 100|0, EBufferType.SInt32);
+        buff.write(explosion.radius, EBufferType.UInt16);
+        buff.write(explosion.damage, EBufferType.UInt16);
 
         this.broadcast(buff);
 

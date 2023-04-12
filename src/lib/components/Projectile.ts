@@ -1,7 +1,7 @@
 import Lag from "../tools/Lag";
-import { dataSize } from "../../constants";
-import { BType } from "../enums/EBufferValueType";
-import { RESPONSE } from "../enums/EPacketTypes";
+import { dataSize } from "../Macros";
+import BType from "../enums/EBufferType";
+import { EServerResponse } from "../enums/EPacketTypes";
 import ILifetimedElement from "../interfaces/ILifetimedElement";
 import IPlayerElement from "../interfaces/IPlayerElement";
 import GMBuffer from "../tools/GMBuffer";
@@ -16,12 +16,8 @@ export type projectileEventCallback = (proj: Projectile) => void;
 
 export default class Projectile extends GamePhysicalElement implements ILifetimedElement, IPlayerElement {
 
-    id: number;
-
     owner: Player;
     index: number;
-    pos: Vector2 = new Vector2();
-    mov: Vector2 = new Vector2();
     collision: NumericBoolean;
     dieOnCol: NumericBoolean;
     lifespan: number;
@@ -74,17 +70,8 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
         this.bounceMethod = bounceMethod;
         this.destroyMethod = destroyMethod;
 
-        this.lifespanTimeout = setTimeout(()=>this.destroy(), this.lifespan);
+        this.lifespanTimeout = setTimeout(()=>this.destroy(), this.lifespan * 1000);
 
-    }
-    
-
-    get direction() {
-        return this.mov.direction();
-    }
-
-    get speed() {
-        return this.mov.magnitude();
     }
 
     destroy(){
@@ -97,7 +84,7 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
         this.onDestroy();
 
         var buff = GMBuffer.allocate(dataSize);
-        buff.write(RESPONSE.PROJECTILE_DESTROY, BType.UInt8);
+        buff.write(EServerResponse.PROJECTILE_DESTROY, BType.UInt8);
         buff.write(this.id, BType.UInt16);
 
         this.game.removeProjectile(this.id);
@@ -122,7 +109,7 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
 
             var boff = Buffer.alloc(dataSize);
 
-            boff.writeUint8(RESPONSE.PROJECTILE_UPDATE, 0);
+            boff.writeUint8(EServerResponse.PROJECTILE_UPDATE, 0);
             boff.writeUInt16LE(this.id, 1);
             boff.writeInt32LE(prediction.pos.x*100|0, 3);
             boff.writeInt32LE(prediction.pos.y*100|0, 7);

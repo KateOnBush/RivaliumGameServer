@@ -6,7 +6,6 @@ export default interface IPlayerSocket extends WebSocket {
 
     player?: Player;
     game?: Game;
-    [key: string]: any;
 
 }
 

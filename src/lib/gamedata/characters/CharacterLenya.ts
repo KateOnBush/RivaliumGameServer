@@ -1,10 +1,10 @@
 import Lag from "../../tools/Lag";
 import Logger from "../../tools/Logger";
 import Ability from "../../components/Ability";
-import { ABILITY_TYPE } from "../../enums/EAbilityType";
+import EAbilityType from "../../enums/EAbilityType";
 import Character from "../../components/Character";
 import { ActiveAbilityData, ActiveChargesAbilityData, NoAbilityData } from "../../components/sub/AbilityData";
-import { EMPTY_METHOD } from "../../../constants";
+import { EMPTY_METHOD } from "../../Macros";
 import GM from "../../tools/GMLib";
 
 
@@ -16,7 +16,7 @@ export default Character.builder(
 
     [
     
-        new Ability(ABILITY_TYPE.ONETIME, [0.35, 0.35], NoAbilityData, function(n, player){
+        new Ability(EAbilityType.ONETIME, [0.1, 0.1], NoAbilityData, function(n, player){
 
             if (!player.game) return;
             var pred = Lag.predictNextPosition(player);
@@ -31,7 +31,7 @@ export default Character.builder(
 
         }),
 
-        new Ability(ABILITY_TYPE.ONETIME, [.3], NoAbilityData, function(n, player){
+        new Ability(EAbilityType.ONETIME, [.3], NoAbilityData, function(n, player){
 
             if (!player.game) return;
             var x = player.x, y = player.y, movvec = player.mov, mousex = player.mouse.x;
@@ -49,7 +49,7 @@ export default Character.builder(
 
         }),
 
-        new Ability(ABILITY_TYPE.ACTIVECHARGES, [.1], new ActiveChargesAbilityData(5, 1, 0, 0), function(n, player, ability){
+        new Ability(EAbilityType.ACTIVECHARGES, [.1], new ActiveChargesAbilityData(5, 1, 0, 0), function(n, player, ability){
 
             Logger.warn("Damn this shit has {} charges, but is {}", ability.data.charges, ability.data.active ? "active" : "not active");
 
@@ -85,7 +85,7 @@ export default Character.builder(
 
         }),
 
-        new Ability(ABILITY_TYPE.ACTIVE, [60], new ActiveAbilityData(25), EMPTY_METHOD)
+        new Ability(EAbilityType.ACTIVE, [60], new ActiveAbilityData(25), EMPTY_METHOD)
 
     ]
 

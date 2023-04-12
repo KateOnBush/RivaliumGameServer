@@ -1,9 +1,9 @@
 import Lag from "./tools/Lag";
 import Logger from "./tools/Logger";
 import Projectile from "./components/Projectile";
-import { dataSize, entityParametersLimit } from "../constants";
-import { BType } from "./enums/EBufferValueType";
-import { REQUEST, RESPONSE } from "./enums/EPacketTypes";
+import { dataSize, entityParametersLimit } from "./Macros";
+import EBufferType from "./enums/EBufferType";
+import { EServerRequest, EServerResponse } from "./enums/EPacketTypes";
 import IPlayerSocket from "./interfaces/IPlayerSocket";
 import GMBuffer from "./tools/GMBuffer";
 import Vector2 from "./tools/vector/Vector2";
@@ -15,31 +15,31 @@ export default class PacketHandler {
     static handle(buffer: GMBuffer, socket: IPlayerSocket) {
 
         buffer.seek(0);
-        var type = buffer.read(BType.UInt8);
+        var type = buffer.read(EBufferType.UInt8);
         if (!socket.player || !socket.game) return;
         let player = socket.player;
 
         switch (type) {
 
-            case REQUEST.POSITION_UPDATE: // Position update
+            case EServerRequest.POSITION_UPDATE: // Position update
 
-                player.pos.x = buffer.read(BType.SInt32) / 100;
-                player.pos.y = buffer.read(BType.SInt32) / 100;
-                player.mov.x = buffer.read(BType.SInt32) / 100;
-                player.mov.y = buffer.read(BType.SInt32) / 100;
+                player.pos.x = buffer.read(EBufferType.SInt32) / 100;
+                player.pos.y = buffer.read(EBufferType.SInt32) / 100;
+                player.mov.x = buffer.read(EBufferType.SInt32) / 100;
+                player.mov.y = buffer.read(EBufferType.SInt32) / 100;
 
-                player.state.on_ground = buffer.read(BType.UInt8) as NumericBoolean;
-                player.state.jump_prep = buffer.read(BType.UInt8) / 100;
-                player.state.wall_slide = buffer.read(BType.UInt8) as NumericBoolean;
-                player.state.grappling = buffer.read(BType.UInt8) as NumericBoolean;
-                player.state.grappled = buffer.read(BType.UInt8) as NumericBoolean;
-                player.state.dir = buffer.read(BType.UInt8) as SignedNumericBoolean;
-                player.state.dash = buffer.read(BType.UInt8) as NumericBoolean;
-                player.state.slide = buffer.read(BType.UInt8) as NumericBoolean;
-                player.state.grounded = buffer.read(BType.UInt8) as NumericBoolean;
-                player.state.slope = buffer.read(BType.UInt8) as NumericBoolean;
-                player.mouse.x = buffer.read(BType.SInt32) / 100;
-                player.mouse.y = buffer.read(BType.SInt32) / 100;
+                player.state.on_ground = buffer.read(EBufferType.UInt8) as NumericBoolean;
+                player.state.jump_prep = buffer.read(EBufferType.UInt8) / 100;
+                player.state.wall_slide = buffer.read(EBufferType.UInt8) as NumericBoolean;
+                player.state.grappling = buffer.read(EBufferType.UInt8) as NumericBoolean;
+                player.state.grappled = buffer.read(EBufferType.UInt8) as NumericBoolean;
+                player.state.dir = buffer.read(EBufferType.SInt8) as SignedNumericBoolean;
+                player.state.dash = buffer.read(EBufferType.UInt8) as NumericBoolean;
+                player.state.slide = buffer.read(EBufferType.UInt8) as NumericBoolean;
+                player.state.grounded = buffer.read(EBufferType.UInt8) as NumericBoolean;
+                player.state.slope = buffer.read(EBufferType.UInt8) as NumericBoolean;
+                player.mouse.x = buffer.read(EBufferType.SInt32) / 100;
+                player.mouse.y = buffer.read(EBufferType.SInt32) / 100;
 
                 let pred = Lag.predictNextPosition(player);
                 player.pos.x = pred.pos.x;
@@ -52,59 +52,59 @@ export default class PacketHandler {
 
                 break;
 
-            case REQUEST.GRAPPLING_POSITION: /// Grappling Position Update
+            case EServerRequest.GRAPPLING_POSITION: /// Grappling Position Update
             {
-                var x = buffer.read(BType.SInt32);
-                var y = buffer.read(BType.SInt32);
-                let gr = buffer.read(BType.UInt8);
+                var x = buffer.read(EBufferType.SInt32);
+                var y = buffer.read(EBufferType.SInt32);
+                let gr = buffer.read(EBufferType.UInt8);
 
                 let b = GMBuffer.allocate(dataSize);
 
-                b.write(RESPONSE.PLAYER_GRAPPLE, BType.UInt8);
-                b.write(socket.player.id, BType.UInt16);
-                b.write(x, BType.SInt32);
-                b.write(y, BType.SInt32);
-                b.write(gr, BType.UInt8);
+                b.write(EServerResponse.PLAYER_GRAPPLE, EBufferType.UInt8);
+                b.write(socket.player.id, EBufferType.UInt16);
+                b.write(x, EBufferType.SInt32);
+                b.write(y, EBufferType.SInt32);
+                b.write(gr, EBufferType.UInt8);
                 
                 socket.game.broadcastExcept(b, socket.player);
                 break;
 
             }
-            case REQUEST.FLIP: /// Flip animation
+            case EServerRequest.FLIP: /// Flip animation
             {
 
-                let forward = buffer.read(BType.UInt8);
-                let start = buffer.read(BType.UInt8);
+                let forward = buffer.read(EBufferType.UInt8);
+                let start = buffer.read(EBufferType.UInt8);
 
                 let b = GMBuffer.allocate(dataSize);
 
-                b.write(RESPONSE.PLAYER_FLIP, BType.UInt8);
-                b.write(socket.player.id, BType.UInt16);
-                b.write(forward, BType.SInt8);
-                b.write(start, BType.SInt8);
+                b.write(EServerResponse.PLAYER_FLIP, EBufferType.UInt8);
+                b.write(socket.player.id, EBufferType.UInt16);
+                b.write(forward, EBufferType.SInt8);
+                b.write(start, EBufferType.SInt8);
 
                 socket.game.broadcastExcept(b, socket.player);
 
             }
-            case REQUEST.PING: /// Ping
+            case EServerRequest.PING: /// Ping
 
                 let e = performance.now();
                 socket.player.ping.ms = e - (socket.player.ping.lastSent ?? e);
 
                 let b = GMBuffer.allocate(dataSize);
 
-                b.write(RESPONSE.PING, BType.UInt8);
-                b.write(1, BType.UInt8);
-                b.write(socket.player.ping.ms, BType.UInt32);
+                b.write(EServerResponse.PING, EBufferType.UInt8);
+                b.write(1, EBufferType.UInt8);
+                b.write(socket.player.ping.ms, EBufferType.UInt32);
 
                 socket.send(b.getBuffer());
                 break;
 
-            case REQUEST.PLAYER_HIT: //Hit (Projectile Destroy)
+            case EServerRequest.PLAYER_HIT: //Hit (Projectile Destroy)
 
-                var _projectile_id = buffer.read(BType.UInt16);
-                var _object_id = buffer.read(BType.UInt16);
-                var _hit_id = buffer.read(BType.UInt16);
+                var _projectile_id = buffer.read(EBufferType.UInt16);
+                var _object_id = buffer.read(EBufferType.UInt16);
+                var _hit_id = buffer.read(EBufferType.UInt16);
 
                 var proj;
 
@@ -129,20 +129,20 @@ export default class PacketHandler {
 
                 break;
 
-            case REQUEST.ABILITY_CAST: //Casting ability 
+            case EServerRequest.ABILITY_CAST: //Casting ability 
 
-                let ability = buffer.read(BType.UInt8);
-                let ability_n = buffer.read(BType.UInt8);
+                let ability = buffer.read(EBufferType.UInt8);
+                let ability_n = buffer.read(EBufferType.UInt8);
 
                 Logger.log("Casting {} of Ability N°{}", ability_n, ability);
 
                 if (socket.player.char.abilities[ability].cast(ability_n, socket.player)) {
 
                     let buff = GMBuffer.allocate(dataSize);
-                    buff.write(RESPONSE.PLAYER_ABILITY_CAST, BType.UInt8);
-                    buff.write(socket.player.id, BType.UInt16);
-                    buff.write(ability, BType.UInt8);
-                    buff.write(ability_n, BType.UInt8);
+                    buff.write(EServerResponse.PLAYER_ABILITY_CAST, EBufferType.UInt8);
+                    buff.write(socket.player.id, EBufferType.UInt16);
+                    buff.write(ability, EBufferType.UInt8);
+                    buff.write(ability_n, EBufferType.UInt8);
         
                     socket.game.broadcast(buff);
 
@@ -150,14 +150,14 @@ export default class PacketHandler {
 
                 break;
 
-            case REQUEST.PROJECTILE_UPDATE: //Projectile Update Position
+            case EServerRequest.PROJECTILE_UPDATE: //Projectile Update Position
             {
 
-                let projid = buffer.read(BType.UInt16);
-                let projx = buffer.read(BType.SInt32)/100;
-                let projy = buffer.read(BType.SInt32)/100;
-                let proj_movx = buffer.read(BType.SInt32)/100;
-                let proj_movy = buffer.read(BType.SInt32)/100;
+                let projid = buffer.read(EBufferType.UInt16);
+                let projx = buffer.read(EBufferType.SInt32)/100;
+                let projy = buffer.read(EBufferType.SInt32)/100;
+                let proj_movx = buffer.read(EBufferType.SInt32)/100;
+                let proj_movy = buffer.read(EBufferType.SInt32)/100;
                 let proj = socket.game.getProjectile(projid);
 
                 if (!proj) break;
@@ -188,18 +188,18 @@ export default class PacketHandler {
 
             }
 
-            case REQUEST.ENTITY_UPDATE: //Entity creation / update
+            case EServerRequest.ENTITY_UPDATE: //Entity creation / update
             {
 
-                let ID      = buffer.read(BType.UInt16);
-                let x       = buffer.read(BType.SInt16)/100;
-                let y       = buffer.read(BType.SInt16)/100;
-                let mx      = buffer.read(BType.SInt16)/100;
-                let my      = buffer.read(BType.SInt16)/100;
+                let ID      = buffer.read(EBufferType.UInt16);
+                let x       = buffer.read(EBufferType.SInt16)/100;
+                let y       = buffer.read(EBufferType.SInt16)/100;
+                let mx      = buffer.read(EBufferType.SInt16)/100;
+                let my      = buffer.read(EBufferType.SInt16)/100;
             
                 let params = [];
                 for(let i = 0; i < entityParametersLimit; i++){
-                    params[i] = buffer.read(BType.SInt16)/100;
+                    params[i] = buffer.read(EBufferType.SInt16)/100;
                 }
 
                 let getEntity = socket.game.getEntity(ID);
@@ -209,17 +209,17 @@ export default class PacketHandler {
                 getEntity.pos.set(x, y);
                 getEntity.mov.set(mx, my);
                 getEntity.parameters = params;
-                socket.game.declareEntity(getEntity);
+                getEntity.update();
                 
                 break;
 
             }
 
-            case REQUEST.ENTITY_HIT: //Entity Hit
+            case EServerRequest.ENTITY_HIT: //Entity Hit
             {
 
-                let ID      = buffer.read(BType.UInt16);
-                let damage  = buffer.read(BType.UInt16);
+                let ID      = buffer.read(EBufferType.UInt16);
+                let damage  = buffer.read(EBufferType.UInt16);
 
                 let damagedEntity = socket.game.getEntity(ID);
 
