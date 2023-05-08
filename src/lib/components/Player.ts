@@ -1,6 +1,6 @@
 import CharacterRepository from "../gamedata/CharacterRepository";
 import { dataSize } from "../Macros";
-import { EServerResponse } from "../enums/EPacketTypes";
+import { EServerResponse, EServerRequest } from '../enums/EPacketTypes';
 import ICharacter from "../interfaces/ICharacter";
 import PlayerSocket from "../interfaces/IPlayerSocket";
 import GMBuffer from "../tools/GMBuffer";
@@ -11,6 +11,7 @@ import Game from "./Game";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
 import PlayerPing from "./sub/PlayerPing";
 import PlayerState from "./sub/PlayerState";
+import EBufferType from "../enums/EBufferType";
 
 export enum EFFECT {
         
@@ -18,6 +19,8 @@ export enum EFFECT {
     BURN,
     ACCELERATE,
     SLOW,
+    VULNERABILITY,
+    INVISIBILITY
 }
 
 export default class Player extends GamePhysicalElement {
@@ -104,8 +107,8 @@ export default class Player extends GamePhysicalElement {
         if (this.state.dead == 1) return;
 
         this.char.health += amt;
-        if (this.char.health > this.char.healthmax){
-            this.char.health = this.char.healthmax;
+        if (this.char.health > this.char.healthMax){
+            this.char.health = this.char.healthMax;
         }
 
     }
@@ -154,5 +157,22 @@ export default class Player extends GamePhysicalElement {
         this.socket.send(buffer.getBuffer());
 
     }
+
+    forceDash(direction: number, time: number, mult: number){
+
+        this.mov = Vector2.polar(1, direction);
+        this.mov.multiply(30 * mult);
+
+        let buff = GMBuffer.allocate(dataSize);
+        buff.write(EServerResponse.PLAYER_FORCED_DASH, EBufferType.UInt8);
+        buff.write(this.id, EBufferType.UInt16);
+        buff.write(direction * 100 | 0, EBufferType.SInt16);
+        buff.write(time * 100 | 0, EBufferType.UInt16);
+        buff.write(mult * 100 | 0, EBufferType.UInt16);
+
+        this.game?.broadcast(buff);
+
+    }
+
 
 }

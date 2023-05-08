@@ -5,7 +5,8 @@ import Character from "../../components/Character";
 import { ActiveChargesAbilityData, NoAbilityData } from "../../components/sub/AbilityData";
 import { EMPTY_METHOD } from "../../Macros";
 import GM from "../../tools/GMLib";
-
+import ProjectileList from "../instancelist/ProjectileList";
+import ExplosionList from "../instancelist/ExplosionList";
 
 export default Character.builder(
 
@@ -13,12 +14,12 @@ export default Character.builder(
     480,
     220,
 
-    [
+    () => [
         new Ability(EAbilityType.ONETIME, [0.25, 1.8], NoAbilityData, function(n, player){
             var shootFunc = ()=>{
                 if (!player.game) return;
                 var pred = Lag.predictNextPosition(player);
-                var proj = player.char.abilities[3].data.active ? 3 : 2;
+                var proj = player.char.abilities[3].data.active ? ProjectileList.GraminUltButtet : ProjectileList.GraminGunBullet;
                 var d = player.mouseDirection,
                     _x = GM.lengthdir_x(6, d),
                     _y = GM.lengthdir_y(6, d);
@@ -45,7 +46,7 @@ export default Character.builder(
             var __d = GM.point_direction(0,0, GM.lengthdir_x(25, _d)+player.mov.x/3, GM.lengthdir_y(25, _d)+player.mov.y/3);
             player.game?.addProjectile(
                 player,
-                4,
+                ProjectileList.GraminGrenade,
                 pred.pos.x,
                 pred.pos.y - 10,
                 __spd, __d,     
@@ -53,7 +54,8 @@ export default Character.builder(
                 EMPTY_METHOD,
                 function(thisProj){
                     player.game?.addExplosion(player,
-                        0, thisProj.x, thisProj.y,
+                        ExplosionList.GraminGrenade, 
+                        thisProj.x, thisProj.y,
                         200, 100
                     )
                 }
@@ -75,7 +77,7 @@ export default Character.builder(
             setTimeout(function(){
                 var pred = Lag.predictNextPosition(player);
                 player.game?.addProjectile(player,
-                    5,
+                    ProjectileList.GraminUltRocket,
                     pred.pos.x + _x,
                     pred.pos.y + _y - 10,
                     60, _d,     
@@ -83,15 +85,16 @@ export default Character.builder(
                     EMPTY_METHOD,
                     function(thisProj){
                         player.game?.addExplosion(player,
-                            1, thisProj.x, thisProj.y,
+                            ExplosionList.GraminUlt,
+                            thisProj.x, thisProj.y,
                             250, 30
                         )
                         for(var i of new Array(4)){
                             player.game?.addProjectile(player,
-                                6,
+                                ProjectileList.GraminUltDebris,
                                 thisProj.x - GM.lengthdir_x(30, thisProj.direction),
                                 thisProj.y - GM.lengthdir_y(30, thisProj.direction),
-                                8, GM.random_range(0, 360),
+                                8, thisProj.direction + 180 + GM.random_range(-40, -40),
                                 1, 0, 1, 20, 0, 0, 1,
                                 EMPTY_METHOD, 
                                 function(p){

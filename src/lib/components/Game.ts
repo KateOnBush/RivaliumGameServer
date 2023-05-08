@@ -5,13 +5,14 @@ import Entity from "./Entity";
 import Explosion from "./Explosion";
 import IPlayerSocket from "../interfaces/IPlayerSocket";
 import { NumericBoolean } from "../types/GameTypes";
-import { dataSize } from "../Macros";
+import { dataSize, defaultBounceFriction } from "../Macros";
 import Lag from "../tools/Lag";
 import GMBuffer from "../tools/GMBuffer";
 import { randomUUID } from "crypto";
 import { EServerResponse } from "../enums/EPacketTypes";
 import EBufferType from "../enums/EBufferType";
 import { EGameState, EGameType } from "../enums/EGameData";
+import ProjectileList from "../gamedata/instancelist/ProjectileList";
 
 export default class Game {
 
@@ -46,7 +47,7 @@ export default class Game {
 
     addProjectile(
         owner: Player,
-        index: number,
+        index: ProjectileList,
         x: number, y: number,
         speed: number, 
         direction: number, 
@@ -58,10 +59,12 @@ export default class Game {
         heal: number, 
         bounce: NumericBoolean = 0, 
         onBounce: projectileEventCallback = () => null, 
-        onDestroy: projectileEventCallback = () => null
+        onDestroy: projectileEventCallback = () => null,
+        bounceFriction: number = defaultBounceFriction,
+        hasWeight: NumericBoolean = 1
     ){
 
-        var nProjectile = new Projectile(owner, this.generateProjectileID(), index, x, y, speed, direction, collision, dieOnCol, lifespan, damage, bleed, heal, bounce, onBounce, onDestroy);
+        var nProjectile = new Projectile(owner, this.generateProjectileID(), index, x, y, speed, direction, collision, dieOnCol, lifespan, damage, bleed, heal, bounce, onBounce, onDestroy, bounceFriction, hasWeight);
 
         nProjectile.game = this;
         this.projectiles.push(nProjectile);
@@ -98,6 +101,8 @@ export default class Game {
             buf.write(p.bounce, EBufferType.UInt8);
             buf.write(p.pos.x*100|0, EBufferType.SInt32);
             buf.write(p.pos.y*100|0, EBufferType.SInt32);
+            buf.write(p.bounceFriction * 100 | 0, EBufferType.UInt8);
+            buf.write(p.hasWeight, EBufferType.UInt8);
 
             player.send(buf);
 
@@ -132,7 +137,7 @@ export default class Game {
         buffer.write(entity.my * 100|0, EBufferType.SInt32);
         buffer.write(entity.health, EBufferType.UInt32);
         buffer.write(entity.armor * 100 | 0, EBufferType.UInt8);
-        buffer.write(entity.lifespan, EBufferType.UInt8);
+        buffer.write(entity.lifespan, EBufferType.UInt8);   
         for(const par of entity.parameters){
             buffer.write(par * 100 | 0, EBufferType.SInt32);
         }

@@ -1,5 +1,5 @@
 import Lag from "../tools/Lag";
-import { dataSize } from "../Macros";
+import { dataSize, defaultBounceFriction } from "../Macros";
 import BType from "../enums/EBufferType";
 import { EServerResponse } from "../enums/EPacketTypes";
 import ILifetimedElement from "../interfaces/ILifetimedElement";
@@ -9,7 +9,6 @@ import GM from "../tools/GMLib";
 import Vector2 from "../tools/vector/Vector2";
 import { NumericBoolean } from "../types/GameTypes";
 import Player from "./Player";
-import GameElement from "./abstract/GameElement";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
 
 export type projectileEventCallback = (proj: Projectile) => void;
@@ -28,6 +27,8 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
     bounce: NumericBoolean;
     bounceMethod: projectileEventCallback;
     destroyMethod: projectileEventCallback;
+    bounceFriction: number;
+    hasWeight: NumericBoolean;
 
     collided: boolean = false;
     destroyed: boolean = false;
@@ -48,7 +49,9 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
         heal: number, 
         bounce: NumericBoolean, 
         bounceMethod: projectileEventCallback, 
-        destroyMethod: projectileEventCallback
+        destroyMethod: projectileEventCallback,
+        bounceFriction: number,
+        hasWeight: NumericBoolean
     ){
 
         super();
@@ -69,6 +72,8 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
         this.bounce = bounce;
         this.bounceMethod = bounceMethod;
         this.destroyMethod = destroyMethod;
+        this.bounceFriction = bounceFriction;
+        this.hasWeight = hasWeight;
 
         this.lifespanTimeout = setTimeout(()=>this.destroy(), this.lifespan * 1000);
 

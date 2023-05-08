@@ -1,25 +1,32 @@
 import CharacterGramin from "./characters/CharacterGramin";
 import CharacterKenn from "./characters/CharacterKenn";
 import CharacterLenya from "./characters/CharacterLenya";
+import CharacterList from "./CharacterList";
+import CharacterMasr from "./characters/CharacterMasr";
 
 export default class CharacterRepository {
 
-    static get(id: number){
+    static get(id: CharacterList){
 
         switch(id){
 
-            case 1: //Kenn
+            case CharacterList.Kenn: //Kenn
             {
                 return CharacterKenn(id);
             }
-            case 2: 
+            case CharacterList.Gramin: 
             {
                 return CharacterGramin(id);
                 
             }
-            case 3: 
+            case CharacterList.Lenya: 
             {
                 return CharacterLenya(id);
+            }
+
+            case CharacterList.Masr:
+            {
+                return CharacterMasr(id);
             }
 
             default:

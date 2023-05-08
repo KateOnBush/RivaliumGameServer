@@ -134,8 +134,6 @@ export default class PacketHandler {
                 let ability = buffer.read(EBufferType.UInt8);
                 let ability_n = buffer.read(EBufferType.UInt8);
 
-                Logger.log("Casting {} of Ability N°{}", ability_n, ability);
-
                 if (socket.player.char.abilities[ability].cast(ability_n, socket.player)) {
 
                     let buff = GMBuffer.allocate(dataSize);
@@ -199,7 +197,7 @@ export default class PacketHandler {
             
                 let params = [];
                 for(let i = 0; i < entityParametersLimit; i++){
-                    params[i] = buffer.read(EBufferType.SInt16)/100;
+                    params[i] = buffer.read(EBufferType.SInt32)/100;
                 }
 
                 let getEntity = socket.game.getEntity(ID);

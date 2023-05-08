@@ -5,6 +5,7 @@ import Character from "../../components/Character";
 import Player, { EFFECT } from "../../components/Player";
 import { ActiveAbilityData, NoAbilityData } from "../../components/sub/AbilityData";
 import { EMPTY_METHOD } from "../../Macros";
+import ProjectileList from "../instancelist/ProjectileList";
 
 export default Character.builder(
 
@@ -12,14 +13,14 @@ export default Character.builder(
     550,
     220,
 
-    [
+    () => [
     
         new Ability(EAbilityType.ONETIME, [0.3, 2], NoAbilityData, function(n: number, player: Player) {
             if (!player.game) return;
             var pred = Lag.predictNextPosition(player);
             let inUlt = player.char.abilities[3].data.active;
             let bleeds = player.char.abilities[1].data.active;
-            let projectile = inUlt ? 1 : 0;
+            let projectile = inUlt ? ProjectileList.KennDaggerTransformed : ProjectileList.KennDagger;
             for(var i = 0; i < (n == 1 ? 3 : 1); i++){
                 player.game.addProjectile(
                     player,

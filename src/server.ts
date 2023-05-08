@@ -13,6 +13,7 @@ import { EGameType } from "./lib/enums/EGameData";
 import { LOGO } from "./logo";
 
 import 'source-map-support/register'
+import CharacterList from "./lib/gamedata/CharacterList";
 
 var clients : PlayerSocket[] = [];
 
@@ -47,7 +48,7 @@ wsServer.on('connection', function(socket: PlayerSocket, req) {
 
 	clients.push(socket);
 
-	game.addPlayer(socket, 3);
+	game.addPlayer(socket, CharacterList.Masr)	;
 	let player = socket.player!;
 
 	/// Telling the client who he is
@@ -57,8 +58,10 @@ wsServer.on('connection', function(socket: PlayerSocket, req) {
 	buff.write(1, 								EBufferType.UInt8); //1: Connected, 0: Disconnected
 	buff.write(0, 								EBufferType.UInt8); //0: Not you, 1: You
 	buff.write(player.char.id, 					EBufferType.UInt8);
-	buff.write(player.char.healthmax, 			EBufferType.UInt16);
-	buff.write(player.char.ultimatechargemax, 	EBufferType.UInt16);
+	buff.write(player.char.health, 				EBufferType.UInt16);
+	buff.write(player.char.ultimateCharge, 		EBufferType.UInt16);
+	buff.write(player.char.healthMax, 			EBufferType.UInt16);
+	buff.write(player.char.ultimateChargeMax, 	EBufferType.UInt16);
 	buff.write(70000, 							EBufferType.SInt32);
 	buff.write(50000, 							EBufferType.SInt32);
 

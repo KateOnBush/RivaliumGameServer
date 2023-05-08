@@ -23,9 +23,11 @@ export default class Vector2 extends Vector3 {
 
     }
 
+
     direction(){
         return GM.point_direction(0, 0, this.x, this.y);
     }
     
 
 }
+

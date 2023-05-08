@@ -1,4 +1,5 @@
-import Vector2 from "../../tools/vector/Vector2";
+import { gravityVec } from '../../Macros';
+import Vector2 from '../../tools/vector/Vector2';
 import GameElement from "./GameElement";
 
 export default abstract class GamePhysicalElement extends GameElement {
@@ -19,6 +20,13 @@ export default abstract class GamePhysicalElement extends GameElement {
 
     get my() {
         return this.mov.y;
+    }
+
+    move(dt: number){
+
+        this.mov.add(Vector2.multiply(gravityVec, dt));
+        this.pos.add(this.mov);
+
     }
 
 } 

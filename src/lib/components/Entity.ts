@@ -7,6 +7,7 @@ import Logger from "../tools/Logger";
 import Player from "./Player";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
 
+
 export default class Entity extends GamePhysicalElement implements ILifetimedElement {
 
     owner: Player;

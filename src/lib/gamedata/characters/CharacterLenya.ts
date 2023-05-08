@@ -3,9 +3,13 @@ import Logger from "../../tools/Logger";
 import Ability from "../../components/Ability";
 import EAbilityType from "../../enums/EAbilityType";
 import Character from "../../components/Character";
-import { ActiveAbilityData, ActiveChargesAbilityData, NoAbilityData } from "../../components/sub/AbilityData";
+import { ActiveAbilityData, ActiveChargesAbilityData, NoAbilityData } from '../../components/sub/AbilityData';
 import { EMPTY_METHOD } from "../../Macros";
 import GM from "../../tools/GMLib";
+import ProjectileList from "../instancelist/ProjectileList";
+import ExplosionList from "../instancelist/ExplosionList";
+import Entity from "../../components/Entity";
+import EntityList from "../instancelist/EntityList";
 
 
 export default Character.builder(
@@ -14,13 +18,13 @@ export default Character.builder(
     640,
     220,
 
-    [
+    () => [
     
         new Ability(EAbilityType.ONETIME, [0.1, 0.1], NoAbilityData, function(n, player){
 
             if (!player.game) return;
             var pred = Lag.predictNextPosition(player);
-            var proj = n == 0 ? 7 : 8;
+            var proj = n == 0 ? ProjectileList.LenyaBlueBullet : ProjectileList.LenyaRedBullet;
             player.game.addProjectile(player,
                 proj,
                 pred.pos.x, pred.pos.y,
@@ -36,7 +40,7 @@ export default Character.builder(
             if (!player.game) return;
             var x = player.x, y = player.y, movvec = player.mov, mousex = player.mouse.x;
             var createdx = x + (Math.sign(mousex - x) == Math.sign(movvec.x) ? 16*movvec.x : Math.sign(mousex - x)*60),
-			    createdy = y + 80;
+			    createdy = y + 100;
             let d = player.mouseDirection;
             player.game.addEntity(
                 player,
@@ -44,14 +48,12 @@ export default Character.builder(
                 createdx, createdy,
                 100, .1,
                 10,
-                [d, d]
+                [d, d, d, d]
             )
 
         }),
 
         new Ability(EAbilityType.ACTIVECHARGES, [.1], new ActiveChargesAbilityData(5, 1, 0, 0), function(n, player, ability){
-
-            Logger.warn("Damn this shit has {} charges, but is {}", ability.data.charges, ability.data.active ? "active" : "not active");
 
             if (ability.data.active){
 
@@ -65,7 +67,7 @@ export default Character.builder(
 
                 var __spd = GM.point_distance(0,0, GM.lengthdir_x(25, _d)+player.mx/3, GM.lengthdir_y(25, _d)+player.my/3);
                 var __d = GM.point_direction(0,0, GM.lengthdir_x(25, _d)+player.mx/3, GM.lengthdir_y(25, _d)+player.my/3);
-                var proj = 9;
+                var proj = ProjectileList.LenyaGrenade;
                 ability.createdProjectile = player.game.addProjectile(player,
                     proj,
                     pred.pos.x, pred.pos.y,
@@ -74,7 +76,7 @@ export default Character.builder(
                     0, 0, 0, 1, EMPTY_METHOD, function(tProj){
                         ability.forceCooldown();
                         player.game?.addExplosion(player,
-                            2,
+                            ExplosionList.LenyaGrenade,
                             tProj.x, tProj.y,
                             160, 20
                         )
@@ -85,7 +87,20 @@ export default Character.builder(
 
         }),
 
-        new Ability(EAbilityType.ACTIVE, [60], new ActiveAbilityData(25), EMPTY_METHOD)
+        new Ability(EAbilityType.ONETIME, [5], NoAbilityData, function(n, player){
+
+            setTimeout(()=>{
+
+                player.game?.addEntity(player, 
+                EntityList.LenyaUltimateRadius, 
+                player.x, player.y, 0, 0, 10,
+                [2200, 0.01]).step((entity, dt)=>{
+                    entity.radius = GM.dtlerp(entity.radius ?? 0, entity.parameters[0], entity.parameters[1], dt);
+                });
+
+            }, 10/3 * 1000 * .5 | 0)
+
+        })
 
     ]
 

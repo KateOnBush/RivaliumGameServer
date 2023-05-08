@@ -1,9 +1,9 @@
 import ICharacter from "../interfaces/ICharacter";
-import { AbilitySet } from "../types/GameTypes";
+import { AbilitySet, AbilitySetInitializer } from "../types/GameTypes";
 
 export default class Character {
 
-    static builder(name: string, health: number, ultimatecharge: number, abilities: AbilitySet): (id: number) => ICharacter{
+    static builder(name: string, health: number, ultimatecharge: number, abilities: AbilitySetInitializer): (id: number) => ICharacter{
 
         return (_id: number)=>{
             
@@ -12,10 +12,10 @@ export default class Character {
                 id: _id,
                 name,
                 health,
-                healthmax: health,
-                ultimatecharge,
-                ultimatechargemax: ultimatecharge,
-                abilities
+                healthMax: health,
+                ultimateCharge: ultimatecharge,
+                ultimateChargeMax: ultimatecharge,
+                abilities: abilities()
 
             };
 

@@ -40,9 +40,9 @@ export default class GameProcessor {
 				buff.write(pl.state.grounded, EBufferType.UInt8);
 				buff.write(pl.state.slope, EBufferType.UInt8);
 				buff.write(pl.char.health, EBufferType.UInt16);
-				buff.write(pl.char.ultimatecharge, EBufferType.UInt16);
-				buff.write(pl.char.healthmax, EBufferType.UInt16);
-				buff.write(pl.char.ultimatechargemax, EBufferType.UInt16);
+				buff.write(pl.char.ultimateCharge, EBufferType.UInt16);
+				buff.write(pl.char.healthMax, EBufferType.UInt16);
+				buff.write(pl.char.ultimateChargeMax, EBufferType.UInt16);
 				buff.write(pl.char.id, EBufferType.UInt8);
 				buff.write(pl.state.dead, EBufferType.UInt8);
 				buff.write(pl.mouse.x, EBufferType.SInt32);
@@ -65,9 +65,22 @@ export default class GameProcessor {
 		game.projectiles.forEach(projectile=>{
 
 			if (projectile.collided) return;
-			projectile.pos.add(Vector2.multiply(projectile.mov, deltaTime));
-			projectile.mov.add(Vector2.multiply(gravityVec, deltaTime));
+			projectile.process(deltaTime)
+			projectile.move(deltaTime);
 
+		})
+
+		game.entities.forEach(entity=>{
+			entity.process(deltaTime);
+		})
+
+		game.players.forEach(player=>{
+			player.process(deltaTime);
+			//player.move(deltaTime);
+		})
+
+		game.explosions.forEach(explosion=>{
+			explosion.process(deltaTime);
 		})
 
 	}

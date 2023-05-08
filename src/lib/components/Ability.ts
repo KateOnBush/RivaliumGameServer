@@ -29,8 +29,6 @@ export default class Ability {
 
     forceCooldown(n = 0){
 
-        Logger.success("Cooldown forced!");
-
         clearTimeout(this.activeTimeout);
         clearTimeout(this.cooldownTimeout);
         if (this.data){
@@ -49,7 +47,8 @@ export default class Ability {
         if (this.cannotCast) return false;
 
         switch(this.type){
-            case 0: //one time
+            
+            case EAbilityType.ONETIME: //one time
             {
                 this.castMethod(n, player, this);
                 this.cannotCast = true
@@ -59,7 +58,7 @@ export default class Ability {
                 return true;
             }
 
-            case 1: //Active
+            case EAbilityType.ACTIVE: //Active
             {
                 if (!this.data.active) {
                     this.castMethod(n, player, this);
@@ -81,7 +80,7 @@ export default class Ability {
                 
             }
 
-            case 2: //Charges
+            case EAbilityType.CHARGES: //Charges
             {
                 if (this.data.charges > 1) {
 
@@ -120,7 +119,7 @@ export default class Ability {
                 break;
             }
 
-            case 3: //Active-charges
+            case EAbilityType.ACTIVECHARGES: //Active-charges
             {
                 if (!this.data.active) {
 

@@ -39,5 +39,3 @@ export default class Explosion extends GameElement implements ILifetimedElement,
     }
 
 }
-
-module.exports = Explosion;

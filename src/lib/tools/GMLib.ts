@@ -20,4 +20,13 @@ export default class GM {
         return Math.random() * (m - n) + n;
     }
     
+
+    static lerp(a: number, b: number, n: number){
+        return a + (b - a) * n;
+    }
+
+    static dtlerp(a: number, b: number, n: number, dt: number){
+        return this.lerp(a, b, 1 - Math.pow(1 - n, dt));
+    }
+
 }
