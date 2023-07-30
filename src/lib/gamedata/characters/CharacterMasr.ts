@@ -1,16 +1,15 @@
-import { EMPTY_METHOD } from '../../Macros';
+import {EMPTY_METHOD} from '../../Macros';
 import Ability from "../../components/Ability";
 import Character from "../../components/Character";
-import { EFFECT } from "../../components/Player";
-import { ActiveAbilityData, NoAbilityData } from "../../components/sub/AbilityData";
+import {EFFECT} from "../../components/Player";
+import {ActiveAbilityData, NoAbilityData} from "../../components/sub/AbilityData";
 import EAbilityType from "../../enums/EAbilityType";
-import Logger from "../../tools/Logger";
+import Vector2 from '../../tools/vector/Vector2';
 import EntityList from "../instancelist/EntityList";
 import ExplosionList from "../instancelist/ExplosionList";
 import ProjectileList from "../instancelist/ProjectileList";
 
 export default Character.builder(
-
     "Masr",
     640,
     220,
@@ -26,20 +25,34 @@ export default Character.builder(
                 }, 100);
             } else {
 
-                setTimeout(() => {
+                if (isUlt) {
 
-                    if (isUlt) player.game?.addProjectile(player, ProjectileList.MasrBoltPowered,
-                        player.x, player.y, 130, player.mouseDirection, 1, 0, 10, 0, 0, 0, 1, function(proj){
-                            if (proj.bounceCount > 3) proj.destroy();
-                            player.game?.addExplosion(player, ExplosionList.MasrBolt, proj.x, proj.y, 150, 0);
-                        }, EMPTY_METHOD, 1, 0);
+                    setTimeout(() => {
 
-                    else player.game?.addProjectile(player, ProjectileList.MasrBoltPowered,
-                        player.x, player.y, 110, player.mouseDirection, 1, 1, 10, 0, 0, 0, 0, EMPTY_METHOD, function(proj){
-                            player.game?.addExplosion(player, ExplosionList.MasrBolt, proj.x, proj.y, 150, 0);
+                        player.game?.addProjectile(player, ProjectileList.MasrBoltPowered,
+                            player.x, player.y, 130, player.mouseDirection, 1, 0, 10, 0, 0, 0, 1, function (proj) {
+                                if (proj.bounceCount > 4) proj.destroy();
+                                player.game?.addExplosion(player, ExplosionList.MasrBolt, proj.x, proj.y, 150, 0);
+                            }, EMPTY_METHOD, 1, 0).step(function (t, dt) {
+
+                            if (Math.random() > 0.9) t.mov = Vector2.polar(t.mov.magnitude(), t.mov.direction() - 20 + Math.random() * 40);
+
                         })
 
-                }, 600);
+                    }, 600)
+
+                } else {
+
+                    setTimeout(() => {
+
+                        player.game?.addProjectile(player, ProjectileList.MasrBoltPowered,
+                            player.x, player.y, 110, player.mouseDirection, 1, 1, 10, 0, 0, 0, 0, EMPTY_METHOD, function (proj) {
+                                player.game?.addExplosion(player, ExplosionList.MasrBolt, proj.x, proj.y, 150, 0);
+                            })
+
+                    }, 600);
+
+                }
             }
             
 
@@ -54,7 +67,7 @@ export default Character.builder(
         }),
         new Ability(EAbilityType.ONETIME, [0], NoAbilityData, function(n, player){
 
-            player.forceDash(player.mouseDirection, 0.2, 2.8);
+            player.forceDash(player.mouseDirection, 0.22, 1.8);
             if (player.char.abilities[3].data.active) {
                 player.addEffect(EFFECT.INVISIBILITY, 3);
             }

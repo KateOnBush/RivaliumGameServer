@@ -1,8 +1,7 @@
-import Logger from "../tools/Logger";
 import EAbilityType from "../enums/EAbilityType";
 import Player from "./Player";
 import Projectile from "./Projectile";
-import { AbilityData } from "./sub/AbilityData";
+import {AbilityData} from "./sub/AbilityData";
 
 export default class Ability {
 

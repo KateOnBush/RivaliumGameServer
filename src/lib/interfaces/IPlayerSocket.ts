@@ -1,4 +1,4 @@
-import { WebSocket } from "ws";
+import {WebSocket} from "ws";
 import Game from "../components/Game";
 import Player from "../components/Player";
 

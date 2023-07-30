@@ -1,5 +1,5 @@
 import ICharacter from "../interfaces/ICharacter";
-import { AbilitySet, AbilitySetInitializer } from "../types/GameTypes";
+import {AbilitySetInitializer} from "../types/GameTypes";
 
 export default class Character {
 

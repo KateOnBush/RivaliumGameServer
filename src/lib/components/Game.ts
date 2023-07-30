@@ -1,17 +1,17 @@
-import { UUID } from "bson";
+import {UUID} from "bson";
 import Player from "./Player";
-import Projectile, { projectileEventCallback } from "./Projectile";
+import Projectile, {projectileEventCallback} from "./Projectile";
 import Entity from "./Entity";
 import Explosion from "./Explosion";
 import IPlayerSocket from "../interfaces/IPlayerSocket";
-import { NumericBoolean } from "../types/GameTypes";
-import { dataSize, defaultBounceFriction } from "../Macros";
+import {NumericBoolean} from "../types/GameTypes";
+import {dataSize, defaultBounceFriction} from "../Macros";
 import Lag from "../tools/Lag";
 import GMBuffer from "../tools/GMBuffer";
-import { randomUUID } from "crypto";
-import { EServerResponse } from "../enums/EPacketTypes";
+import {randomUUID} from "crypto";
+import {EServerResponse} from "../enums/EPacketTypes";
 import EBufferType from "../enums/EBufferType";
-import { EGameState, EGameType } from "../enums/EGameData";
+import {EGameState, EGameType} from "../enums/EGameData";
 import ProjectileList from "../gamedata/instancelist/ProjectileList";
 
 export default class Game {
@@ -25,7 +25,6 @@ export default class Game {
     projectiles: Projectile[] = [];
     entities: Entity[] = [];
     explosions: Explosion[] = [];
-    
 
     constructor(type?: EGameType) {
 

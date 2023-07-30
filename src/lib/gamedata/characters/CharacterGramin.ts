@@ -2,14 +2,13 @@ import Lag from "../../tools/Lag";
 import Ability from "../../components/Ability";
 import EAbilityType from "../../enums/EAbilityType";
 import Character from "../../components/Character";
-import { ActiveChargesAbilityData, NoAbilityData } from "../../components/sub/AbilityData";
-import { EMPTY_METHOD } from "../../Macros";
+import {ActiveChargesAbilityData, NoAbilityData} from "../../components/sub/AbilityData";
+import {EMPTY_METHOD} from "../../Macros";
 import GM from "../../tools/GMLib";
 import ProjectileList from "../instancelist/ProjectileList";
 import ExplosionList from "../instancelist/ExplosionList";
 
 export default Character.builder(
-
     "Gramin",
     480,
     220,

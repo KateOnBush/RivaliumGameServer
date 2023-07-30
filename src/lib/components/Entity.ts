@@ -1,9 +1,8 @@
-import { dataSize } from "../Macros";
+import {dataSize} from "../Macros";
 import EBufferType from "../enums/EBufferType";
-import { EServerResponse } from "../enums/EPacketTypes";
+import {EServerResponse} from "../enums/EPacketTypes";
 import ILifetimedElement from "../interfaces/ILifetimedElement";
 import GMBuffer from "../tools/GMBuffer";
-import Logger from "../tools/Logger";
 import Player from "./Player";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
 

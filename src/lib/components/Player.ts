@@ -1,13 +1,12 @@
 import CharacterRepository from "../gamedata/CharacterRepository";
-import { dataSize } from "../Macros";
-import { EServerResponse, EServerRequest } from '../enums/EPacketTypes';
+import {dataSize} from "../Macros";
+import {EServerResponse} from '../enums/EPacketTypes';
 import ICharacter from "../interfaces/ICharacter";
 import PlayerSocket from "../interfaces/IPlayerSocket";
 import GMBuffer from "../tools/GMBuffer";
 import GM from "../tools/GMLib";
 import Vector2 from "../tools/vector/Vector2";
-import { EffectData } from "../types/GameTypes";
-import Game from "./Game";
+import {EffectData} from "../types/GameTypes";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
 import PlayerPing from "./sub/PlayerPing";
 import PlayerState from "./sub/PlayerState";
@@ -34,6 +33,10 @@ export default class Player extends GamePhysicalElement {
     char: ICharacter;
     ping: PlayerPing = new PlayerPing();
 
+    kills: number = 0;
+    deaths: number = 0;
+    assists: number = 0;
+
     effectTimeouts: NodeJS.Timeout[] = [];
 
 
@@ -54,27 +57,28 @@ export default class Player extends GamePhysicalElement {
 
     }
 
-    hit(damage: number, attacker: Player){
+    hit(damage: number, attacker: Player, visual: boolean = true) {
 
         if (this.state.dead == 1) return;
 
+        attacker.char.ultimateCharge += damage;
+        if (attacker.char.ultimateCharge > attacker.char.ultimateChargeMax) attacker.char.ultimateCharge = attacker.char.ultimateChargeMax;
+
         this.char.health -= damage;
-        if (this.char.health < 0)
-        {
+        if (this.char.health < 0) {
             this.char.health = 0;
+            this.dead = 1;
+            this.kill(attacker);
 
         }
 
-        var hitbuff = Buffer.alloc(dataSize);
-		hitbuff.writeUInt8(EServerResponse.PLAYER_HIT, 0)
-		hitbuff.writeUInt16LE(this.id, 1);
-		hitbuff.writeUInt16LE(attacker.id, 3);
+        var hitbuff = GMBuffer.allocate(dataSize);
+        hitbuff.write(EServerResponse.PLAYER_HIT, EBufferType.UInt8)
+        hitbuff.write(this.id, EBufferType.UInt16);
+        hitbuff.write(attacker.id, EBufferType.UInt16);
+        hitbuff.write(visual ? 1 : 0, EBufferType.UInt8);
 
-        if (this.game) this.game.players.forEach(p=>{
-
-            p.socket.send(hitbuff);
-
-        });
+        this.game?.broadcast(hitbuff);
 
     }
 
@@ -94,7 +98,7 @@ export default class Player extends GamePhysicalElement {
 
             this.effectTimeouts.push(setTimeout(()=>{
 
-                this.hit(damage/5 | 0, attacker);
+                this.hit(damage / 5 | 0, attacker, false);
                 
             }, (i+1)*250));
 
@@ -134,21 +138,19 @@ export default class Player extends GamePhysicalElement {
 
     }
 
-    addEffect(type: EFFECT, duration: number, data: EffectData = {}){
+    addEffect(type: EFFECT, duration: number, data: EffectData = {}) {
 
-        let _b = Buffer.alloc(dataSize);
-		_b.writeUInt8(EServerResponse.EFFECT_ADD, 0);
-		_b.writeUInt16LE(this.id, 1)
-		_b.writeUInt8(type, 3);
-		_b.writeUInt16LE(duration * 100, 4);
+        let _b = GMBuffer.allocate(dataSize);
+        _b.write(EServerResponse.EFFECT_ADD, EBufferType.UInt8);
+        _b.write(this.id, EBufferType.UInt16)
+        _b.write(type, EBufferType.UInt8);
+        _b.write(duration * 100, EBufferType.UInt16);
 
-        if ([EFFECT.BURN, EFFECT.HEAL].includes(type) && data.multiplier) { //Speed or boost
-            _b.writeUInt16LE(data.multiplier * 100, 6);
+        if ([EFFECT.ACCELERATE, EFFECT.SLOW].includes(type) && data.multiplier) { //Speed or boost
+            _b.write(data.multiplier * 100 | 0, EBufferType.UInt16);
         }
 
-        if (this.game) this.game.players.forEach(p=>{
-            p.socket.send(_b);
-        });
+        this.game?.broadcast(_b);
 
     }
 
@@ -169,6 +171,18 @@ export default class Player extends GamePhysicalElement {
         buff.write(direction * 100 | 0, EBufferType.SInt16);
         buff.write(time * 100 | 0, EBufferType.UInt16);
         buff.write(mult * 100 | 0, EBufferType.UInt16);
+
+        this.game?.broadcast(buff);
+
+    }
+
+    kill(killer: Player) {
+
+        var buff = GMBuffer.allocate(dataSize);
+
+        buff.write(EServerResponse.PLAYER_DEATH, EBufferType.UInt8);
+        buff.write(this.id, EBufferType.UInt16);
+        buff.write(killer.id, EBufferType.UInt16);
 
         this.game?.broadcast(buff);
 

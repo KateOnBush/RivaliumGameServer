@@ -1,10 +1,9 @@
 import Lag from "./tools/Lag";
 import Game from "./components/Game";
-import { dataSize, gravity as grav, gravityVec } from "./Macros";
+import {dataSize} from "./Macros";
 import EBufferType from "./enums/EBufferType";
-import { EServerResponse } from "./enums/EPacketTypes";
+import {EServerResponse} from "./enums/EPacketTypes";
 import GMBuffer from "./tools/GMBuffer";
-import Vector2 from "./tools/vector/Vector2";
 
 export default class GameProcessor {
 
@@ -25,31 +24,24 @@ export default class GameProcessor {
 				let buff = GMBuffer.allocate(dataSize);
 				buff.write(EServerResponse.PLAYER_UPDATE, EBufferType.UInt8);
 				buff.write(pl.id, EBufferType.UInt16);
-				buff.write((pred.pos.x)*100|0, EBufferType.SInt32);
+				buff.write(pl.state.id, EBufferType.UInt8);
+				buff.write((pred.pos.x) * 100 | 0, EBufferType.SInt32);
 				buff.write((pl.state.on_ground ? pl.y : pred.pos.y) *100|0, EBufferType.SInt32);
-				buff.write(pred.mov.x*100|0, EBufferType.SInt32);
-				buff.write((pl.state.on_ground ? pl.my : pred.mov.y)*100|0, EBufferType.SInt32);
+				buff.write(pred.mov.x * 100 | 0, EBufferType.SInt32);
+				buff.write((pl.state.on_ground ? pl.my : pred.mov.y) * 100 | 0, EBufferType.SInt32);
 				buff.write(pl.state.on_ground, EBufferType.UInt8);
-				buff.write(pl.state.jump_prep*100, EBufferType.UInt8);
-				buff.write(pl.state.wall_slide, EBufferType.UInt8);
-				buff.write(pl.state.grappling, EBufferType.UInt8);
-				buff.write(pl.state.grappled, EBufferType.UInt8);
 				buff.write(pl.state.dir, EBufferType.SInt8);
-				buff.write(pl.state.dash, EBufferType.UInt8);
 				buff.write(pl.state.slide, EBufferType.UInt8);
-				buff.write(pl.state.grounded, EBufferType.UInt8);
-				buff.write(pl.state.slope, EBufferType.UInt8);
 				buff.write(pl.char.health, EBufferType.UInt16);
 				buff.write(pl.char.ultimateCharge, EBufferType.UInt16);
 				buff.write(pl.char.healthMax, EBufferType.UInt16);
 				buff.write(pl.char.ultimateChargeMax, EBufferType.UInt16);
 				buff.write(pl.char.id, EBufferType.UInt8);
-				buff.write(pl.state.dead, EBufferType.UInt8);
-				buff.write(pl.mouse.x, EBufferType.SInt32);
-				buff.write(pl.mouse.y, EBufferType.SInt32);
-	
+				buff.write(pl.mouse.x * 100 | 0, EBufferType.SInt32);
+				buff.write(pl.mouse.y * 100 | 0, EBufferType.SInt32);
+
 				sendbuff.push(buff.getBuffer());
-	
+
 			})
 	
 			var sendbuff_c = Buffer.concat(sendbuff);

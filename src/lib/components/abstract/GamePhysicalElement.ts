@@ -1,4 +1,4 @@
-import { gravityVec } from '../../Macros';
+import {gravityVec} from '../../Macros';
 import Vector2 from '../../tools/vector/Vector2';
 import GameElement from "./GameElement";
 

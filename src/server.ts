@@ -1,26 +1,26 @@
-import { WebSocketServer } from "ws"
+import {WebSocketServer} from "ws"
 import Logger from "./lib/tools/Logger";
-import { dataSize, serverPort } from "./lib/Macros";
+import {dataSize, serverPort} from "./lib/Macros";
 import PlayerSocket from "./lib/interfaces/IPlayerSocket";
 import GMBuffer from "./lib/tools/GMBuffer";
 import EBufferType from "./lib/enums/EBufferType";
-import { EServerResponse } from "./lib/enums/EPacketTypes";
+import {EServerResponse} from "./lib/enums/EPacketTypes";
 import GameProcessor from "./lib/GameProcessor";
 import Ping from "./lib/tools/Ping";
 import Game from "./lib/components/Game";
 import PacketHandler from "./lib/PacketHandler";
-import { EGameType } from "./lib/enums/EGameData";
-import { LOGO } from "./logo";
+import {EGameType} from "./lib/enums/EGameData";
+import {LOGO} from "./logo";
 
 import 'source-map-support/register'
 import CharacterList from "./lib/gamedata/CharacterList";
 
-var clients : PlayerSocket[] = [];
+let clients: PlayerSocket[] = [];
 
 let game = new Game(EGameType.NORMAL);
 let lastDelta = performance.now();
 
-setInterval(()=>{
+setInterval(() => {
 	let dt = (performance.now() - lastDelta) * 60/1000;
 	lastDelta = performance.now();
 	GameProcessor.update(game)
@@ -48,11 +48,11 @@ wsServer.on('connection', function(socket: PlayerSocket, req) {
 
 	clients.push(socket);
 
-	game.addPlayer(socket, CharacterList.Masr)	;
+	game.addPlayer(socket, CharacterList.Kenn);
 	let player = socket.player!;
 
 	/// Telling the client who he is
-	var buff = GMBuffer.allocate(dataSize);
+	let buff = GMBuffer.allocate(dataSize);
 	buff.write(EServerResponse.PLAYER_JOIN, 	EBufferType.UInt8);
 	buff.write(player.id, 						EBufferType.UInt16);
 	buff.write(1, 								EBufferType.UInt8); //1: Connected, 0: Disconnected
@@ -75,9 +75,9 @@ wsServer.on('connection', function(socket: PlayerSocket, req) {
 
 		let buffer = data as Buffer;
 		var n = ~~(buffer.byteLength/dataSize);
-		for(var o = 0; o < n; o++){
+		for (let o = 0; o < n; o++) {
 
-			PacketHandler.handle(GMBuffer.from(buffer.subarray(o*n, (o+1)*dataSize-1)), socket);
+			PacketHandler.handle(GMBuffer.from(buffer.subarray(o * n, (o + 1) * dataSize - 1)), socket);
 
 		}
 

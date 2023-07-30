@@ -1,19 +1,16 @@
 import Lag from "../../tools/Lag";
-import Logger from "../../tools/Logger";
 import Ability from "../../components/Ability";
 import EAbilityType from "../../enums/EAbilityType";
 import Character from "../../components/Character";
-import { ActiveAbilityData, ActiveChargesAbilityData, NoAbilityData } from '../../components/sub/AbilityData';
-import { EMPTY_METHOD } from "../../Macros";
+import {ActiveChargesAbilityData, NoAbilityData} from '../../components/sub/AbilityData';
+import {EMPTY_METHOD} from "../../Macros";
 import GM from "../../tools/GMLib";
 import ProjectileList from "../instancelist/ProjectileList";
 import ExplosionList from "../instancelist/ExplosionList";
-import Entity from "../../components/Entity";
 import EntityList from "../instancelist/EntityList";
 
 
 export default Character.builder(
-
     "Lenya",
     640,
     220,

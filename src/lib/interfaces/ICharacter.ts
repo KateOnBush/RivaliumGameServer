@@ -1,4 +1,4 @@
-import { AbilitySet } from "../types/GameTypes";
+import {AbilitySet} from "../types/GameTypes";
 
 
 export default interface ICharacter {

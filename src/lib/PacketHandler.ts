@@ -1,13 +1,13 @@
 import Lag from "./tools/Lag";
 import Logger from "./tools/Logger";
-import Projectile from "./components/Projectile";
-import { dataSize, entityParametersLimit } from "./Macros";
+import {dataSize, entityParametersLimit} from "./Macros";
 import EBufferType from "./enums/EBufferType";
-import { EServerRequest, EServerResponse } from "./enums/EPacketTypes";
+import {EServerRequest, EServerResponse} from "./enums/EPacketTypes";
 import IPlayerSocket from "./interfaces/IPlayerSocket";
 import GMBuffer from "./tools/GMBuffer";
 import Vector2 from "./tools/vector/Vector2";
-import { NumericBoolean, SignedNumericBoolean } from "./types/GameTypes";
+import {NumericBoolean, SignedNumericBoolean} from "./types/GameTypes";
+import EPlayerState from "./enums/EPlayerState";
 
 
 export default class PacketHandler {
@@ -19,6 +19,8 @@ export default class PacketHandler {
         if (!socket.player || !socket.game) return;
         let player = socket.player;
 
+        if (![EServerRequest.POSITION_UPDATE, EServerRequest.PING].includes(type)) Logger.info("Received packet type {} from playerId {}", EServerRequest[type], player.id);
+
         switch (type) {
 
             case EServerRequest.POSITION_UPDATE: // Position update
@@ -28,16 +30,11 @@ export default class PacketHandler {
                 player.mov.x = buffer.read(EBufferType.SInt32) / 100;
                 player.mov.y = buffer.read(EBufferType.SInt32) / 100;
 
+                player.state.id = buffer.read(EBufferType.UInt8) as EPlayerState;
+
                 player.state.on_ground = buffer.read(EBufferType.UInt8) as NumericBoolean;
-                player.state.jump_prep = buffer.read(EBufferType.UInt8) / 100;
-                player.state.wall_slide = buffer.read(EBufferType.UInt8) as NumericBoolean;
-                player.state.grappling = buffer.read(EBufferType.UInt8) as NumericBoolean;
-                player.state.grappled = buffer.read(EBufferType.UInt8) as NumericBoolean;
                 player.state.dir = buffer.read(EBufferType.SInt8) as SignedNumericBoolean;
-                player.state.dash = buffer.read(EBufferType.UInt8) as NumericBoolean;
                 player.state.slide = buffer.read(EBufferType.UInt8) as NumericBoolean;
-                player.state.grounded = buffer.read(EBufferType.UInt8) as NumericBoolean;
-                player.state.slope = buffer.read(EBufferType.UInt8) as NumericBoolean;
                 player.mouse.x = buffer.read(EBufferType.SInt32) / 100;
                 player.mouse.y = buffer.read(EBufferType.SInt32) / 100;
 

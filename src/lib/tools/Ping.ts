@@ -1,7 +1,6 @@
-import { dataSize } from "../Macros";
-import { EServerResponse } from "../enums/EPacketTypes";
+import {dataSize} from "../Macros";
+import {EServerResponse} from "../enums/EPacketTypes";
 import IPlayerSocket from "../interfaces/IPlayerSocket";
-import Game from '../components/Game';
 import GMBuffer from "./GMBuffer";
 import EBufferType from "../enums/EBufferType";
 
