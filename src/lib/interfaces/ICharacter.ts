@@ -1,9 +1,10 @@
 import {AbilitySet} from "../types/GameTypes";
+import CharacterList from "../gamedata/CharacterList";
 
 
 export default interface ICharacter {
 
-    id: number;
+    id: CharacterList;
     name: string;
     health: number;
     healthMax: number;

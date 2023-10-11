@@ -1,5 +1,6 @@
 export enum EServerRequest {
 
+    IDENTIFY,
     POSITION_UPDATE = 2,
     GRAPPLING_POSITION,
     FLIP,
@@ -15,7 +16,12 @@ export enum EServerRequest {
 
 export enum EServerResponse {
 
-    PLAYER_JOIN = 1,
+    PREMATCH,
+
+    GAME_STATE,
+
+    PLAYER_CREATE,
+    PLAYER_CONNECTION,
     PLAYER_UPDATE,
     PLAYER_GRAPPLE,
     PLAYER_FLIP,
@@ -37,5 +43,17 @@ export enum EServerResponse {
 	ENTITY_CREATE,
     ENTITY_UPDATE,
     ENTITY_DESTROY
+
+}
+
+export enum EServerResponsePreMatch {
+
+    MATCH_NOT_FOUND,
+    MATCH_ENDED,
+    REJOINED,
+    IDENTIFIED,
+    PLAYER_LOADED,
+    MATCH_STARTING,
+    MATCH_STARTED
 
 }

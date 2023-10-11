@@ -1,6 +1,6 @@
 import CharacterRepository from "../gamedata/CharacterRepository";
 import {dataSize} from "../Macros";
-import {EServerResponse} from '../enums/EPacketTypes';
+import {EServerResponse} from '../enums/TCPPacketTypes';
 import ICharacter from "../interfaces/ICharacter";
 import PlayerSocket from "../interfaces/IPlayerSocket";
 import GMBuffer from "../tools/GMBuffer";
@@ -11,6 +11,8 @@ import GamePhysicalElement from "./abstract/GamePhysicalElement";
 import PlayerPing from "./sub/PlayerPing";
 import PlayerState from "./sub/PlayerState";
 import EBufferType from "../enums/EBufferType";
+import MatchPlayer from "../database/match/data/MatchPlayer";
+import EPlayerState from "../enums/EPlayerState";
 
 export enum EFFECT {
         
@@ -37,10 +39,14 @@ export default class Player extends GamePhysicalElement {
     deaths: number = 0;
     assists: number = 0;
 
+    matchPlayer: MatchPlayer;
+
+    team: number = 0;
+
     effectTimeouts: NodeJS.Timeout[] = [];
 
 
-    constructor(socket: PlayerSocket, id: number, charid: number, position?: Vector2, state?: PlayerState){
+    constructor(socket: PlayerSocket, id: number, charid: number, team: number = 0, position?: Vector2, state?: PlayerState){
 
         super();
         this.socket = socket;
@@ -48,6 +54,7 @@ export default class Player extends GamePhysicalElement {
         if (position) this.pos = position;
         if (state) this.state = state;
         this.char = CharacterRepository.get(charid);
+        this.team = team;
 
     }
 
@@ -59,7 +66,8 @@ export default class Player extends GamePhysicalElement {
 
     hit(damage: number, attacker: Player, visual: boolean = true) {
 
-        if (this.state.dead == 1) return;
+        if (this.state.id == EPlayerState.DEAD) return;
+        if (this.team == attacker.team) return;
 
         attacker.char.ultimateCharge += damage;
         if (attacker.char.ultimateCharge > attacker.char.ultimateChargeMax) attacker.char.ultimateCharge = attacker.char.ultimateChargeMax;
@@ -73,7 +81,7 @@ export default class Player extends GamePhysicalElement {
         }
 
         var hitbuff = GMBuffer.allocate(dataSize);
-        hitbuff.write(EServerResponse.PLAYER_HIT, EBufferType.UInt8)
+        hitbuff.write(EServerResponse.PLAYER_HIT, EBufferType.UInt8);
         hitbuff.write(this.id, EBufferType.UInt16);
         hitbuff.write(attacker.id, EBufferType.UInt16);
         hitbuff.write(visual ? 1 : 0, EBufferType.UInt8);
@@ -119,7 +127,7 @@ export default class Player extends GamePhysicalElement {
 
     heal(amt: number, time: number){
 
-        if (this.state.dead == 1) return;
+        if (this.state.id != EPlayerState.DEAD) return;
 
         let n = time * 4 | 0;
         let amtpr = amt/n | 0;

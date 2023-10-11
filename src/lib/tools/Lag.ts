@@ -31,16 +31,8 @@ export default class Lag {
 
     static predictPosition(posVec: Vector2, movVec: Vector2, amt: number): Prediction {
 
-        for(let i = 1; i <= amt; i++){
-
-            posVec.add(movVec);
-            movVec.add(gravityVec);
-    
-        }
-    
-        let s = amt - Math.floor(amt);
-        posVec.add(Vector2.multiply(movVec, s));
-        movVec.add(Vector2.multiply(gravityVec, s));
+        posVec.add(Vector2.multiply(movVec, amt));
+        movVec.add(Vector2.multiply(gravityVec, amt));
         
         return {pos: posVec, mov: movVec};
     

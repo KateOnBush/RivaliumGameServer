@@ -1,6 +1,6 @@
 enum CharacterList {
 
-    Kenn = 1,
+    Kenn = 0,
     Gramin,
     Lenya,
     Masr

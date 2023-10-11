@@ -2,26 +2,97 @@ import Lag from "./tools/Lag";
 import Logger from "./tools/Logger";
 import {dataSize, entityParametersLimit} from "./Macros";
 import EBufferType from "./enums/EBufferType";
-import {EServerRequest, EServerResponse} from "./enums/EPacketTypes";
+import {EServerRequest, EServerResponse, EServerResponsePreMatch} from "./enums/TCPPacketTypes";
 import IPlayerSocket from "./interfaces/IPlayerSocket";
 import GMBuffer from "./tools/GMBuffer";
 import Vector2 from "./tools/vector/Vector2";
 import {NumericBoolean, SignedNumericBoolean} from "./types/GameTypes";
 import EPlayerState from "./enums/EPlayerState";
+import Database from "./database/Database";
+import {MatchState} from "./database/match/MatchTypes";
+import Time from "./tools/Time";
 
 
 export default class PacketHandler {
 
-    static handle(buffer: GMBuffer, socket: IPlayerSocket) {
+    static async handle(buffer: GMBuffer, socket: IPlayerSocket) {
 
         buffer.seek(0);
-        var type = buffer.read(EBufferType.UInt8);
-        if (!socket.player || !socket.game) return;
+        let type = buffer.read(EBufferType.UInt8);
         let player = socket.player;
 
-        if (![EServerRequest.POSITION_UPDATE, EServerRequest.PING].includes(type)) Logger.info("Received packet type {} from playerId {}", EServerRequest[type], player.id);
+        if (![EServerRequest.POSITION_UPDATE, EServerRequest.PING].includes(type)) Logger.info("Received packet type {} from playerId {}", EServerRequest[type], player?.id ?? null);
 
         switch (type) {
+
+            case EServerRequest.IDENTIFY:
+
+                let pass = buffer.read(EBufferType.UInt32);
+                let access = buffer.read(EBufferType.UInt32);
+
+                let response = GMBuffer.allocate(dataSize);
+                response.write(EServerResponse.PREMATCH, EBufferType.UInt8);
+
+                Logger.info("Player attempting identification, verifying...");
+
+                let match = await Database.verifyPlayer(socket, pass, access);
+                if (!match) {
+                    response.write(EServerResponsePreMatch.MATCH_NOT_FOUND, EBufferType.UInt8);
+                } else if (match.state == MatchState.FINISHED) {
+                    response.write(EServerResponsePreMatch.MATCH_ENDED, EBufferType.UInt8);
+                } else if (match.state == MatchState.STARTED || match.state == MatchState.LOADING) {
+                    response.write(EServerResponsePreMatch.REJOINED, EBufferType.UInt8);
+                    socket.identified = true;
+                    //rejoining
+                } else {
+
+                    Logger.info("Player identified! Match id: {}", match.getID());
+                    socket.identified = true;
+                    response.write(EServerResponsePreMatch.IDENTIFIED, EBufferType.UInt8);
+
+                    let msg = GMBuffer.allocate(dataSize);
+                    msg.write(EServerResponse.PREMATCH, EBufferType.UInt8);
+                    msg.write(EServerResponsePreMatch.PLAYER_LOADED, EBufferType.UInt8);
+                    msg.write(socket.player.matchPlayer.playerId, EBufferType.UInt16);
+
+                    socket.game.broadcast(msg);
+
+                    Logger.info("Sending IDENTIFIED");
+
+                }
+
+                socket.send(response.getBuffer());
+
+                if (!match) break;
+
+                if (match.playerManager.players.every(team => team.every(mPlayer => mPlayer.joined)) && match.state == MatchState.AWAITING_PLAYERS) {
+
+                    //start match
+                    match.state = MatchState.LOADING;
+                    Logger.info("All players joined, starting...");
+
+                    let msg = GMBuffer.allocate(dataSize);
+                    msg.write(EServerResponse.PREMATCH, EBufferType.UInt8);
+                    msg.write(EServerResponsePreMatch.MATCH_STARTING, EBufferType.UInt8);
+                    socket.game.broadcast(msg);
+
+                    await Time.wait(10000);
+
+                    msg = GMBuffer.allocate(dataSize);
+                    msg.write(EServerResponse.PREMATCH, EBufferType.UInt8);
+                    msg.write(EServerResponsePreMatch.MATCH_STARTED, EBufferType.UInt8);
+
+                    match.state = MatchState.STARTED;
+
+                    await Database.saveMatch(match);
+
+                    socket.game.broadcast(msg);
+
+                    match.game.start();
+
+                }
+
+                break;
 
             case EServerRequest.POSITION_UPDATE: // Position update
 
@@ -42,7 +113,7 @@ export default class PacketHandler {
                 player.pos.x = pred.pos.x;
                 player.mov.x = pred.mov.x;
 
-                if (player.state.on_ground){
+                if (!player.state.on_ground){
                     player.pos.y = pred.pos.y;
                     player.mov.y = pred.mov.y;
                 }
@@ -67,6 +138,7 @@ export default class PacketHandler {
                 break;
 
             }
+
             case EServerRequest.FLIP: /// Flip animation
             {
 
@@ -83,6 +155,7 @@ export default class PacketHandler {
                 socket.game.broadcastExcept(b, socket.player);
 
             }
+
             case EServerRequest.PING: /// Ping
 
                 let e = performance.now();
@@ -99,24 +172,28 @@ export default class PacketHandler {
 
             case EServerRequest.PLAYER_HIT: //Hit (Projectile Destroy)
 
-                var _projectile_id = buffer.read(EBufferType.UInt16);
-                var _object_id = buffer.read(EBufferType.UInt16);
-                var _hit_id = buffer.read(EBufferType.UInt16);
+                const _projectile_id = buffer.read(EBufferType.UInt16);
+                const _object_id = buffer.read(EBufferType.UInt16);
+                const _hit_id = buffer.read(EBufferType.UInt16);
+                let _x = buffer.read(EBufferType.SInt32)/100,
+                    _y = buffer.read(EBufferType.SInt32)/100;
 
-                var proj;
+                let proj;
 
                 if (_projectile_id != 0) {
                     proj = socket.game.getProjectile(_projectile_id);
                 }
 
                 if (!proj) break;
+                proj.pos.x = _x;
+                proj.pos.y = _y;
 
-                let hitplayer = socket.game.getPlayer(_hit_id);
-                if (hitplayer) {
+                let playerHit = socket.game.getPlayer(_hit_id);
+                if (playerHit) {
 
-                    hitplayer.hit(proj.damage, socket.player);
+                    playerHit.hit(proj.damage, socket.player);
                     if (proj.bleed > 0)
-                        hitplayer.burn(proj.bleed, socket.player);
+                        playerHit.burn(proj.bleed, socket.player);
                     if (proj.heal > 0)
                         socket.player.healInstantly(proj.heal);
 

@@ -16,11 +16,11 @@ export default Character.builder(
 
         new Ability(EAbilityType.ONETIME, [0.3, 1], NoAbilityData, function (n: number, player: Player) {
             if (!player.game) return;
-            var pred = Lag.predictNextPosition(player);
+            const pred = Lag.predictNextPosition(player);
             let inUlt = player.char.abilities[3].data.active;
             let bleeds = player.char.abilities[1].data.active;
             let projectile = inUlt ? ProjectileList.KennDaggerTransformed : ProjectileList.KennDagger;
-            for (var i = 0; i < (n == 1 ? 4 : 1); i++) {
+            for (let i = 0; i < (n == 1 ? 4 : 1); i++) {
                 player.game.addProjectile(
                     player,
                     projectile,

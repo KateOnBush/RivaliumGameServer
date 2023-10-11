@@ -9,7 +9,8 @@ export enum EGameType {
 export enum EGameState {
 
     STARTING,
-    ONGOING,
-    ENDING
+    PREROUND,
+    BATTLE,
+    SUDDENDEATH
 
 }

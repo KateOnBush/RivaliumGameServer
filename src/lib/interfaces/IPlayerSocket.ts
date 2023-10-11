@@ -4,8 +4,9 @@ import Player from "../components/Player";
 
 export default interface IPlayerSocket extends WebSocket {
 
-    player?: Player;
-    game?: Game;
+    player: Player;
+    game: Game;
+    identified: boolean;
 
 }
 

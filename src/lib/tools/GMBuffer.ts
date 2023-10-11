@@ -4,6 +4,7 @@ export default class GMBuffer {
 
     private buffer: Buffer;
     private index: number = 0;
+    private data: Array<[any, EBufferType]> = [];
 
     static allocate(size: number){
         let b = new GMBuffer();
@@ -21,6 +22,10 @@ export default class GMBuffer {
     }
 
     private constructor(){}
+
+    copy() {
+        return GMBuffer.from(this.getBuffer());
+    }
 
     write(value: any, type: EBufferType){
 
@@ -145,9 +150,8 @@ export default class GMBuffer {
     poke(value: any, type: EBufferType, index: number){
         let lastIndex = this.index;
         this.seek(index);
-        let val = this.write(value, type);
+        this.write(value, type);
         this.index = lastIndex;
-        return val;
     }
 
     getBuffer() {

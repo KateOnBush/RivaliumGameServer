@@ -3,36 +3,36 @@ import Logger from "./lib/tools/Logger";
 import {dataSize, serverPort} from "./lib/Macros";
 import PlayerSocket from "./lib/interfaces/IPlayerSocket";
 import GMBuffer from "./lib/tools/GMBuffer";
-import EBufferType from "./lib/enums/EBufferType";
-import {EServerResponse} from "./lib/enums/EPacketTypes";
 import GameProcessor from "./lib/GameProcessor";
 import Ping from "./lib/tools/Ping";
-import Game from "./lib/components/Game";
 import PacketHandler from "./lib/PacketHandler";
-import {EGameType} from "./lib/enums/EGameData";
 import {LOGO} from "./logo";
 
 import 'source-map-support/register'
-import CharacterList from "./lib/gamedata/CharacterList";
+import Database from "./lib/database/Database";
+import dgram from 'dgram';
 
-let clients: PlayerSocket[] = [];
-
-let game = new Game(EGameType.NORMAL);
 let lastDelta = performance.now();
 
 setInterval(() => {
-	let dt = (performance.now() - lastDelta) * 60/1000;
-	lastDelta = performance.now();
-	GameProcessor.update(game)
-	GameProcessor.process(game, dt);
+	for(const game of GameProcessor.GameList) {
+		let dt = (performance.now() - lastDelta) * 60 / 1000;
+		lastDelta = performance.now();
+		GameProcessor.process(game, dt);
+		GameProcessor.update(game)
+	}
 }, 1000/60|0);
 
 
-setInterval(()=>Ping.ping(clients), 500);
+setInterval(()=>{
+	GameProcessor.GameList.forEach(game => Ping.ping(game.players.map(player => player.socket)));
+}, 1000);
+setInterval(()=>Database.lookupUninitializedMatches(), 5000);
 
 const wsServer = new WebSocketServer({
 	port: serverPort
 });
+const udpServer = dgram.createSocket('udp6');
 
 
 wsServer.on('listening', function(){
@@ -42,42 +42,31 @@ wsServer.on('listening', function(){
 
 })
 
+udpServer.on('listening', function () {
+	Logger.info("UDP Channel listening at port: {}", serverPort);
+})
+
 wsServer.on('connection', function(socket: PlayerSocket, req) {
 
 	Logger.info("Client connected: {}", req.socket.remoteAddress);
 
-	clients.push(socket);
+	socket.identified = false;
 
-	game.addPlayer(socket, CharacterList.Kenn);
-	let player = socket.player!;
-
-	/// Telling the client who he is
-	let buff = GMBuffer.allocate(dataSize);
-	buff.write(EServerResponse.PLAYER_JOIN, 	EBufferType.UInt8);
-	buff.write(player.id, 						EBufferType.UInt16);
-	buff.write(1, 								EBufferType.UInt8); //1: Connected, 0: Disconnected
-	buff.write(0, 								EBufferType.UInt8); //0: Not you, 1: You
-	buff.write(player.char.id, 					EBufferType.UInt8);
-	buff.write(player.char.health, 				EBufferType.UInt16);
-	buff.write(player.char.ultimateCharge, 		EBufferType.UInt16);
-	buff.write(player.char.healthMax, 			EBufferType.UInt16);
-	buff.write(player.char.ultimateChargeMax, 	EBufferType.UInt16);
-	buff.write(70000, 							EBufferType.SInt32);
-	buff.write(50000, 							EBufferType.SInt32);
-
-	player.game?.broadcastExcept(buff, player);
-
-	let selfBuff = GMBuffer.from(buff.getBuffer());
-	selfBuff.poke(1, EBufferType.UInt8, 4);
-	player.send(selfBuff);
+	setTimeout(()=> {
+		if (!socket.identified) {
+			socket.close();
+		}
+	}, 5000);
 
 	socket.on('message', function(data) {
 
 		let buffer = data as Buffer;
-		var n = ~~(buffer.byteLength/dataSize);
+		let n = ~~(buffer.byteLength/dataSize);
 		for (let o = 0; o < n; o++) {
 
-			PacketHandler.handle(GMBuffer.from(buffer.subarray(o * n, (o + 1) * dataSize - 1)), socket);
+			PacketHandler.handle(GMBuffer.from(buffer.subarray(o * n, (o + 1) * dataSize - 1)), socket).catch((err) => {
+				Logger.error("Error handling received packet from {}\nError: {}", req.socket.remoteAddress, (err as Error).stack);
+			});
 
 		}
 
@@ -96,3 +85,5 @@ wsServer.on('connection', function(socket: PlayerSocket, req) {
 	});
 
 });
+
+udpServer.bind(serverPort);

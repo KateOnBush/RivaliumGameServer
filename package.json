@@ -5,22 +5,28 @@
     "bson": "latest",
     "crypto": "latest",
     "dgram": "latest",
-    "mongodb": "^5.1.0",
+    "mongodb": "^5.8.1",
+    "mongodb-typescript": "^3.0.0",
     "net": "latest",
-    "nodemon": "^2.0.22",
+    "nodemon": "^3.0.1",
     "pkg": "^5.8.0",
     "source-map-support": "^0.5.21",
     "ws": "latest"
   },
   "scripts": {
     "start:dev": "npx nodemon",
-    "build": "rimraf ./build && tsc -sourcemap",
-    "start": "npm run build && node build/server.js"
+    "compile": "rimraf ./build && tsc -sourcemap",
+    "start": "npm run compile && node build/server.js",
+    "build": "npm run compile && pkg ."
   },
-  "name": "epicgameserver",
-  "version": "1.0.0",
-  "main": "server.js",
-  "bin": "server.js",
+  "pkg": {
+    "scripts": "build/**/*.js",
+    "dest": "out"
+  },
+  "name": "rivalium-game-server",
+  "version": "0.0alpha",
+  "main": "build/server.js",
+  "bin": "build/server.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/KateOnBush/EpicGameServer.git"

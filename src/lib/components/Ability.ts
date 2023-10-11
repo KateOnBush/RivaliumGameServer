@@ -15,7 +15,7 @@ export default class Ability {
 
     createdProjectile?: Projectile;
 
-    constructor(type: EAbilityType, cooldowns: number[], abilitydata: AbilityData, castMethod: (n: number, p: Player, a: Ability) => void){
+    constructor(type: EAbilityType, cooldowns: number[], abilitydata: AbilityData, castMethod: (n: number, p: Player, a: Ability) => void) {
         
         this.type = type;
         this.maxCooldown = cooldowns;

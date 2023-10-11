@@ -1,4 +1,3 @@
-import {UUID} from "bson";
 import Player from "./Player";
 import Projectile, {projectileEventCallback} from "./Projectile";
 import Entity from "./Entity";
@@ -8,39 +7,120 @@ import {NumericBoolean} from "../types/GameTypes";
 import {dataSize, defaultBounceFriction} from "../Macros";
 import Lag from "../tools/Lag";
 import GMBuffer from "../tools/GMBuffer";
-import {randomUUID} from "crypto";
-import {EServerResponse} from "../enums/EPacketTypes";
+import {EServerResponse} from "../enums/TCPPacketTypes";
 import EBufferType from "../enums/EBufferType";
-import {EGameState, EGameType} from "../enums/EGameData";
+import {EGameState} from "../enums/EGameData";
 import ProjectileList from "../gamedata/instancelist/ProjectileList";
+import {MatchType} from "../database/match/MatchTypes";
+import GameProcessor from "../GameProcessor";
+
+enum GameRoundPhase {
+    PREPARATION,
+    BATTLE
+}
 
 export default class Game {
 
-    id: UUID = new UUID(randomUUID());
+    matchId: string;
 
-    type: EGameType = EGameType.NORMAL;
-    state: EGameState = EGameState.ONGOING;
+    type: MatchType;
+    state: EGameState = EGameState.STARTING;
 
     players: Player[] = [];
     projectiles: Projectile[] = [];
     entities: Entity[] = [];
     explosions: Explosion[] = [];
 
-    constructor(type?: EGameType) {
+    currentRound: number = 1;
 
-        if (type) this.type = type;
+    constructor(type: MatchType, matchId: string) {
+        this.type = type;
+        this.matchId = matchId;
+        GameProcessor.GameList.push(this);
+    }
+
+    changeState(newState: EGameState) {
+        this.state = newState;
+        let buff = GMBuffer.allocate(dataSize);
+        buff.write(EServerResponse.GAME_STATE, EBufferType.UInt8);
+        buff.write(newState, EBufferType.UInt8);
+        buff.write(this.currentRound, EBufferType.UInt8);
+        buff.write(5, EBufferType.UInt8);
+        this.broadcast(buff);
+        if (newState == EGameState.PREROUND) {
+            for(const i of [1, 2, 3, 4]) {
+                setTimeout(()=>{
+                    let locBuff = GMBuffer.allocate(dataSize);
+                    locBuff.write(EServerResponse.GAME_STATE, EBufferType.UInt8);
+                    locBuff.write(EGameState.PREROUND, EBufferType.UInt8);
+                    locBuff.write(this.currentRound, EBufferType.UInt8);
+                    locBuff.write(5 - i, EBufferType.UInt8);
+                    this.broadcast(locBuff);
+                }, i * 1000);
+            }
+            setTimeout(()=>{
+                this.startRound();
+            }, 5000);
+        }
+    }
+
+    startRound() {
+        if (this.currentRound == 15) this.changeState(EGameState.SUDDENDEATH);
+        else this.changeState(EGameState.BATTLE);
+    }
+    setup() {
+        this.changeState(EGameState.PREROUND);
+    }
+
+    start() {
+
+        this.announceAllPlayers();
+        this.setup();
 
     }
 
-    addPlayer(socket: IPlayerSocket, charid: number){
+    announceAllPlayers() {
+        for(const player of this.players) {
+            this.announcePlayer(player);
+        }
+    }
 
-        var nPlayer = new Player(socket, this.generateID(), charid);
+    announcePlayer(player: Player) {
+
+        let buff = GMBuffer.allocate(dataSize);
+        buff.write(EServerResponse.PLAYER_CREATE, 	    EBufferType.UInt8);
+
+        buff.write(player.id, 						    EBufferType.UInt16);
+        buff.write(0, 							EBufferType.UInt8); //0: Not you, 1: You
+        buff.write(player.char.id, 					    EBufferType.UInt8);
+        buff.write(player.char.health, 				    EBufferType.UInt16);
+        buff.write(player.char.ultimateCharge, 		    EBufferType.UInt16);
+        buff.write(player.char.healthMax, 			    EBufferType.UInt16);
+        buff.write(player.char.ultimateChargeMax, 	    EBufferType.UInt16);
+        buff.write(Math.round(player.x * 100), 		EBufferType.SInt32);
+        buff.write(Math.round(player.y * 100), 		EBufferType.SInt32);
+
+        this.broadcastExcept(buff, player);
+
+        let selfBuff = buff.copy();
+        selfBuff.poke(1, EBufferType.UInt8, 3);
+        player.send(selfBuff);
+
+    }
+
+    addPlayer(socket: IPlayerSocket, charId: number, playerId: number, team: number){
+
+        let nPlayer = new Player(socket, playerId, charId, team);
 
         nPlayer.game = this;
+        nPlayer.pos.x = 512;
+        nPlayer.pos.y = 1170;
         socket.player = nPlayer;
         socket.game = this;
 
-        return this.players.push(nPlayer);
+        this.players.push(nPlayer);
+
+        return nPlayer;
 
     }
 
@@ -282,5 +362,3 @@ export default class Game {
     }
 
 }
-
-module.exports = Game;

@@ -1,0 +1,22 @@
+export enum EServerRequest {
+
+    POSITION_UPDATE,
+    GRAPPLING_POSITION,
+    FLIP,
+    PROJECTILE_UPDATE,
+    ENTITY_UPDATE,
+
+}
+
+export enum EServerResponse {
+
+    PLAYER_UPDATE,
+    PLAYER_GRAPPLE,
+    PLAYER_FLIP,
+    PLAYER_FORCED_DASH,
+
+    PROJECTILE_UPDATE,
+
+    ENTITY_UPDATE
+
+}

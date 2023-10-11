@@ -7,8 +7,8 @@ enum EPlayerState {
 	GRAPPLED,
 	WALL_SLIDING,
 	GROUNDED,
-	CASTING,
-	DEAD
+	DEAD,
+	BLOCKED
 
 }
 

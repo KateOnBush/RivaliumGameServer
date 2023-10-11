@@ -1,5 +1,5 @@
 import {dataSize} from "../Macros";
-import {EServerResponse} from "../enums/EPacketTypes";
+import {EServerResponse} from "../enums/TCPPacketTypes";
 import IPlayerSocket from "../interfaces/IPlayerSocket";
 import GMBuffer from "./GMBuffer";
 import EBufferType from "../enums/EBufferType";

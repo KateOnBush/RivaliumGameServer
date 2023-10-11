@@ -1,14 +1,14 @@
 enum EBufferType {
 
-    UInt8,
-    UInt16,
-    UInt32,
+    UInt8 = 0x10,
+    UInt16 = 0x20,
+    UInt32 = 0x40,
 
-    SInt8,
-    SInt16,
-    SInt32,
+    SInt8 = 0x11,
+    SInt16 = 0x21,
+    SInt32 = 0x41,
 
-    Float32
+    Float32 = 0x42
 
 }
 

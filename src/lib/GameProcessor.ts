@@ -2,22 +2,25 @@ import Lag from "./tools/Lag";
 import Game from "./components/Game";
 import {dataSize} from "./Macros";
 import EBufferType from "./enums/EBufferType";
-import {EServerResponse} from "./enums/EPacketTypes";
+import {EServerResponse} from "./enums/TCPPacketTypes";
 import GMBuffer from "./tools/GMBuffer";
+import {EGameState} from "./enums/EGameData";
 
 export default class GameProcessor {
+
+	static GameList: Game[] = [];
 
 	static update(game: Game){
 
 		game.players.forEach(u => {
 
-			let sendbuff : Buffer[] = [];
+			let bufferList : Buffer[] = [];
 	
 			game.players.forEach(pl=>{
 	
 				let comp = Lag.compensateClose(u.ping.ms);
 	
-				if (pl.speed < 1) comp = 0; 
+				if (pl.speed < 1) comp = 0;
 	
 				let pred = Lag.predictPosition(pl.pos, pl.mov, comp);
 	
@@ -25,10 +28,10 @@ export default class GameProcessor {
 				buff.write(EServerResponse.PLAYER_UPDATE, EBufferType.UInt8);
 				buff.write(pl.id, EBufferType.UInt16);
 				buff.write(pl.state.id, EBufferType.UInt8);
-				buff.write((pred.pos.x) * 100 | 0, EBufferType.SInt32);
-				buff.write((pl.state.on_ground ? pl.y : pred.pos.y) *100|0, EBufferType.SInt32);
-				buff.write(pred.mov.x * 100 | 0, EBufferType.SInt32);
-				buff.write((pl.state.on_ground ? pl.my : pred.mov.y) * 100 | 0, EBufferType.SInt32);
+				buff.write(Math.round((pred.pos.x) * 100), EBufferType.SInt32);
+				buff.write(Math.round((pl.state.on_ground ? pl.y : pred.pos.y) * 100), EBufferType.SInt32);
+				buff.write(Math.round(pred.mov.x * 100), EBufferType.SInt32);
+				buff.write(Math.round((pl.state.on_ground ? pl.my : pred.mov.y) * 100), EBufferType.SInt32);
 				buff.write(pl.state.on_ground, EBufferType.UInt8);
 				buff.write(pl.state.dir, EBufferType.SInt8);
 				buff.write(pl.state.slide, EBufferType.UInt8);
@@ -37,16 +40,16 @@ export default class GameProcessor {
 				buff.write(pl.char.healthMax, EBufferType.UInt16);
 				buff.write(pl.char.ultimateChargeMax, EBufferType.UInt16);
 				buff.write(pl.char.id, EBufferType.UInt8);
-				buff.write(pl.mouse.x * 100 | 0, EBufferType.SInt32);
-				buff.write(pl.mouse.y * 100 | 0, EBufferType.SInt32);
+				buff.write(Math.round(pl.mouse.x * 100), EBufferType.SInt32);
+				buff.write(Math.round(pl.mouse.y * 100), EBufferType.SInt32);
 
-				sendbuff.push(buff.getBuffer());
+				bufferList.push(buff.getBuffer());
 
-			})
+			});
 	
-			var sendbuff_c = Buffer.concat(sendbuff);
+			let concatenatedBuffer = Buffer.concat(bufferList);
 	
-			u.socket.send(sendbuff_c);
+			u.socket.send(concatenatedBuffer);
 	
 		})
 
@@ -54,10 +57,14 @@ export default class GameProcessor {
 
 	static process(game: Game, deltaTime: number){
 
+		if (game.state == EGameState.STARTING) {
+			return;
+		}
+
 		game.projectiles.forEach(projectile=>{
 
 			if (projectile.collided) return;
-			projectile.process(deltaTime)
+			projectile.process(deltaTime);
 			projectile.move(deltaTime);
 
 		})

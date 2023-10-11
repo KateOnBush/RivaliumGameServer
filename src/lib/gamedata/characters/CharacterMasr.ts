@@ -21,7 +21,7 @@ export default Character.builder(
             if (n == 0) {
                 setTimeout(() => {
                     player.game?.addProjectile(player, ProjectileList.MasrBolt,
-                        player.x, player.y, 80, player.mouseDirection, 1, 1, 10, 0, 0, 0, 1, EMPTY_METHOD, EMPTY_METHOD, 1, 0)
+                        player.x, player.y, 80, player.mouseDirection, 1, 1, 10, 50, 0, 0, 1, EMPTY_METHOD, EMPTY_METHOD, 1, 0)
                 }, 100);
             } else {
 

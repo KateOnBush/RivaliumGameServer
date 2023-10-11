@@ -1,6 +1,6 @@
 import {dataSize} from "../Macros";
 import EBufferType from "../enums/EBufferType";
-import {EServerResponse} from "../enums/EPacketTypes";
+import {EServerResponse} from "../enums/TCPPacketTypes";
 import ILifetimedElement from "../interfaces/ILifetimedElement";
 import GMBuffer from "../tools/GMBuffer";
 import Player from "./Player";
