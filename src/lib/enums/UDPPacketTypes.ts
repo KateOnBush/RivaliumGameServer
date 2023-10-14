@@ -1,4 +1,4 @@
-export enum EServerRequest {
+export enum UDPServerRequest {
 
     POSITION_UPDATE,
     GRAPPLING_POSITION,
@@ -8,7 +8,7 @@ export enum EServerRequest {
 
 }
 
-export enum EServerResponse {
+export enum UDPServerResponse {
 
     PLAYER_UPDATE,
     PLAYER_GRAPPLE,

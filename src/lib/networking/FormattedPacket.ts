@@ -32,9 +32,8 @@ export abstract class FormattedPacket {
         return buff;
     }
 
+    static from(channel: EPacketChannel, buffer: GMBuffer) {
 
-
-
-
+    }
 
 }

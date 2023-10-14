@@ -2,7 +2,7 @@ import Lag from "./tools/Lag";
 import Logger from "./tools/Logger";
 import {dataSize, entityParametersLimit} from "./Macros";
 import EBufferType from "./enums/EBufferType";
-import {EServerRequest, EServerResponse, EServerResponsePreMatch} from "./enums/TCPPacketTypes";
+import {EServerRequest, EServerResponse, EPrematchState} from "./enums/TCPPacketTypes";
 import IPlayerSocket from "./interfaces/IPlayerSocket";
 import GMBuffer from "./tools/GMBuffer";
 import Vector2 from "./tools/vector/Vector2";
@@ -37,22 +37,22 @@ export default class PacketHandler {
 
                 let match = await Database.verifyPlayer(socket, pass, access);
                 if (!match) {
-                    response.write(EServerResponsePreMatch.MATCH_NOT_FOUND, EBufferType.UInt8);
+                    response.write(EPrematchState.MATCH_NOT_FOUND, EBufferType.UInt8);
                 } else if (match.state == MatchState.FINISHED) {
-                    response.write(EServerResponsePreMatch.MATCH_ENDED, EBufferType.UInt8);
+                    response.write(EPrematchState.MATCH_ENDED, EBufferType.UInt8);
                 } else if (match.state == MatchState.STARTED || match.state == MatchState.LOADING) {
-                    response.write(EServerResponsePreMatch.REJOINED, EBufferType.UInt8);
+                    response.write(EPrematchState.REJOINED, EBufferType.UInt8);
                     socket.identified = true;
                     //rejoining
                 } else {
 
                     Logger.info("Player identified! Match id: {}", match.getID());
                     socket.identified = true;
-                    response.write(EServerResponsePreMatch.IDENTIFIED, EBufferType.UInt8);
+                    response.write(EPrematchState.IDENTIFIED, EBufferType.UInt8);
 
                     let msg = GMBuffer.allocate(dataSize);
                     msg.write(EServerResponse.PREMATCH, EBufferType.UInt8);
-                    msg.write(EServerResponsePreMatch.PLAYER_LOADED, EBufferType.UInt8);
+                    msg.write(EPrematchState.PLAYER_LOADED, EBufferType.UInt8);
                     msg.write(socket.player.matchPlayer.playerId, EBufferType.UInt16);
 
                     socket.game.broadcast(msg);
@@ -73,14 +73,14 @@ export default class PacketHandler {
 
                     let msg = GMBuffer.allocate(dataSize);
                     msg.write(EServerResponse.PREMATCH, EBufferType.UInt8);
-                    msg.write(EServerResponsePreMatch.MATCH_STARTING, EBufferType.UInt8);
+                    msg.write(EPrematchState.MATCH_STARTING, EBufferType.UInt8);
                     socket.game.broadcast(msg);
 
                     await Time.wait(10000);
 
                     msg = GMBuffer.allocate(dataSize);
                     msg.write(EServerResponse.PREMATCH, EBufferType.UInt8);
-                    msg.write(EServerResponsePreMatch.MATCH_STARTED, EBufferType.UInt8);
+                    msg.write(EPrematchState.MATCH_STARTED, EBufferType.UInt8);
 
                     match.state = MatchState.STARTED;
 

@@ -1,33 +1,23 @@
-export enum EServerRequest {
+export enum TCPServerRequest {
 
     IDENTIFY,
-    POSITION_UPDATE = 2,
-    GRAPPLING_POSITION,
-    FLIP,
     PING,
     PLAYER_HIT,
-    PLAYER_EXPLOSION_HIT,
     ABILITY_CAST,
-    PROJECTILE_UPDATE,
-    ENTITY_UPDATE,
     ENTITY_HIT
 
 }
 
-export enum EServerResponse {
+export enum TCPServerResponse {
 
-    PREMATCH,
+    PRE_MATCH,
 
     GAME_STATE,
 
     PLAYER_CREATE,
     PLAYER_CONNECTION,
-    PLAYER_UPDATE,
-    PLAYER_GRAPPLE,
-    PLAYER_FLIP,
     PLAYER_HIT,
     PLAYER_ABILITY_CAST,
-    PLAYER_FORCED_DASH,
     PLAYER_DEATH,
 
     EFFECT_ADD,
@@ -35,25 +25,11 @@ export enum EServerResponse {
     PING,
 
     PROJECTILE_CREATE,
-    PROJECTILE_UPDATE,
     PROJECTILE_DESTROY,
 
     EXPLOSION_CREATE,
     
 	ENTITY_CREATE,
-    ENTITY_UPDATE,
     ENTITY_DESTROY
-
-}
-
-export enum EServerResponsePreMatch {
-
-    MATCH_NOT_FOUND,
-    MATCH_ENDED,
-    REJOINED,
-    IDENTIFIED,
-    PLAYER_LOADED,
-    MATCH_STARTING,
-    MATCH_STARTED
 
 }
