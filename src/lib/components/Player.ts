@@ -67,7 +67,7 @@ export default class Player extends GamePhysicalElement {
     hit(damage: number, attacker: Player, visual: boolean = true) {
 
         if (this.state.id == EPlayerState.DEAD) return;
-        if (this.team == attacker.team) return;
+        //if (this.team == attacker.team) return;
 
         attacker.char.ultimateCharge += damage;
         if (attacker.char.ultimateCharge > attacker.char.ultimateChargeMax) attacker.char.ultimateCharge = attacker.char.ultimateChargeMax;

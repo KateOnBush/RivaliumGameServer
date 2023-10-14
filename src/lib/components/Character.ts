@@ -13,7 +13,7 @@ export default class Character {
                 name,
                 health,
                 healthMax: health,
-                ultimateCharge: ultimatecharge,
+                ultimateCharge: 0,
                 ultimateChargeMax: ultimatecharge,
                 abilities: abilities()
 

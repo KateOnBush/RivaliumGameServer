@@ -173,7 +173,7 @@ export default class PacketHandler {
             case EServerRequest.PLAYER_HIT: //Hit (Projectile Destroy)
 
                 const _projectile_id = buffer.read(EBufferType.UInt16);
-                const _object_id = buffer.read(EBufferType.UInt16);
+                const _object_id = buffer.read(EBufferType.UInt32);
                 const _hit_id = buffer.read(EBufferType.UInt16);
                 let _x = buffer.read(EBufferType.SInt32)/100,
                     _y = buffer.read(EBufferType.SInt32)/100;
