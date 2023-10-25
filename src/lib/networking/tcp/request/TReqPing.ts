@@ -6,7 +6,7 @@ import {TCPServerRequest} from "../../../enums/TCPPacketTypes";
 export default class TReqPing extends FormattedPacket {
 
     channel = EPacketChannel.TCP;
-    data: [string, EBufferType][] = [];
+    attributes = [];
     index: TCPServerRequest.PING;
 
 }

@@ -2,17 +2,18 @@ import {FormattedPacket} from "../../FormattedPacket";
 import EPacketChannel from "../../../enums/EPacketChannel";
 import EBufferType from "../../../enums/EBufferType";
 import {TCPServerRequest} from "../../../enums/TCPPacketTypes";
+import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
 
 export default class TReqPlayerHit extends FormattedPacket {
 
     channel = EPacketChannel.TCP;
-    data: [string, EBufferType][] = [
-        ["projectileId", EBufferType.UInt16],
-        ["objectId", EBufferType.UInt32],
-        ["hitId", EBufferType.UInt16],
-        ["x", EBufferType.SInt32],
-        ["y", EBufferType.SInt32]
-    ];
+    attributes = new FormattedPacketAttributeListBuilder()
+        .add("projectileId", EBufferType.UInt16)
+        .add("objectId", EBufferType.UInt32)
+        .add("hitId", EBufferType.UInt16)
+        .add("x", EBufferType.SInt32, 100)
+        .add("y", EBufferType.SInt32, 100)
+        .build();
     index: TCPServerRequest.PLAYER_HIT;
 
     projectileId: number = 0;

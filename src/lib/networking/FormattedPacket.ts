@@ -1,19 +1,18 @@
 import EBufferType from "../enums/EBufferType";
 import EPacketChannel from "../enums/EPacketChannel";
 import GMBuffer from "../tools/GMBuffer";
+import FormattedPacketAttributeList from "./attributes/FormattedPacketAttributeList";
 
 export abstract class FormattedPacket {
 
-    abstract data: Array<[string, EBufferType]>;
+    abstract attributes: FormattedPacketAttributeList;
     abstract channel: EPacketChannel;
     abstract index: number;
-    [key: string]: any
-
-    static UDPIndex: number = 0x0;
+    [key: string]: any;
 
     size() {
-        return this.data.reduce((acc: number, currentValue) => {
-            return (acc + currentValue[1] >> 4);
+        return this.attributes.reduce((acc: number, currentValue) => {
+            return (acc + currentValue.type >> 4);
         }, 0);
     }
 
@@ -23,11 +22,12 @@ export abstract class FormattedPacket {
         // TCP: Length(1 byte) + Index(1 byte) + Data
         let buff = GMBuffer.allocate(size);
         buff.write(size, EBufferType.UInt8);
-        buff.write(accumulator, EBufferType.UInt8);
+        if (this.channel == EPacketChannel.UDP) buff.write(accumulator, EBufferType.UInt8); //Writing the accumulator
         buff.write(this.index, EBufferType.UInt8);
-        for(const [key, type] of this.data) {
-            let value = this[key] ?? 0;
-            buff.write(value, type);
+        for(const attribute of this.attributes) {
+            let value = this[attribute.name] ?? 0;
+            if (attribute.multiplier == 1) buff.write(value, attribute.type);
+            else buff.write(Math.round(value * attribute.multiplier), attribute.type);
         }
         return buff;
     }
