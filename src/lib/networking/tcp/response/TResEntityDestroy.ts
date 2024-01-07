@@ -1,19 +1,17 @@
 import {FormattedPacket} from "../../FormattedPacket";
 import EPacketChannel from "../../../enums/EPacketChannel";
 import EBufferType from "../../../enums/EBufferType";
-import {TCPServerRequest} from "../../../enums/TCPPacketTypes";
+import {TCPServerResponse} from "../../../enums/TCPPacketTypes";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
 
-export default class TReqEntityHit extends FormattedPacket {
+export default class TResEntityDestroy extends FormattedPacket {
 
     channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
-        .add("projectileId", EBufferType.UInt16)
         .add("entityId", EBufferType.UInt16)
         .build();
-    index: TCPServerRequest.ENTITY_HIT;
+    index: TCPServerResponse.PROJECTILE_DESTROY;
 
-    projectileId: number = 0;
-    entityId: number = 0;
+    entityId: number;
 
 }

@@ -2,7 +2,7 @@ import Lag from "../../tools/Lag";
 import Ability from "../../components/Ability";
 import EAbilityType from "../../enums/EAbilityType";
 import Character from "../../components/Character";
-import Player, {EFFECT} from "../../components/Player";
+import Player, {PlayerEffect} from "../../components/Player";
 import {ActiveAbilityData, NoAbilityData} from "../../components/sub/AbilityData";
 import {EMPTY_METHOD} from "../../Macros";
 import ProjectileList from "../instancelist/ProjectileList";
@@ -40,7 +40,7 @@ export default Character.builder(
 
         new Ability(EAbilityType.ACTIVE, [13], new ActiveAbilityData(8), function(n: number, player: Player){
 
-            player.addEffect(EFFECT.ACCELERATE, 8, {multiplier: 1.45});
+            player.addEffect(PlayerEffect.ACCELERATE, 8, {multiplier: 1.45});
 
         }),
 

@@ -1,7 +1,7 @@
 import Lag from "../tools/Lag";
 import {dataSize} from "../Macros";
 import BType from "../enums/EBufferType";
-import {EServerResponse} from "../enums/TCPPacketTypes";
+import {TCPServerResponse} from "../enums/TCPPacketTypes";
 import ILifetimedElement from "../interfaces/ILifetimedElement";
 import IPlayerElement from "../interfaces/IPlayerElement";
 import GMBuffer from "../tools/GMBuffer";
@@ -10,6 +10,7 @@ import Vector2 from "../tools/vector/Vector2";
 import {NumericBoolean} from "../types/GameTypes";
 import Player from "./Player";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
+import {UDPServerResponse} from "../enums/UDPPacketTypes";
 
 export type projectileEventCallback = (proj: Projectile) => void;
 
@@ -89,7 +90,7 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
         this.onDestroy();
 
         var buff = GMBuffer.allocate(dataSize);
-        buff.write(EServerResponse.PROJECTILE_DESTROY, BType.UInt8);
+        buff.write(TCPServerResponse.PROJECTILE_DESTROY, BType.UInt8);
         buff.write(this.id, BType.UInt16);
 
         this.game.removeProjectile(this.id);
@@ -114,7 +115,7 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
 
             var boff = Buffer.alloc(dataSize);
 
-            boff.writeUint8(EServerResponse.PROJECTILE_UPDATE, 0);
+            boff.writeUint8(UDPServerResponse.PROJECTILE_UPDATE, 0);
             boff.writeUInt16LE(this.id, 1);
             boff.writeInt32LE(prediction.pos.x*100|0, 3);
             boff.writeInt32LE(prediction.pos.y*100|0, 7);

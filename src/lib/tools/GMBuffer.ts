@@ -29,6 +29,8 @@ export default class GMBuffer {
 
     write(value: any, type: EBufferType){
 
+        const beforeIndex = this.index;
+
         switch(type){
 
             case EBufferType.UInt8: {
@@ -64,7 +66,6 @@ export default class GMBuffer {
                 break;
             }
 
-
             case EBufferType.Float32: {
                 this.buffer.writeFloatLE(value, this.index);
                 this.index+=4;
@@ -76,6 +77,36 @@ export default class GMBuffer {
             }
 
         }
+
+        let writtenBits = 0, writtenLength = this.index - beforeIndex;
+        let writtenValueAsUInt = 0, consecutiveXOR = 0;
+        switch (writtenLength) {
+            case 1:
+                writtenValueAsUInt = this.buffer.readUInt8(beforeIndex);
+                consecutiveXOR = writtenValueAsUInt;
+                break;
+            case 2:
+                writtenValueAsUInt = this.buffer.readUInt16LE(beforeIndex);
+                consecutiveXOR = writtenValueAsUInt & 0xFF;
+                consecutiveXOR ^= (writtenValueAsUInt >> 8) & 0xFF;
+                break;
+            case 4:
+                writtenValueAsUInt = this.buffer.readUInt32LE(beforeIndex);
+                consecutiveXOR = writtenValueAsUInt & 0xFF;
+                consecutiveXOR ^= (writtenValueAsUInt >> 8) & 0xFF;
+                consecutiveXOR ^= (writtenValueAsUInt >> 16) & 0xFF;
+                consecutiveXOR ^= (writtenValueAsUInt >> 24) & 0xFF;
+                break;
+        }
+        while(writtenValueAsUInt > 0) {
+            writtenBits += (writtenValueAsUInt & 1);
+            writtenValueAsUInt >>= 1;
+        }
+        return ((consecutiveXOR << 8) | (writtenBits & 0xFF));
+
+    }
+
+    consecutiveXOR() {
 
     }
 

@@ -4,7 +4,8 @@ export default class FormattedPacketAttribute {
 
     name: string;
     type: EBufferType;
-    multiplier: number;
+    multiplier: number = 1;
+    boolean: boolean = false;
 
     constructor(name: string, type: EBufferType, multiplier: number) {
         this.name = name;

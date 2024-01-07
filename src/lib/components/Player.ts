@@ -1,6 +1,6 @@
 import CharacterRepository from "../gamedata/CharacterRepository";
 import {dataSize} from "../Macros";
-import {EServerResponse} from '../enums/TCPPacketTypes';
+import {TCPServerResponse} from '../enums/TCPPacketTypes';
 import ICharacter from "../interfaces/ICharacter";
 import PlayerSocket from "../interfaces/IPlayerSocket";
 import GMBuffer from "../tools/GMBuffer";
@@ -13,9 +13,11 @@ import PlayerState from "./sub/PlayerState";
 import EBufferType from "../enums/EBufferType";
 import MatchPlayer from "../database/match/data/MatchPlayer";
 import EPlayerState from "../enums/EPlayerState";
+import {UDPServerResponse} from "../enums/UDPPacketTypes";
 
-export enum EFFECT {
-        
+export enum PlayerEffect {
+
+    NONE,
     HEAL,
     BURN,
     ACCELERATE,
@@ -81,7 +83,7 @@ export default class Player extends GamePhysicalElement {
         }
 
         var hitbuff = GMBuffer.allocate(dataSize);
-        hitbuff.write(EServerResponse.PLAYER_HIT, EBufferType.UInt8);
+        hitbuff.write(TCPServerResponse.PLAYER_HIT, EBufferType.UInt8);
         hitbuff.write(this.id, EBufferType.UInt16);
         hitbuff.write(attacker.id, EBufferType.UInt16);
         hitbuff.write(visual ? 1 : 0, EBufferType.UInt8);
@@ -100,7 +102,7 @@ export default class Player extends GamePhysicalElement {
 
         let time = (damage/5) | 0;
 
-        this.addEffect(EFFECT.BURN, time * .25);
+        this.addEffect(PlayerEffect.BURN, time * .25);
 
         for(var i = 0; i < time; i++){
 
@@ -130,15 +132,15 @@ export default class Player extends GamePhysicalElement {
         if (this.state.id != EPlayerState.DEAD) return;
 
         let n = time * 4 | 0;
-        let amtpr = amt/n | 0;
+        let amtPr = amt/n | 0;
 
-        this.addEffect(EFFECT.HEAL, time);
+        this.addEffect(PlayerEffect.HEAL, time);
 
-        for(var i = 0; i < n; i++){
+        for(let i = 0; i < n; i++){
 
             this.effectTimeouts.push(setTimeout(()=>{
 
-                this.healInstantly(amtpr);
+                this.healInstantly(amtPr);
 
             }, (i+1)*250));
 
@@ -146,15 +148,15 @@ export default class Player extends GamePhysicalElement {
 
     }
 
-    addEffect(type: EFFECT, duration: number, data: EffectData = {}) {
+    addEffect(type: PlayerEffect, duration: number, data: EffectData = {}) {
 
         let _b = GMBuffer.allocate(dataSize);
-        _b.write(EServerResponse.EFFECT_ADD, EBufferType.UInt8);
+        _b.write(TCPServerResponse.EFFECT_ADD, EBufferType.UInt8);
         _b.write(this.id, EBufferType.UInt16)
         _b.write(type, EBufferType.UInt8);
         _b.write(duration * 100, EBufferType.UInt16);
 
-        if ([EFFECT.ACCELERATE, EFFECT.SLOW].includes(type) && data.multiplier) { //Speed or boost
+        if ([PlayerEffect.ACCELERATE, PlayerEffect.SLOW].includes(type) && data.multiplier) { //Speed or boost
             _b.write(data.multiplier * 100 | 0, EBufferType.UInt16);
         }
 
@@ -174,7 +176,7 @@ export default class Player extends GamePhysicalElement {
         this.mov.multiply(30 * mult);
 
         let buff = GMBuffer.allocate(dataSize);
-        buff.write(EServerResponse.PLAYER_FORCED_DASH, EBufferType.UInt8);
+        buff.write(UDPServerResponse.PLAYER_FORCED_DASH, EBufferType.UInt8);
         buff.write(this.id, EBufferType.UInt16);
         buff.write(direction * 100 | 0, EBufferType.SInt16);
         buff.write(time * 100 | 0, EBufferType.UInt16);
@@ -188,7 +190,7 @@ export default class Player extends GamePhysicalElement {
 
         var buff = GMBuffer.allocate(dataSize);
 
-        buff.write(EServerResponse.PLAYER_DEATH, EBufferType.UInt8);
+        buff.write(TCPServerResponse.PLAYER_DEATH, EBufferType.UInt8);
         buff.write(this.id, EBufferType.UInt16);
         buff.write(killer.id, EBufferType.UInt16);
 

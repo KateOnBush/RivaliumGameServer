@@ -8,7 +8,7 @@ import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacke
 export default class TResPreMatch extends FormattedPacket {
 
     channel = EPacketChannel.TCP;
-    attributes = new FormattedPacketAttributeListBuilder()
+    static override attributes = new FormattedPacketAttributeListBuilder()
         .add("state", EBufferType.UInt8)
         .add("playerId", EBufferType.UInt8)
         .build();

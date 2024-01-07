@@ -7,7 +7,7 @@ import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacke
 export default class TReqAbilityCast extends FormattedPacket {
 
     channel = EPacketChannel.TCP;
-    attributes = new FormattedPacketAttributeListBuilder()
+    static override attributes = new FormattedPacketAttributeListBuilder()
         .add("ability", EBufferType.UInt8)
         .add("abilityN", EBufferType.UInt8)
         .build();

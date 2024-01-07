@@ -1,7 +1,7 @@
 import {EMPTY_METHOD} from '../../Macros';
 import Ability from "../../components/Ability";
 import Character from "../../components/Character";
-import {EFFECT} from "../../components/Player";
+import {PlayerEffect} from "../../components/Player";
 import {ActiveAbilityData, NoAbilityData} from "../../components/sub/AbilityData";
 import EAbilityType from "../../enums/EAbilityType";
 import Vector2 from '../../tools/vector/Vector2';
@@ -69,7 +69,7 @@ export default Character.builder(
 
             player.forceDash(player.mouseDirection, 0.22, 1.8);
             if (player.char.abilities[3].data.active) {
-                player.addEffect(EFFECT.INVISIBILITY, 3);
+                player.addEffect(PlayerEffect.INVISIBILITY, 3);
             }
         
         }),

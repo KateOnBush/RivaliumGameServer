@@ -11,6 +11,11 @@ export default class FormattedPacketAttributeListBuilder {
         return this;
     }
 
+    asBoolean() {
+        this.data[this.data.length - 1].boolean = true;
+        return this;
+    }
+
     build() {
         return this.data;
     }

@@ -2,9 +2,10 @@ import Lag from "./tools/Lag";
 import Game from "./components/Game";
 import {dataSize} from "./Macros";
 import EBufferType from "./enums/EBufferType";
-import {EServerResponse} from "./enums/TCPPacketTypes";
+import {TCPServerResponse} from "./enums/TCPPacketTypes";
 import GMBuffer from "./tools/GMBuffer";
 import {EGameState} from "./enums/EGameData";
+import {UDPServerResponse} from "./enums/UDPPacketTypes";
 
 export default class GameProcessor {
 
@@ -25,7 +26,7 @@ export default class GameProcessor {
 				let pred = Lag.predictPosition(pl.pos, pl.mov, comp);
 	
 				let buff = GMBuffer.allocate(dataSize);
-				buff.write(EServerResponse.PLAYER_UPDATE, EBufferType.UInt8);
+				buff.write(UDPServerResponse.PLAYER_UPDATE, EBufferType.UInt8);
 				buff.write(pl.id, EBufferType.UInt16);
 				buff.write(pl.state.id, EBufferType.UInt8);
 				buff.write(Math.round((pred.pos.x) * 100), EBufferType.SInt32);

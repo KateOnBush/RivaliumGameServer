@@ -7,7 +7,7 @@ import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacke
 export default class TReqIdentify extends FormattedPacket {
 
     channel = EPacketChannel.TCP;
-    attributes = new FormattedPacketAttributeListBuilder()
+    static override attributes = new FormattedPacketAttributeListBuilder()
         .add("pass", EBufferType.UInt16)
         .add("access", EBufferType.UInt16)
         .build();

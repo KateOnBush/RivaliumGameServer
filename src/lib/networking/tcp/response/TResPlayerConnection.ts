@@ -8,8 +8,8 @@ import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacke
 export default class TResPlayerConnection extends FormattedPacket {
 
     channel = EPacketChannel.TCP;
-    attributes = new FormattedPacketAttributeListBuilder().build();
-    index: TCPServerResponse.GAME_STATE;
+    static override attributes = new FormattedPacketAttributeListBuilder().build();
+    index: TCPServerResponse.PLAYER_CONNECTION;
 
     state: EPreMatchState = 0;
 

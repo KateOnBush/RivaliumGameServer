@@ -1,20 +1,22 @@
 import {FormattedPacket} from "../../FormattedPacket";
 import EPacketChannel from "../../../enums/EPacketChannel";
 import EBufferType from "../../../enums/EBufferType";
-import {TCPServerRequest, TCPServerResponse} from "../../../enums/TCPPacketTypes";
+import {TCPServerResponse} from "../../../enums/TCPPacketTypes";
 import {EPreMatchState} from "../../../enums/EPreMatchState";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
 
-export default class TResGameState extends FormattedPacket {
+export default class TResPlayerHit extends FormattedPacket {
 
     channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
-        .add("state", EBufferType.UInt8)
-        .add("playerId", EBufferType.UInt8)
+        .add("id", EBufferType.UInt16)
+        .add("attackerId", EBufferType.UInt16)
+        .add("visual", EBufferType.UInt8)
         .build();
-    index: TCPServerResponse.GAME_STATE;
+    index: TCPServerResponse.PLAYER_HIT;
 
-    state: EPreMatchState = 0;
-    playerId: number = 0;
+    id: number = 0;
+    attackerId: number = 0;
+    visual: number = 0;
 
 }

@@ -1,10 +1,11 @@
 import {dataSize} from "../Macros";
 import EBufferType from "../enums/EBufferType";
-import {EServerResponse} from "../enums/TCPPacketTypes";
+import {TCPServerResponse} from "../enums/TCPPacketTypes";
 import ILifetimedElement from "../interfaces/ILifetimedElement";
 import GMBuffer from "../tools/GMBuffer";
 import Player from "./Player";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
+import {UDPServerRequest, UDPServerResponse} from "../enums/UDPPacketTypes";
 
 
 export default class Entity extends GamePhysicalElement implements ILifetimedElement {
@@ -48,7 +49,7 @@ export default class Entity extends GamePhysicalElement implements ILifetimedEle
     update(){
 
         let buffer = GMBuffer.allocate(dataSize);
-        buffer.write(EServerResponse.ENTITY_UPDATE, EBufferType.UInt8);
+        buffer.write(UDPServerResponse.ENTITY_UPDATE, EBufferType.UInt8);
         buffer.write(this.owner.id, EBufferType.UInt16);
         buffer.write(this.id, EBufferType.UInt16);
         buffer.write(this.x * 100|0, EBufferType.SInt32);
@@ -69,7 +70,7 @@ export default class Entity extends GamePhysicalElement implements ILifetimedEle
         if (!this.game) return;
 
         var buffer = GMBuffer.allocate(dataSize);
-        buffer.write(EServerResponse.ENTITY_DESTROY, EBufferType.UInt8);
+        buffer.write(TCPServerResponse.ENTITY_DESTROY, EBufferType.UInt8);
         buffer.write(this.id, EBufferType.UInt16);
 
         this.game.broadcast(buffer);

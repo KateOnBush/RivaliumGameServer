@@ -7,7 +7,7 @@ import {NumericBoolean} from "../types/GameTypes";
 import {dataSize, defaultBounceFriction} from "../Macros";
 import Lag from "../tools/Lag";
 import GMBuffer from "../tools/GMBuffer";
-import {EServerResponse} from "../enums/TCPPacketTypes";
+import {TCPServerResponse} from "../enums/TCPPacketTypes";
 import EBufferType from "../enums/EBufferType";
 import {EGameState} from "../enums/EGameData";
 import ProjectileList from "../gamedata/instancelist/ProjectileList";
@@ -42,7 +42,7 @@ export default class Game {
     changeState(newState: EGameState) {
         this.state = newState;
         let buff = GMBuffer.allocate(dataSize);
-        buff.write(EServerResponse.GAME_STATE, EBufferType.UInt8);
+        buff.write(TCPServerResponse.GAME_STATE, EBufferType.UInt8);
         buff.write(newState, EBufferType.UInt8);
         buff.write(this.currentRound, EBufferType.UInt8);
         buff.write(5, EBufferType.UInt8);
@@ -51,7 +51,7 @@ export default class Game {
             for(const i of [1, 2, 3, 4]) {
                 setTimeout(()=>{
                     let locBuff = GMBuffer.allocate(dataSize);
-                    locBuff.write(EServerResponse.GAME_STATE, EBufferType.UInt8);
+                    locBuff.write(TCPServerResponse.GAME_STATE, EBufferType.UInt8);
                     locBuff.write(EGameState.PREROUND, EBufferType.UInt8);
                     locBuff.write(this.currentRound, EBufferType.UInt8);
                     locBuff.write(5 - i, EBufferType.UInt8);
@@ -88,7 +88,7 @@ export default class Game {
     announcePlayer(player: Player) {
 
         let buff = GMBuffer.allocate(dataSize);
-        buff.write(EServerResponse.PLAYER_CREATE, 	    EBufferType.UInt8);
+        buff.write(TCPServerResponse.PLAYER_CREATE, 	    EBufferType.UInt8);
 
         buff.write(player.id, 						    EBufferType.UInt16);
         buff.write(0, 							EBufferType.UInt8); //0: Not you, 1: You
@@ -160,7 +160,7 @@ export default class Game {
 
             var buf = GMBuffer.allocate(dataSize);
 
-            buf.write(EServerResponse.PROJECTILE_CREATE, EBufferType.UInt8);
+            buf.write(TCPServerResponse.PROJECTILE_CREATE, EBufferType.UInt8);
             buf.write(p.owner.id, EBufferType.UInt16);
             buf.write(p.index, EBufferType.UInt16);
             let pred = Lag.predictPosition(p.pos, p.mov, Lag.compensateCloseProjectile(player.ping.ms));
@@ -206,7 +206,7 @@ export default class Game {
     declareEntity(entity: Entity){
 
         let buffer = GMBuffer.allocate(dataSize);
-        buffer.write(EServerResponse.ENTITY_CREATE, EBufferType.UInt8);
+        buffer.write(TCPServerResponse.ENTITY_CREATE, EBufferType.UInt8);
         buffer.write(entity.index, EBufferType.UInt16);
         buffer.write(entity.owner.id, EBufferType.UInt16);
         buffer.write(entity.id, EBufferType.UInt16);
@@ -238,7 +238,7 @@ export default class Game {
 
         let buff = GMBuffer.allocate(dataSize);
 
-        buff.write(EServerResponse.EXPLOSION_CREATE, EBufferType.UInt8);
+        buff.write(TCPServerResponse.EXPLOSION_CREATE, EBufferType.UInt8);
         buff.write(explosion.owner.id, EBufferType.UInt16);
         buff.write(explosion.index, EBufferType.UInt16);
         buff.write(explosion.x * 100|0, EBufferType.SInt32);

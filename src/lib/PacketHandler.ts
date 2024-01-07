@@ -2,7 +2,7 @@ import Lag from "./tools/Lag";
 import Logger from "./tools/Logger";
 import {dataSize, entityParametersLimit} from "./Macros";
 import EBufferType from "./enums/EBufferType";
-import {EServerRequest, EServerResponse, EPrematchState} from "./enums/TCPPacketTypes";
+import {TCPServerRequest, TCPServerResponse} from "./enums/TCPPacketTypes";
 import IPlayerSocket from "./interfaces/IPlayerSocket";
 import GMBuffer from "./tools/GMBuffer";
 import Vector2 from "./tools/vector/Vector2";
@@ -11,27 +11,28 @@ import EPlayerState from "./enums/EPlayerState";
 import Database from "./database/Database";
 import {MatchState} from "./database/match/MatchTypes";
 import Time from "./tools/Time";
+import {UDPServerResponse} from "./enums/UDPPacketTypes";
 
 
 export default class PacketHandler {
 
     static async handle(buffer: GMBuffer, socket: IPlayerSocket) {
 
-        buffer.seek(0);
+        /*buffer.seek(0);
         let type = buffer.read(EBufferType.UInt8);
         let player = socket.player;
 
-        if (![EServerRequest.POSITION_UPDATE, EServerRequest.PING].includes(type)) Logger.info("Received packet type {} from playerId {}", EServerRequest[type], player?.id ?? null);
+        //if (![TCP.POSITION_UPDATE, TCPServerRequest.PING].includes(type)) Logger.info("Received packet type {} from playerId {}", TCPServerRequest[type], player?.id ?? null);
 
         switch (type) {
 
-            case EServerRequest.IDENTIFY:
+            case TCPServerRequest.IDENTIFY:
 
                 let pass = buffer.read(EBufferType.UInt32);
                 let access = buffer.read(EBufferType.UInt32);
 
                 let response = GMBuffer.allocate(dataSize);
-                response.write(EServerResponse.PREMATCH, EBufferType.UInt8);
+                response.write(TCPServerResponse.PRE_MATCH, EBufferType.UInt8);
 
                 Logger.info("Player attempting identification, verifying...");
 
@@ -51,7 +52,7 @@ export default class PacketHandler {
                     response.write(EPrematchState.IDENTIFIED, EBufferType.UInt8);
 
                     let msg = GMBuffer.allocate(dataSize);
-                    msg.write(EServerResponse.PREMATCH, EBufferType.UInt8);
+                    msg.write(TCPServerResponse.PRE_MATCH, EBufferType.UInt8);
                     msg.write(EPrematchState.PLAYER_LOADED, EBufferType.UInt8);
                     msg.write(socket.player.matchPlayer.playerId, EBufferType.UInt16);
 
@@ -72,14 +73,14 @@ export default class PacketHandler {
                     Logger.info("All players joined, starting...");
 
                     let msg = GMBuffer.allocate(dataSize);
-                    msg.write(EServerResponse.PREMATCH, EBufferType.UInt8);
+                    msg.write(TCPServerResponse.PREMATCH, EBufferType.UInt8);
                     msg.write(EPrematchState.MATCH_STARTING, EBufferType.UInt8);
                     socket.game.broadcast(msg);
 
                     await Time.wait(10000);
 
                     msg = GMBuffer.allocate(dataSize);
-                    msg.write(EServerResponse.PREMATCH, EBufferType.UInt8);
+                    msg.write(TCPServerResponse.PREMATCH, EBufferType.UInt8);
                     msg.write(EPrematchState.MATCH_STARTED, EBufferType.UInt8);
 
                     match.state = MatchState.STARTED;
@@ -94,7 +95,7 @@ export default class PacketHandler {
 
                 break;
 
-            case EServerRequest.POSITION_UPDATE: // Position update
+            case TCPServerRequest.POSITION_UPDATE: // Position update
 
                 player.pos.x = buffer.read(EBufferType.SInt32) / 100;
                 player.pos.y = buffer.read(EBufferType.SInt32) / 100;
@@ -120,7 +121,7 @@ export default class PacketHandler {
 
                 break;
 
-            case EServerRequest.GRAPPLING_POSITION: /// Grappling Position Update
+            case TCPServerRequest.GRAPPLING_POSITION: /// Grappling Position Update
             {
                 var x = buffer.read(EBufferType.SInt32);
                 var y = buffer.read(EBufferType.SInt32);
@@ -128,7 +129,7 @@ export default class PacketHandler {
 
                 let b = GMBuffer.allocate(dataSize);
 
-                b.write(EServerResponse.PLAYER_GRAPPLE, EBufferType.UInt8);
+                b.write(TCPServerResponse.PLAYER_GRAPPLE, EBufferType.UInt8);
                 b.write(socket.player.id, EBufferType.UInt16);
                 b.write(x, EBufferType.SInt32);
                 b.write(y, EBufferType.SInt32);
@@ -139,7 +140,7 @@ export default class PacketHandler {
 
             }
 
-            case EServerRequest.FLIP: /// Flip animation
+            case TCPServerRequest.FLIP: /// Flip animation
             {
 
                 let forward = buffer.read(EBufferType.UInt8);
@@ -147,7 +148,7 @@ export default class PacketHandler {
 
                 let b = GMBuffer.allocate(dataSize);
 
-                b.write(EServerResponse.PLAYER_FLIP, EBufferType.UInt8);
+                b.write(TCPServerResponse.PLAYER_FLIP, EBufferType.UInt8);
                 b.write(socket.player.id, EBufferType.UInt16);
                 b.write(forward, EBufferType.SInt8);
                 b.write(start, EBufferType.SInt8);
@@ -156,21 +157,21 @@ export default class PacketHandler {
 
             }
 
-            case EServerRequest.PING: /// Ping
+            case TCPServerRequest.PING: /// Ping
 
                 let e = performance.now();
                 socket.player.ping.ms = e - (socket.player.ping.lastSent ?? e);
 
                 let b = GMBuffer.allocate(dataSize);
 
-                b.write(EServerResponse.PING, EBufferType.UInt8);
+                b.write(TCPServerResponse.PING, EBufferType.UInt8);
                 b.write(1, EBufferType.UInt8);
                 b.write(socket.player.ping.ms, EBufferType.UInt32);
 
                 socket.send(b.getBuffer());
                 break;
 
-            case EServerRequest.PLAYER_HIT: //Hit (Projectile Destroy)
+            case TCPServerRequest.PLAYER_HIT: //Hit (Projectile Destroy)
 
                 const _projectile_id = buffer.read(EBufferType.UInt16);
                 const _object_id = buffer.read(EBufferType.UInt32);
@@ -203,7 +204,7 @@ export default class PacketHandler {
 
                 break;
 
-            case EServerRequest.ABILITY_CAST: //Casting ability 
+            case TCPServerRequest.ABILITY_CAST: //Casting ability
 
                 let ability = buffer.read(EBufferType.UInt8);
                 let ability_n = buffer.read(EBufferType.UInt8);
@@ -211,7 +212,7 @@ export default class PacketHandler {
                 if (socket.player.char.abilities[ability].cast(ability_n, socket.player)) {
 
                     let buff = GMBuffer.allocate(dataSize);
-                    buff.write(EServerResponse.PLAYER_ABILITY_CAST, EBufferType.UInt8);
+                    buff.write(TCPServerResponse.PLAYER_ABILITY_CAST, EBufferType.UInt8);
                     buff.write(socket.player.id, EBufferType.UInt16);
                     buff.write(ability, EBufferType.UInt8);
                     buff.write(ability_n, EBufferType.UInt8);
@@ -222,7 +223,7 @@ export default class PacketHandler {
 
                 break;
 
-            case EServerRequest.PROJECTILE_UPDATE: //Projectile Update Position
+            case TCPServerRequest.PROJECTILE_UPDATE: //Projectile Update Position
             {
 
                 let projid = buffer.read(EBufferType.UInt16);
@@ -260,7 +261,7 @@ export default class PacketHandler {
 
             }
 
-            case EServerRequest.ENTITY_UPDATE: //Entity creation / update
+            case TCPServerRequest.ENTITY_UPDATE: //Entity creation / update
             {
 
                 let ID      = buffer.read(EBufferType.UInt16);
@@ -287,7 +288,7 @@ export default class PacketHandler {
 
             }
 
-            case EServerRequest.ENTITY_HIT: //Entity Hit
+            case TCPServerRequest.ENTITY_HIT: //Entity Hit
             {
 
                 let ID      = buffer.read(EBufferType.UInt16);
@@ -301,7 +302,7 @@ export default class PacketHandler {
 
             }
 
-        }
+        }*/
 
     }
 

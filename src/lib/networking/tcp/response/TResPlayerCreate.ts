@@ -4,11 +4,14 @@ import EBufferType from "../../../enums/EBufferType";
 import {TCPServerResponse} from "../../../enums/TCPPacketTypes";
 import {EPreMatchState} from "../../../enums/EPreMatchState";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
+import {PlayerID} from "../../../database/match/MatchTypes";
+import {NumericBoolean} from "../../../types/GameTypes";
+import CharacterList from "../../../gamedata/CharacterList";
 
 export default class TResPlayerCreate extends FormattedPacket {
 
     channel = EPacketChannel.TCP;
-    attributes = new FormattedPacketAttributeListBuilder()
+    static override attributes = new FormattedPacketAttributeListBuilder()
         .add("id", EBufferType.UInt16)
         .add("isYou", EBufferType.UInt8)
         .add("characterId", EBufferType.UInt8)
@@ -21,7 +24,14 @@ export default class TResPlayerCreate extends FormattedPacket {
         .build();
     index: TCPServerResponse.PLAYER_CREATE;
 
-    state: EPreMatchState = 0;
-    playerId: number = 0;
+    id: PlayerID;
+    isYou: NumericBoolean;
+    characterId: CharacterList;
+    characterHealth: number;
+    characterUltimateCharge: number;
+    characterMaxHealth: number;
+    characterMaxUltimateCharge: number;
+    x: number;
+    y: number;
 
 }

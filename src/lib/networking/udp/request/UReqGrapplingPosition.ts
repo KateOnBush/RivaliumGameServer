@@ -3,23 +3,22 @@ import EPacketChannel from "../../../enums/EPacketChannel";
 import EBufferType from "../../../enums/EBufferType";
 import {TCPServerRequest} from "../../../enums/TCPPacketTypes";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
+import EPlayerState from "../../../enums/EPlayerState";
+import {NumericBoolean, SignedNumericBoolean} from "../../../types/GameTypes";
+import {UDPServerRequest, UDPServerResponse} from "../../../enums/UDPPacketTypes";
 
-export default class TReqPlayerHit extends FormattedPacket {
+export default class UReqPositionUpdate extends FormattedPacket {
 
-    channel = EPacketChannel.TCP;
+    channel = EPacketChannel.UDP;
     static override attributes = new FormattedPacketAttributeListBuilder()
-        .add("projectileId", EBufferType.UInt16)
-        .add("objectId", EBufferType.UInt32)
-        .add("hitId", EBufferType.UInt16)
         .add("x", EBufferType.SInt32, 100)
         .add("y", EBufferType.SInt32, 100)
+        .add("gr", EBufferType.UInt8)
         .build();
-    index: TCPServerRequest.PLAYER_HIT;
+    index: UDPServerRequest.GRAPPLING_POSITION;
 
-    projectileId: number = 0;
-    objectId: number = 0;
-    hitId: number = 0;
-    x: number = 0;
-    y: number = 0;
+    x: number;
+    y: number;
+    gr: number;
 
 }

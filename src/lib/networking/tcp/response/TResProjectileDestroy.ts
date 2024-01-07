@@ -4,17 +4,18 @@ import EBufferType from "../../../enums/EBufferType";
 import {TCPServerRequest, TCPServerResponse} from "../../../enums/TCPPacketTypes";
 import {EPreMatchState} from "../../../enums/EPreMatchState";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
+import {PlayerID} from "../../../database/match/MatchTypes";
+import ProjectileList from "../../../gamedata/instancelist/ProjectileList";
+import {NumericBoolean} from "../../../types/GameTypes";
 
-export default class TResGameState extends FormattedPacket {
+export default class TResProjectileDestroy extends FormattedPacket {
 
     channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
-        .add("state", EBufferType.UInt8)
-        .add("playerId", EBufferType.UInt8)
+        .add("projId", EBufferType.UInt16)
         .build();
-    index: TCPServerResponse.GAME_STATE;
+    index: TCPServerResponse.PROJECTILE_DESTROY;
 
-    state: EPreMatchState = 0;
-    playerId: number = 0;
+    projId: number;
 
 }

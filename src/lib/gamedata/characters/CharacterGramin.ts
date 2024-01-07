@@ -9,6 +9,7 @@ import ProjectileList from "../instancelist/ProjectileList";
 import ExplosionList from "../instancelist/ExplosionList";
 
 export default Character.builder(
+
     "Gramin",
     480,
     220,
