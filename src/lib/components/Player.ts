@@ -14,6 +14,12 @@ import EBufferType from "../enums/EBufferType";
 import MatchPlayer from "../database/match/data/MatchPlayer";
 import EPlayerState from "../enums/EPlayerState";
 import {UDPServerResponse} from "../enums/UDPPacketTypes";
+import {FormattedPacket} from "../networking/FormattedPacket";
+import EPacketChannel from "../enums/EPacketChannel";
+import TResPlayerHit from "../networking/tcp/response/TResPlayerHit";
+import TResEffectAdd from "../networking/tcp/response/TResEffectAdd";
+import TResPlayerForcedDash from "../networking/tcp/response/TResPlayerForcedDash";
+import TResPlayerDeath from "../networking/tcp/response/TResPlayerDeath";
 
 export enum PlayerEffect {
 
@@ -28,8 +34,7 @@ export enum PlayerEffect {
 
 export default class Player extends GamePhysicalElement {
 
-    socket: PlayerSocket;
-    charid: number;
+    TCPsocket: PlayerSocket;
 
     mouse: Vector2 = new Vector2();
     state: PlayerState = new PlayerState();
@@ -51,7 +56,7 @@ export default class Player extends GamePhysicalElement {
     constructor(socket: PlayerSocket, id: number, charid: number, team: number = 0, position?: Vector2, state?: PlayerState){
 
         super();
-        this.socket = socket;
+        this.TCPsocket = socket;
         this.id = id;
         if (position) this.pos = position;
         if (state) this.state = state;
@@ -69,7 +74,7 @@ export default class Player extends GamePhysicalElement {
     hit(damage: number, attacker: Player, visual: boolean = true) {
 
         if (this.state.id == EPlayerState.DEAD) return;
-        //if (this.team == attacker.team) return;
+        if (this.team == attacker.team) return;
 
         attacker.char.ultimateCharge += damage;
         if (attacker.char.ultimateCharge > attacker.char.ultimateChargeMax) attacker.char.ultimateCharge = attacker.char.ultimateChargeMax;
@@ -82,13 +87,12 @@ export default class Player extends GamePhysicalElement {
 
         }
 
-        var hitbuff = GMBuffer.allocate(dataSize);
-        hitbuff.write(TCPServerResponse.PLAYER_HIT, EBufferType.UInt8);
-        hitbuff.write(this.id, EBufferType.UInt16);
-        hitbuff.write(attacker.id, EBufferType.UInt16);
-        hitbuff.write(visual ? 1 : 0, EBufferType.UInt8);
+        let playerHit = new TResPlayerHit();
+        playerHit.playerId = this.id;
+        playerHit.attackerId = attacker.id;
+        playerHit.visual = visual;
 
-        this.game?.broadcast(hitbuff);
+        this.game?.broadcast(playerHit);
 
     }
 
@@ -104,7 +108,7 @@ export default class Player extends GamePhysicalElement {
 
         this.addEffect(PlayerEffect.BURN, time * .25);
 
-        for(var i = 0; i < time; i++){
+        for(let i = 0; i < time; i++){
 
             this.effectTimeouts.push(setTimeout(()=>{
 
@@ -150,51 +154,57 @@ export default class Player extends GamePhysicalElement {
 
     addEffect(type: PlayerEffect, duration: number, data: EffectData = {}) {
 
-        let _b = GMBuffer.allocate(dataSize);
-        _b.write(TCPServerResponse.EFFECT_ADD, EBufferType.UInt8);
-        _b.write(this.id, EBufferType.UInt16)
-        _b.write(type, EBufferType.UInt8);
-        _b.write(duration * 100, EBufferType.UInt16);
+        let effectAdd = new TResEffectAdd();
+        effectAdd.playerId = this.id;
+        effectAdd.duration = duration;
+        effectAdd.type = type;
+        if (data.multiplier) effectAdd.multiplier = data.multiplier;
 
-        if ([PlayerEffect.ACCELERATE, PlayerEffect.SLOW].includes(type) && data.multiplier) { //Speed or boost
-            _b.write(data.multiplier * 100 | 0, EBufferType.UInt16);
-        }
-
-        this.game?.broadcast(_b);
+        this.game?.broadcast(effectAdd);
 
     }
 
-    send(buffer: GMBuffer){
+    send(packet: FormattedPacket){
 
-        this.socket.send(buffer.getBuffer());
+        let bakedPacket = packet.bake();
+        if (packet.channel == EPacketChannel.TCP) {
+            this.TCPsocket.send(bakedPacket.getBuffer());
+            return;
+        }
+        this.UDPsocket.send(bakedPacket.getBuffer());
 
+    }
+
+    sendRawTCP(buffer: GMBuffer) {
+        this.TCPsocket.send(buffer.getBuffer());
+    }
+    sendRawUDP(buffer: GMBuffer) {
+        this.UDPsocket.send(buffer.getBuffer());
     }
 
     forceDash(direction: number, time: number, mult: number){
 
+        let forcedDash = new TResPlayerForcedDash();
+
         this.mov = Vector2.polar(1, direction);
         this.mov.multiply(30 * mult);
 
-        let buff = GMBuffer.allocate(dataSize);
-        buff.write(UDPServerResponse.PLAYER_FORCED_DASH, EBufferType.UInt8);
-        buff.write(this.id, EBufferType.UInt16);
-        buff.write(direction * 100 | 0, EBufferType.SInt16);
-        buff.write(time * 100 | 0, EBufferType.UInt16);
-        buff.write(mult * 100 | 0, EBufferType.UInt16);
+        forcedDash.playerId = this.id;
+        forcedDash.direction = direction;
+        forcedDash.time = time;
+        forcedDash.mult = mult;
 
-        this.game?.broadcast(buff);
+        this.game?.broadcast(forcedDash);
 
     }
 
     kill(killer: Player) {
 
-        var buff = GMBuffer.allocate(dataSize);
+        let playerDeath = new TResPlayerDeath();
+        playerDeath.victim = this.id;
+        playerDeath.killer = killer.id;
 
-        buff.write(TCPServerResponse.PLAYER_DEATH, EBufferType.UInt8);
-        buff.write(this.id, EBufferType.UInt16);
-        buff.write(killer.id, EBufferType.UInt16);
-
-        this.game?.broadcast(buff);
+        this.game?.broadcast(playerDeath);
 
     }
 

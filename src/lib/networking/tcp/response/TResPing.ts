@@ -6,12 +6,12 @@ import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacke
 import {PlayerEffect} from "../../../components/Player";
 import {NumericBoolean} from "../../../types/GameTypes";
 
-export default class TResEffectAdd extends FormattedPacket {
+export default class TResPing extends FormattedPacket {
 
     channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("requesting", EBufferType.UInt8)
-        .add("ping", EBufferType.UInt8)
+        .add("ping", EBufferType.UInt16)
         .build();
     index: TCPServerResponse.EFFECT_ADD;
 

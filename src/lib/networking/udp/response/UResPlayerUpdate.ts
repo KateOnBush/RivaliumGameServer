@@ -1,29 +1,37 @@
 import {FormattedPacket} from "../../FormattedPacket";
 import EPacketChannel from "../../../enums/EPacketChannel";
 import EBufferType from "../../../enums/EBufferType";
-import {TCPServerRequest} from "../../../enums/TCPPacketTypes";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
+import {UDPServerResponse} from "../../../enums/UDPPacketTypes";
+import {PlayerID} from "../../../database/match/MatchTypes";
 import EPlayerState from "../../../enums/EPlayerState";
+import CharacterList from "../../../gamedata/CharacterList";
 import {NumericBoolean, SignedNumericBoolean} from "../../../types/GameTypes";
-import {UDPServerRequest} from "../../../enums/UDPPacketTypes";
 
-export default class UReqPositionUpdate extends FormattedPacket {
+export default class UResPlayerUpdate extends FormattedPacket {
 
     channel = EPacketChannel.UDP;
     static override attributes = new FormattedPacketAttributeListBuilder()
+        .add("playerId", EBufferType.UInt16)
+        .add("stateId", EBufferType.UInt8)
         .add("x", EBufferType.SInt32, 100)
         .add("y", EBufferType.SInt32, 100)
         .add("movX", EBufferType.SInt32, 100)
         .add("movY", EBufferType.SInt32, 100)
         .add("mouseX", EBufferType.SInt32, 100)
         .add("mouseY", EBufferType.SInt32, 100)
-        .add("stateId", EBufferType.UInt8)
         .add("onGround", EBufferType.UInt8).asBoolean()
         .add("slide", EBufferType.UInt8).asBoolean()
-        .add("orientation", EBufferType.UInt8).asBoolean()
+        .add("direction", EBufferType.UInt8).asBoolean()
+        .add("characterId", EBufferType.UInt8)
+        .add("characterHealth", EBufferType.UInt16)
+        .add("characterMaxHealth", EBufferType.UInt16)
+        .add("characterUltimateCharge", EBufferType.UInt16)
+        .add("characterMaxUltimateCharge", EBufferType.UInt16)
         .build();
-    index: UDPServerRequest.POSITION_UPDATE;
+    index: UDPServerResponse.PLAYER_UPDATE;
 
+    playerId: PlayerID;
     x: number;
     y: number;
     movX: number;
@@ -33,8 +41,14 @@ export default class UReqPositionUpdate extends FormattedPacket {
 
     stateId: EPlayerState;
 
+    characterId: CharacterList;
+    characterHealth: number;
+    characterUltimateCharge: number;
+    characterMaxHealth: number;
+    characterMaxUltimateCharge: number;
+
     onGround: NumericBoolean;
     slide: NumericBoolean;
-    orientation: SignedNumericBoolean;
+    direction: SignedNumericBoolean;
 
 }

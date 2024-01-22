@@ -122,7 +122,7 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
             boff.writeInt32LE(prediction.mov.x*100|0, 11);
             boff.writeInt32LE(prediction.mov.y*100|0, 15);
 
-            pl.socket.send(boff);
+            pl.TCPsocket.send(boff);
 
         })
         

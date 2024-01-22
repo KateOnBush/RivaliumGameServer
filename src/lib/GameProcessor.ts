@@ -50,7 +50,7 @@ export default class GameProcessor {
 	
 			let concatenatedBuffer = Buffer.concat(bufferList);
 	
-			u.socket.send(concatenatedBuffer);
+			u.TCPsocket.send(concatenatedBuffer);
 	
 		})
 

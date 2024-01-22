@@ -6,6 +6,8 @@ import GMBuffer from "../tools/GMBuffer";
 import Player from "./Player";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
 import {UDPServerRequest, UDPServerResponse} from "../enums/UDPPacketTypes";
+import UResEntityUpdate from "../networking/udp/response/UResEntityUpdate";
+import TResEntityDestroy from "../networking/tcp/response/TResEntityDestroy";
 
 
 export default class Entity extends GamePhysicalElement implements ILifetimedElement {
@@ -14,7 +16,7 @@ export default class Entity extends GamePhysicalElement implements ILifetimedEle
     index: number;
     health: number;
     armor: number;
-    parameters: number[];
+    parameters: number[] = [0, 0, 0, 0, 0];
     lifespan: number;
     lifespanTimeout: NodeJS.Timeout;
 
@@ -48,20 +50,22 @@ export default class Entity extends GamePhysicalElement implements ILifetimedEle
 
     update(){
 
-        let buffer = GMBuffer.allocate(dataSize);
-        buffer.write(UDPServerResponse.ENTITY_UPDATE, EBufferType.UInt8);
-        buffer.write(this.owner.id, EBufferType.UInt16);
-        buffer.write(this.id, EBufferType.UInt16);
-        buffer.write(this.x * 100|0, EBufferType.SInt32);
-        buffer.write(this.y * 100|0, EBufferType.SInt32);
-        buffer.write(this.mx * 100|0, EBufferType.SInt32);
-        buffer.write(this.my * 100|0, EBufferType.SInt32);
-        buffer.write(this.health, EBufferType.UInt32);
-        buffer.write(this.armor * 100 | 0, EBufferType.UInt8);
-        for(const par of this.parameters){
-            buffer.write(par * 100 | 0, EBufferType.SInt32);
-        }
-        this.game?.broadcast(buffer);
+        let updateEntity = new UResEntityUpdate();
+        updateEntity.x = this.x;
+        updateEntity.movX = this.mx;
+        updateEntity.y = this.y;
+        updateEntity.movY = this.my;
+        updateEntity.ownerId = this.owner.id;
+        updateEntity.entityId = this.id;
+        updateEntity.armor = this.armor;
+        updateEntity.health = this.health;
+        updateEntity.param1 = this.parameters[0];
+        updateEntity.param2 = this.parameters[1];
+        updateEntity.param3 = this.parameters[2];
+        updateEntity.param4 = this.parameters[3];
+        updateEntity.param5 = this.parameters[4];
+
+        this.game?.broadcast(updateEntity);
 
     }
 
@@ -69,12 +73,10 @@ export default class Entity extends GamePhysicalElement implements ILifetimedEle
 
         if (!this.game) return;
 
-        var buffer = GMBuffer.allocate(dataSize);
-        buffer.write(TCPServerResponse.ENTITY_DESTROY, EBufferType.UInt8);
-        buffer.write(this.id, EBufferType.UInt16);
+        let entityDestroy = new TResEntityDestroy();
+        entityDestroy.entityId = this.id;
 
-        this.game.broadcast(buffer);
-
+        this.game.broadcast(entityDestroy);
         this.game.removeEntity(this.id);
 
         clearTimeout(this.lifespanTimeout);

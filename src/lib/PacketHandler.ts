@@ -18,7 +18,7 @@ export default class PacketHandler {
 
     static async handle(buffer: GMBuffer, socket: IPlayerSocket) {
 
-        /*buffer.seek(0);
+        buffer.seek(0);
         let type = buffer.read(EBufferType.UInt8);
         let player = socket.player;
 

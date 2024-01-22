@@ -13,6 +13,8 @@ import {EGameState} from "../enums/EGameData";
 import ProjectileList from "../gamedata/instancelist/ProjectileList";
 import {MatchType} from "../database/match/MatchTypes";
 import GameProcessor from "../GameProcessor";
+import {FormattedPacket} from "../networking/FormattedPacket";
+import EPacketChannel from "../enums/EPacketChannel";
 
 enum GameRoundPhase {
     PREPARATION,
@@ -349,16 +351,22 @@ export default class Game {
         return t;
     }
 
-    broadcast(buffer: GMBuffer){
-
-        this.players.forEach(p=>p.socket.send(buffer.getBuffer()));
-
+    broadcast(packet: FormattedPacket){
+        let bakedPacket = packet.bake();
+        if (packet.channel == EPacketChannel.TCP) {
+            this.players.forEach(p=>p.sendRawTCP(bakedPacket));
+            return;
+        }
+        this.players.forEach(p=>p.sendRawUDP(bakedPacket));
     }
 
-    broadcastExcept(buffer: GMBuffer, except: Player){
-
-        this.players.forEach(p=>{if (p.id != except.id) p.socket.send(buffer.getBuffer())});
-
+    broadcastExcept(packet: FormattedPacket, except: Player){
+        let bakedPacket = packet.bake();
+        if (packet.channel == EPacketChannel.TCP) {
+            this.players.forEach(p=> { if (p.id !== except.id) p.sendRawTCP(bakedPacket) });
+            return;
+        }
+        this.players.forEach(p=>{ if (p.id !== except.id) p.sendRawUDP(bakedPacket) });
     }
 
 }

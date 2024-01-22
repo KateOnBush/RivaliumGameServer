@@ -1,5 +1,14 @@
 import Vector2 from "./tools/vector/Vector2";
 
+export const LOGO = `
+
+            Version 0.0
+            █▀█ ▀█▀ █ █ ▄▀▄ █   ▀█▀ █ █ █▄ ▄█   
+            █▀▄ ▄█▄ ▀▄▀ █▀█ █▄▄ ▄█▄ █▄█ █ ▀ █       
+                                  Game Server
+                               
+`;
+
 export const serverPort = 2003;
 
 export const dataSize = 64;

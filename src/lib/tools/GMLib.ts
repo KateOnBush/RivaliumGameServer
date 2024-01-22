@@ -1,5 +1,5 @@
 export default class GM {
-
+    
     static point_direction(x1: number, y1: number, x2: number, y2: number){
         return Math.atan2(y1 - y2, x2 - x1) * 180/Math.PI;
     }
@@ -19,7 +19,6 @@ export default class GM {
     static random_range(n: number, m: number){
         return Math.random() * (m - n) + n;
     }
-    
 
     static lerp(a: number, b: number, n: number){
         return a + (b - a) * n;

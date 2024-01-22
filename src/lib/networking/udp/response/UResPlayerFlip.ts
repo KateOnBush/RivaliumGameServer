@@ -1,21 +1,21 @@
 import {FormattedPacket} from "../../FormattedPacket";
 import EPacketChannel from "../../../enums/EPacketChannel";
 import EBufferType from "../../../enums/EBufferType";
-import {TCPServerRequest} from "../../../enums/TCPPacketTypes";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
-import EPlayerState from "../../../enums/EPlayerState";
-import {NumericBoolean, SignedNumericBoolean} from "../../../types/GameTypes";
-import {UDPServerRequest, UDPServerResponse} from "../../../enums/UDPPacketTypes";
+import {UDPServerResponse} from "../../../enums/UDPPacketTypes";
+import {PlayerID} from "../../../database/match/MatchTypes";
 
-export default class UReqPositionUpdate extends FormattedPacket {
+export default class UResPlayerFlip extends FormattedPacket {
 
     channel = EPacketChannel.UDP;
     static override attributes = new FormattedPacketAttributeListBuilder()
+        .add("playerId", EBufferType.UInt16)
         .add("forward", EBufferType.UInt8)
         .add("start", EBufferType.UInt8, 100)
         .build();
-    index: UDPServerRequest.FLIP;
+    index: UDPServerResponse.PLAYER_FLIP;
 
+    playerId: PlayerID;
     forward: number;
     start: number;
 

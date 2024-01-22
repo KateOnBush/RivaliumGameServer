@@ -9,14 +9,14 @@ export default class TResPlayerHit extends FormattedPacket {
 
     channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
-        .add("id", EBufferType.UInt16)
+        .add("playerId", EBufferType.UInt16)
         .add("attackerId", EBufferType.UInt16)
-        .add("visual", EBufferType.UInt8)
+        .add("visual", EBufferType.UInt8).asBoolean()
         .build();
     index: TCPServerResponse.PLAYER_HIT;
 
-    id: number = 0;
+    playerId: number = 0;
     attackerId: number = 0;
-    visual: number = 0;
+    visual: boolean = false;
 
 }

@@ -15,12 +15,12 @@ export default class Ability {
 
     createdProjectile?: Projectile;
 
-    constructor(type: EAbilityType, cooldowns: number[], abilitydata: AbilityData, castMethod: (n: number, p: Player, a: Ability) => void) {
+    constructor(type: EAbilityType, cooldowns: number[], abilityData: AbilityData, castMethod: (n: number, p: Player, a: Ability) => void) {
         
         this.type = type;
         this.maxCooldown = cooldowns;
         this.cannotCast = false;
-        this.data = abilitydata;
+        this.data = abilityData;
         this.castMethod = castMethod;
         this.activeTimeout = undefined;
         this.cooldownTimeout = undefined;
@@ -91,7 +91,7 @@ export default class Ability {
                         this.cannotCast = false;
                     }, this.data.cooldownCharge * 1000);
                     if (this.data.recharger == undefined) {
-                        var recharge = () => {
+                        let recharge = () => {
                             this.data.charges += 1;
                             if (this.data.charges < this.data.maxCharges){
                                 this.data.recharger = setTimeout(recharge, this.data.chargeTime * 1000);

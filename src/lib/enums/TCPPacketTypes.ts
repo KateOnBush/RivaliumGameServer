@@ -19,6 +19,7 @@ export enum TCPServerResponse {
     PLAYER_HIT,
     PLAYER_ABILITY_CAST,
     PLAYER_DEATH,
+    PLAYER_FORCED_DASH,
 
     EFFECT_ADD,
 

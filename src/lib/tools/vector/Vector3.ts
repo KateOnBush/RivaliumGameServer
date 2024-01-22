@@ -84,11 +84,11 @@ export default class Vector3 {
     }
 
     static cross(a: Vector3, b: Vector3){
-        var i = a.y * b.z - a.z * b.y;
-		var j = a.z * b.x - a.x * b.z;
-		var k = a.x * b.y - a.y * b.x;
-		
-		return Vector3.cartesian(i, j, k);
+        const i = a.y * b.z - a.z * b.y;
+        const j = a.z * b.x - a.x * b.z;
+        const k = a.x * b.y - a.y * b.x;
+
+        return Vector3.cartesian(i, j, k);
     }
 
     project2d() {

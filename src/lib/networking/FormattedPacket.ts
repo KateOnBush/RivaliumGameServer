@@ -30,6 +30,7 @@ export abstract class FormattedPacket {
         const attributes = (this.constructor as typeof FormattedPacket).attributes;
         let size = this.size(), fullSize = size + (this.channel == EPacketChannel.UDP ? 5 : 2);
         // ! UDP: Length<Data>(1 byte) + Accumulator(1 byte) + Index(1 byte) + Data + Checksum<Data>(2 byte)
+        // * Checksum = ConsecutiveXOR(1 byte) + Sum(1 byte)
         // ! TCP: Length<Data>(1 byte) + Index(1 byte) + Data
         let buff = GMBuffer.allocate(fullSize);
         buff.write(size, EBufferType.UInt8);
