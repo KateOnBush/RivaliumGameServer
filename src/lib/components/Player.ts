@@ -2,7 +2,7 @@ import CharacterRepository from "../gamedata/CharacterRepository";
 import {dataSize} from "../Macros";
 import {TCPServerResponse} from '../enums/TCPPacketTypes';
 import ICharacter from "../interfaces/ICharacter";
-import PlayerSocket from "../interfaces/IPlayerSocket";
+import PlayerSocket from "../networking/TCPPlayerSocket";
 import GMBuffer from "../tools/GMBuffer";
 import GM from "../tools/GMLib";
 import Vector2 from "../tools/vector/Vector2";

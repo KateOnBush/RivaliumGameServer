@@ -3,7 +3,7 @@ import Logger from "./tools/Logger";
 import {dataSize, entityParametersLimit} from "./Macros";
 import EBufferType from "./enums/EBufferType";
 import {TCPServerRequest, TCPServerResponse} from "./enums/TCPPacketTypes";
-import IPlayerSocket from "./interfaces/IPlayerSocket";
+import TCPPlayerSocket from "./networking/TCPPlayerSocket";
 import GMBuffer from "./tools/GMBuffer";
 import Vector2 from "./tools/vector/Vector2";
 import {NumericBoolean, SignedNumericBoolean} from "./types/GameTypes";
@@ -16,7 +16,7 @@ import {UDPServerResponse} from "./enums/UDPPacketTypes";
 
 export default class PacketHandler {
 
-    static async handle(buffer: GMBuffer, socket: IPlayerSocket) {
+    static async handle(buffer: GMBuffer, socket: TCPPlayerSocket) {
 
         buffer.seek(0);
         let type = buffer.read(EBufferType.UInt8);
@@ -28,70 +28,7 @@ export default class PacketHandler {
 
             case TCPServerRequest.IDENTIFY:
 
-                let pass = buffer.read(EBufferType.UInt32);
-                let access = buffer.read(EBufferType.UInt32);
 
-                let response = GMBuffer.allocate(dataSize);
-                response.write(TCPServerResponse.PRE_MATCH, EBufferType.UInt8);
-
-                Logger.info("Player attempting identification, verifying...");
-
-                let match = await Database.verifyPlayer(socket, pass, access);
-                if (!match) {
-                    response.write(EPrematchState.MATCH_NOT_FOUND, EBufferType.UInt8);
-                } else if (match.state == MatchState.FINISHED) {
-                    response.write(EPrematchState.MATCH_ENDED, EBufferType.UInt8);
-                } else if (match.state == MatchState.STARTED || match.state == MatchState.LOADING) {
-                    response.write(EPrematchState.REJOINED, EBufferType.UInt8);
-                    socket.identified = true;
-                    //rejoining
-                } else {
-
-                    Logger.info("Player identified! Match id: {}", match.getID());
-                    socket.identified = true;
-                    response.write(EPrematchState.IDENTIFIED, EBufferType.UInt8);
-
-                    let msg = GMBuffer.allocate(dataSize);
-                    msg.write(TCPServerResponse.PRE_MATCH, EBufferType.UInt8);
-                    msg.write(EPrematchState.PLAYER_LOADED, EBufferType.UInt8);
-                    msg.write(socket.player.matchPlayer.playerId, EBufferType.UInt16);
-
-                    socket.game.broadcast(msg);
-
-                    Logger.info("Sending IDENTIFIED");
-
-                }
-
-                socket.send(response.getBuffer());
-
-                if (!match) break;
-
-                if (match.playerManager.players.every(team => team.every(mPlayer => mPlayer.joined)) && match.state == MatchState.AWAITING_PLAYERS) {
-
-                    //start match
-                    match.state = MatchState.LOADING;
-                    Logger.info("All players joined, starting...");
-
-                    let msg = GMBuffer.allocate(dataSize);
-                    msg.write(TCPServerResponse.PREMATCH, EBufferType.UInt8);
-                    msg.write(EPrematchState.MATCH_STARTING, EBufferType.UInt8);
-                    socket.game.broadcast(msg);
-
-                    await Time.wait(10000);
-
-                    msg = GMBuffer.allocate(dataSize);
-                    msg.write(TCPServerResponse.PREMATCH, EBufferType.UInt8);
-                    msg.write(EPrematchState.MATCH_STARTED, EBufferType.UInt8);
-
-                    match.state = MatchState.STARTED;
-
-                    await Database.saveMatch(match);
-
-                    socket.game.broadcast(msg);
-
-                    match.game.start();
-
-                }
 
                 break;
 
@@ -302,7 +239,7 @@ export default class PacketHandler {
 
             }
 
-        }*/
+        }
 
     }
 

@@ -2,7 +2,7 @@ import Player from "./Player";
 import Projectile, {ProjectileEventMethod} from "./Projectile";
 import Entity from "./Entity";
 import Explosion from "./Explosion";
-import IPlayerSocket from "../interfaces/IPlayerSocket";
+import TCPPlayerSocket from "../networking/TCPPlayerSocket";
 import {NumericBoolean} from "../types/GameTypes";
 import {dataSize, defaultBounceFriction} from "../Macros";
 import Lag from "../tools/Lag";
@@ -110,7 +110,7 @@ export default class Game {
 
     }
 
-    addPlayer(socket: IPlayerSocket, charId: number, playerId: number, team: number){
+    addPlayer(socket: TCPPlayerSocket, charId: number, playerId: number, team: number){
 
         let nPlayer = new Player(socket, playerId, charId, team);
 

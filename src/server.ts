@@ -1,7 +1,7 @@
 import {WebSocketServer} from "ws"
 import Logger from "./lib/tools/Logger";
 import {dataSize, LOGO, serverPort} from "./lib/Macros";
-import PlayerSocket from "./lib/interfaces/IPlayerSocket";
+import PlayerSocket from "./lib/networking/TCPPlayerSocket";
 import GMBuffer from "./lib/tools/GMBuffer";
 import GameProcessor from "./lib/GameProcessor";
 import Ping from "./lib/tools/Ping";
@@ -10,10 +10,6 @@ import PacketHandler from "./lib/PacketHandler";
 import 'source-map-support/register'
 import Database from "./lib/database/Database";
 import dgram from 'dgram';
-import {FormattedPacket} from "./lib/networking/FormattedPacket";
-import FormattedPacketAttributeListBuilder from "./lib/networking/attributes/FormattedPacketAttributeListBuilder";
-import EPacketChannel from "./lib/enums/EPacketChannel";
-import EBufferType from "./lib/enums/EBufferType";
 
 let lastDelta = performance.now();
 
