@@ -18,6 +18,11 @@ export default class TResEntityCreate extends FormattedPacket {
         .add("health", EBufferType.UInt32)
         .add("armor", EBufferType.UInt8, 100)
         .add("lifespan", EBufferType.UInt8)
+        .add("param1", EBufferType.SInt32, 100)
+        .add("param2", EBufferType.SInt32, 100)
+        .add("param3", EBufferType.SInt32, 100)
+        .add("param4", EBufferType.SInt32, 100)
+        .add("param5", EBufferType.SInt32, 100)
         .build();
     index: TCPServerResponse.PROJECTILE_DESTROY;
 
@@ -31,5 +36,10 @@ export default class TResEntityCreate extends FormattedPacket {
     health: number;
     armor: number;
     lifespan: number;
+    param1: number;
+    param2: number;
+    param3: number;
+    param4: number;
+    param5: number;
 
 }

@@ -1,5 +1,5 @@
 import Player from "./Player";
-import Projectile, {projectileEventCallback} from "./Projectile";
+import Projectile, {ProjectileEventMethod} from "./Projectile";
 import Entity from "./Entity";
 import Explosion from "./Explosion";
 import IPlayerSocket from "../interfaces/IPlayerSocket";
@@ -15,6 +15,11 @@ import {MatchType} from "../database/match/MatchTypes";
 import GameProcessor from "../GameProcessor";
 import {FormattedPacket} from "../networking/FormattedPacket";
 import EPacketChannel from "../enums/EPacketChannel";
+import TResGameState from "../networking/tcp/response/TResGameState";
+import TResPlayerCreate from "../networking/tcp/response/TResPlayerCreate";
+import TResProjectileCreate from "../networking/tcp/response/TResProjectileCreate";
+import TResEntityCreate from "../networking/tcp/response/TResEntityCreate";
+import TResExplosionCreate from "../networking/tcp/response/TResExplosionCreate";
 
 enum GameRoundPhase {
     PREPARATION,
@@ -43,21 +48,19 @@ export default class Game {
 
     changeState(newState: EGameState) {
         this.state = newState;
-        let buff = GMBuffer.allocate(dataSize);
-        buff.write(TCPServerResponse.GAME_STATE, EBufferType.UInt8);
-        buff.write(newState, EBufferType.UInt8);
-        buff.write(this.currentRound, EBufferType.UInt8);
-        buff.write(5, EBufferType.UInt8);
-        this.broadcast(buff);
+        let gameState = new TResGameState();
+        gameState.state = newState;
+        gameState.currentRound = this.currentRound;
+        gameState.timer = 5;
+        this.broadcast(gameState);
         if (newState == EGameState.PREROUND) {
             for(const i of [1, 2, 3, 4]) {
                 setTimeout(()=>{
-                    let locBuff = GMBuffer.allocate(dataSize);
-                    locBuff.write(TCPServerResponse.GAME_STATE, EBufferType.UInt8);
-                    locBuff.write(EGameState.PREROUND, EBufferType.UInt8);
-                    locBuff.write(this.currentRound, EBufferType.UInt8);
-                    locBuff.write(5 - i, EBufferType.UInt8);
-                    this.broadcast(locBuff);
+                    let gameState = new TResGameState();
+                    gameState.state = EGameState.PREROUND;
+                    gameState.currentRound = this.currentRound;
+                    gameState.timer = 5 - i;
+                    this.broadcast(gameState);
                 }, i * 1000);
             }
             setTimeout(()=>{
@@ -89,24 +92,21 @@ export default class Game {
 
     announcePlayer(player: Player) {
 
-        let buff = GMBuffer.allocate(dataSize);
-        buff.write(TCPServerResponse.PLAYER_CREATE, 	    EBufferType.UInt8);
+        let playerCreate = new TResPlayerCreate();
+        playerCreate.playerId = player.id;
+        playerCreate.isYou = 0;
+        playerCreate.x = player.x;
+        playerCreate.y = player.y;
+        playerCreate.characterId = player.char.id;
+        playerCreate.characterHealth = player.char.health;
+        playerCreate.characterMaxHealth = player.char.healthMax;
+        playerCreate.characterUltimateCharge = player.char.ultimateCharge;
+        playerCreate.characterMaxUltimateCharge = player.char.ultimateChargeMax;
 
-        buff.write(player.id, 						    EBufferType.UInt16);
-        buff.write(0, 							EBufferType.UInt8); //0: Not you, 1: You
-        buff.write(player.char.id, 					    EBufferType.UInt8);
-        buff.write(player.char.health, 				    EBufferType.UInt16);
-        buff.write(player.char.ultimateCharge, 		    EBufferType.UInt16);
-        buff.write(player.char.healthMax, 			    EBufferType.UInt16);
-        buff.write(player.char.ultimateChargeMax, 	    EBufferType.UInt16);
-        buff.write(Math.round(player.x * 100), 		EBufferType.SInt32);
-        buff.write(Math.round(player.y * 100), 		EBufferType.SInt32);
+        this.broadcastExcept(playerCreate, player);
 
-        this.broadcastExcept(buff, player);
-
-        let selfBuff = buff.copy();
-        selfBuff.poke(1, EBufferType.UInt8, 3);
-        player.send(selfBuff);
+        playerCreate.isYou = 1;
+        player.send(playerCreate);
 
     }
 
@@ -139,13 +139,13 @@ export default class Game {
         bleed: number, 
         heal: number, 
         bounce: NumericBoolean = 0, 
-        onBounce: projectileEventCallback = () => null, 
-        onDestroy: projectileEventCallback = () => null,
+        onBounce: ProjectileEventMethod = () => null,
+        onDestroy: ProjectileEventMethod = () => null,
         bounceFriction: number = defaultBounceFriction,
         hasWeight: NumericBoolean = 1
     ){
 
-        var nProjectile = new Projectile(owner, this.generateProjectileID(), index, x, y, speed, direction, collision, dieOnCol, lifespan, damage, bleed, heal, bounce, onBounce, onDestroy, bounceFriction, hasWeight);
+        let nProjectile = new Projectile(owner, this.generateProjectileID(), index, x, y, speed, direction, collision, dieOnCol, lifespan, damage, bleed, heal, bounce, onBounce, onDestroy, bounceFriction, hasWeight);
 
         nProjectile.game = this;
         this.projectiles.push(nProjectile);
@@ -158,34 +158,32 @@ export default class Game {
 
     declareProjectile(p: Projectile){
 
+        let projectileDeclaration = new TResProjectileCreate();
+        projectileDeclaration.ownerId = p.owner.id;
+        projectileDeclaration.projIndex = p.index;
+        projectileDeclaration.projId = p.id;
+        projectileDeclaration.collision = p.collision;
+        projectileDeclaration.dieOnCollision = p.dieOnCol;
+        projectileDeclaration.lifespan = p.lifespan;
+        projectileDeclaration.damage = p.damage;
+        projectileDeclaration.bleed = p.bleed;
+        projectileDeclaration.heal = p.heal;
+        projectileDeclaration.bounce = p.bounce;
+        projectileDeclaration.hasWeight = p.hasWeight;
+        projectileDeclaration.oldX = p.pos.x;
+        projectileDeclaration.oldY = p.pos.y;
+        projectileDeclaration.bounceFriction = p.bounceFriction;
+
         this.players.forEach(player => {
 
-            var buf = GMBuffer.allocate(dataSize);
-
-            buf.write(TCPServerResponse.PROJECTILE_CREATE, EBufferType.UInt8);
-            buf.write(p.owner.id, EBufferType.UInt16);
-            buf.write(p.index, EBufferType.UInt16);
             let pred = Lag.predictPosition(p.pos, p.mov, Lag.compensateCloseProjectile(player.ping.ms));
-            buf.write(pred.pos.x*100|0, EBufferType.SInt32);
-            buf.write(pred.pos.y*100|0, EBufferType.SInt32);
-            let newspd = pred.mov.magnitude()
-            let newdir = pred.mov.direction();
-            buf.write(newspd*100|0, EBufferType.SInt32);
-            buf.write(newdir*10|0, EBufferType.SInt16);
-            buf.write(p.collision, EBufferType.UInt8);
-            buf.write(p.dieOnCol, EBufferType.UInt8);
-            buf.write(p.lifespan, EBufferType.UInt8);
-            buf.write(p.damage, EBufferType.UInt16);
-            buf.write(p.bleed, EBufferType.UInt16);
-            buf.write(p.heal, EBufferType.UInt16);
-            buf.write(p.id, EBufferType.UInt16);
-            buf.write(p.bounce, EBufferType.UInt8);
-            buf.write(p.pos.x*100|0, EBufferType.SInt32);
-            buf.write(p.pos.y*100|0, EBufferType.SInt32);
-            buf.write(p.bounceFriction * 100 | 0, EBufferType.UInt8);
-            buf.write(p.hasWeight, EBufferType.UInt8);
-
-            player.send(buf);
+            let newSpd = pred.mov.magnitude()
+            let newDir = pred.mov.direction();
+            projectileDeclaration.x = pred.pos.x;
+            projectileDeclaration.y = pred.pos.y;
+            projectileDeclaration.speed = newSpd;
+            projectileDeclaration.direction = newDir;
+            player.send(projectileDeclaration);
 
         });
 
@@ -193,41 +191,38 @@ export default class Game {
 
     addEntity(owner: Player, index: number, x: number, y: number, health: number, armor: number, lifespan = 10, entityParameters: number[] = []){
 
-        var nEntity = new Entity(owner, this.generateEntityID(), index, x, y, health, armor, lifespan, entityParameters);
-
+        let nEntity = new Entity(owner, this.generateEntityID(), index, x, y, health, armor, lifespan, entityParameters);
         nEntity.game = this;
-
         this.entities.push(nEntity);
-
         this.declareEntity(nEntity);
-
         return nEntity;
 
     }
 
     declareEntity(entity: Entity){
 
-        let buffer = GMBuffer.allocate(dataSize);
-        buffer.write(TCPServerResponse.ENTITY_CREATE, EBufferType.UInt8);
-        buffer.write(entity.index, EBufferType.UInt16);
-        buffer.write(entity.owner.id, EBufferType.UInt16);
-        buffer.write(entity.id, EBufferType.UInt16);
-        buffer.write(entity.x * 100|0, EBufferType.SInt32);
-        buffer.write(entity.y * 100|0, EBufferType.SInt32);
-        buffer.write(entity.mx * 100|0, EBufferType.SInt32);    
-        buffer.write(entity.my * 100|0, EBufferType.SInt32);
-        buffer.write(entity.health, EBufferType.UInt32);
-        buffer.write(entity.armor * 100 | 0, EBufferType.UInt8);
-        buffer.write(entity.lifespan, EBufferType.UInt8);   
-        for(const par of entity.parameters){
-            buffer.write(par * 100 | 0, EBufferType.SInt32);
-        }
-        this.broadcast(buffer);
+        let declareEntity = new TResEntityCreate();
+        declareEntity.entityId = entity.id;
+        declareEntity.entityIndex = entity.index;
+        declareEntity.ownerId = entity.owner.id;
+        declareEntity.x = entity.x;
+        declareEntity.y = entity.y;
+        declareEntity.mx = entity.mx;
+        declareEntity.my = entity.my;
+        declareEntity.health = entity.health;
+        declareEntity.armor = entity.armor;
+        declareEntity.lifespan = entity.lifespan;
+        declareEntity.param1 = entity.parameters[0];
+        declareEntity.param2 = entity.parameters[1];
+        declareEntity.param3 = entity.parameters[2];
+        declareEntity.param4 = entity.parameters[3];
+        declareEntity.param5 = entity.parameters[4];
+        this.broadcast(declareEntity);
     }
 
     addExplosion(owner: Player, index: number, x: number, y: number, radius: number, damage: number){
 
-        var nExplosion = new Explosion(owner, this.generateExplosionID(), index, x, y, radius, damage);
+        let nExplosion = new Explosion(owner, this.generateExplosionID(), index, x, y, radius, damage);
 
         nExplosion.game = this;
         this.explosions.push(nExplosion);
@@ -238,116 +233,68 @@ export default class Game {
 
     declareExplosion(explosion: Explosion){
 
-        let buff = GMBuffer.allocate(dataSize);
-
-        buff.write(TCPServerResponse.EXPLOSION_CREATE, EBufferType.UInt8);
-        buff.write(explosion.owner.id, EBufferType.UInt16);
-        buff.write(explosion.index, EBufferType.UInt16);
-        buff.write(explosion.x * 100|0, EBufferType.SInt32);
-        buff.write(explosion.y * 100|0, EBufferType.SInt32);
-        buff.write(explosion.radius, EBufferType.UInt16);
-        buff.write(explosion.damage, EBufferType.UInt16);
-
-        this.broadcast(buff);
+        let declareExplosion = new TResExplosionCreate();
+        declareExplosion.ownerId = explosion.owner.id;
+        declareExplosion.explosionIndex = explosion.index;
+        declareExplosion.x = explosion.x;
+        declareExplosion.y = explosion.y;
+        declareExplosion.radius = explosion.radius;
+        declareExplosion.damage = explosion.damage;
+        this.broadcast(declareExplosion);
 
     }
 
     getPlayer(_id: number){
-
         return this.players.find(t=>t.id == _id);
-
     }
 
     getProjectile(_id: number){
-
         return this.projectiles.find(t=>t.id == _id);
-
     }
 
     getEntity(_id: number){
-
         return this.entities.find(t=>t.id == _id);
-
-    }
-
-    getExplosion(_id: number){
-
-        return this.explosions.find(t=>t.id == _id);
-
     }
 
     removePlayer(_id: number){
-
         return this.players.splice(this.players.findIndex(p => p.id === _id), 1);
-
     }
 
     removeProjectile(_id: number){
-
         return this.projectiles.splice(this.projectiles.findIndex(p => p.id === _id), 1);
-
     }
 
     removeEntity(_id: number){
-
         return this.entities.splice(this.entities.findIndex(p=>p.id === _id), 1);
-
     }
 
     removeExplosion(_id: number){
-
         return this.explosions.splice(this.explosions.findIndex(p=>p.id === _id), 1);
-
-    }
-
-    generateID(){
-
-        var t = Math.random()*10000|0;
-        while(this.players.findIndex(n=>n.id == t)>=0){
-
-            t = Math.random()*10000|0;
-
-        }
-
-        return t;
-
     }
 
     generateProjectileID(){
-
-        var t = Math.random()*10000|0;
+        let t = Math.random()*10000|0;
         while(this.projectiles.findIndex(n=>n.id == t)>=0){
-
             t = Math.random()*10000|0;
-
         }
-
         return t;
-
     }
 
     generateEntityID(){
-
-        var t = Math.random()*10000|0;
+        let t = Math.random()*10000|0;
         while(this.entities.findIndex(n=>n.id == t)>=0){
 
             t = Math.random()*10000|0;
 
         }
-
         return t;
-
     }
 
     generateExplosionID(){
-
-        var t = Math.random()*10000|0;
+        let t = Math.random()*10000|0;
         while(this.explosions.findIndex(n=>n.id == t)>=0){
-
             t = Math.random()*10000|0;
-
         }
-
         return t;
     }
 

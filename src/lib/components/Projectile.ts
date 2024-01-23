@@ -11,8 +11,10 @@ import {NumericBoolean} from "../types/GameTypes";
 import Player from "./Player";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
 import {UDPServerResponse} from "../enums/UDPPacketTypes";
+import TResProjectileDestroy from "../networking/tcp/response/TResProjectileDestroy";
+import UResProjectileUpdate from "../networking/udp/response/UResProjectileUpdate";
 
-export type projectileEventCallback = (proj: Projectile) => void;
+export type ProjectileEventMethod = (proj: Projectile) => void;
 
 export default class Projectile extends GamePhysicalElement implements ILifetimedElement, IPlayerElement {
 
@@ -26,8 +28,8 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
     bleed: number;
     heal: number;
     bounce: NumericBoolean;
-    bounceMethod: projectileEventCallback;
-    destroyMethod: projectileEventCallback;
+    bounceMethod: ProjectileEventMethod;
+    destroyMethod: ProjectileEventMethod;
     bounceFriction: number;
     hasWeight: NumericBoolean;
 
@@ -49,8 +51,8 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
         bleed: number, 
         heal: number, 
         bounce: NumericBoolean, 
-        bounceMethod: projectileEventCallback, 
-        destroyMethod: projectileEventCallback,
+        bounceMethod: ProjectileEventMethod,
+        destroyMethod: ProjectileEventMethod,
         bounceFriction: number,
         hasWeight: NumericBoolean
     ){
@@ -84,18 +86,13 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
 
         if (this.game == undefined) return;
         if (this.destroyed) return;
-
         this.destroyed = true;
-        
         this.onDestroy();
 
-        var buff = GMBuffer.allocate(dataSize);
-        buff.write(TCPServerResponse.PROJECTILE_DESTROY, BType.UInt8);
-        buff.write(this.id, BType.UInt16);
-
+        let projectileDestroy = new TResProjectileDestroy();
+        projectileDestroy.projId = this.id;
         this.game.removeProjectile(this.id);
-
-        this.game.broadcast(buff);
+        this.game.broadcast(projectileDestroy);
 
         clearTimeout(this.lifespanTimeout);
 
@@ -104,39 +101,31 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
     update(){
         
         if (!this.game) return;
+        let projectileUpdate = new UResProjectileUpdate();
+        projectileUpdate.projectileId = this.id;
 
         this.game.players.forEach(pl=>{
 
             if (pl.id == this.owner.id) return;
-
             let comp1 = Lag.compensatePrecise(pl.ping.ms);
-
             let prediction = Lag.predictPosition(this.pos, this.mov, comp1);
 
-            var boff = Buffer.alloc(dataSize);
+            projectileUpdate.x = prediction.pos.x;
+            projectileUpdate.y = prediction.pos.y;
+            projectileUpdate.movX = prediction.mov.x;
+            projectileUpdate.movY = prediction.mov.y;
 
-            boff.writeUint8(UDPServerResponse.PROJECTILE_UPDATE, 0);
-            boff.writeUInt16LE(this.id, 1);
-            boff.writeInt32LE(prediction.pos.x*100|0, 3);
-            boff.writeInt32LE(prediction.pos.y*100|0, 7);
-            boff.writeInt32LE(prediction.mov.x*100|0, 11);
-            boff.writeInt32LE(prediction.mov.y*100|0, 15);
-
-            pl.TCPsocket.send(boff);
+            pl.send(projectileUpdate);
 
         })
         
     }
 
     onBounce(){
-
         this.bounceMethod(this);
-
     }
 
     onDestroy(){
-
         this.destroyMethod(this);
-
     }
 }

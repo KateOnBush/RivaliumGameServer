@@ -12,7 +12,7 @@ export default class TResPlayerCreate extends FormattedPacket {
 
     channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
-        .add("id", EBufferType.UInt16)
+        .add("playerId", EBufferType.UInt16)
         .add("isYou", EBufferType.UInt8)
         .add("characterId", EBufferType.UInt8)
         .add("characterHealth", EBufferType.UInt16)
@@ -24,7 +24,7 @@ export default class TResPlayerCreate extends FormattedPacket {
         .build();
     index: TCPServerResponse.PLAYER_CREATE;
 
-    id: PlayerID;
+    playerId: PlayerID;
     isYou: NumericBoolean;
     characterId: CharacterList;
     characterHealth: number;

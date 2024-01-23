@@ -29,13 +29,8 @@ export default class Explosion extends GameElement implements ILifetimedElement,
     }
     
     destroy(): void {
-        
-        //Destroy
-
         this.game?.removeExplosion(this.id);
-
         clearTimeout(this.lifespanTimeout);
-
     }
 
 }

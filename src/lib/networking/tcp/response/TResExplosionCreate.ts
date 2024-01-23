@@ -13,7 +13,7 @@ export default class TResExplosionCreate extends FormattedPacket {
     channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("ownerId", EBufferType.UInt16)
-        .add("explosionId", EBufferType.UInt16)
+        .add("explosionIndex", EBufferType.UInt16)
         .add("x", EBufferType.SInt32, 100)
         .add("y", EBufferType.SInt32, 100)
         .add("radius", EBufferType.UInt16)
@@ -22,7 +22,7 @@ export default class TResExplosionCreate extends FormattedPacket {
     index: TCPServerResponse.PROJECTILE_DESTROY;
 
     ownerId: number;
-    explosionId: number;
+    explosionIndex: number;
     x: number;
     y: number;
     radius: number;
