@@ -49,6 +49,6 @@ export default class UResPlayerUpdate extends FormattedPacket {
 
     onGround: NumericBoolean;
     slide: NumericBoolean;
-    direction: SignedNumericBoolean;
+    direction: NumericBoolean;
 
 }

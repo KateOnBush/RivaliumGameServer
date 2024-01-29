@@ -3,7 +3,7 @@ import {AbilitySetInitializer} from "../types/GameTypes";
 
 export default class Character {
 
-    static builder(name: string, health: number, ultimatecharge: number, abilities: AbilitySetInitializer): (id: number) => ICharacter{
+    static builder(name: string, health: number, ultimateCharge: number, abilities: AbilitySetInitializer): (id: number) => ICharacter{
 
         return (_id: number)=>{
             
@@ -13,8 +13,8 @@ export default class Character {
                 name,
                 health,
                 healthMax: health,
-                ultimateCharge: ultimatecharge,
-                ultimateChargeMax: ultimatecharge,
+                ultimateCharge: ultimateCharge,
+                ultimateChargeMax: ultimateCharge,
                 abilities: abilities()
 
             };

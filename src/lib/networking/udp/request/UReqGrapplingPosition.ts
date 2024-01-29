@@ -6,8 +6,11 @@ import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacke
 import EPlayerState from "../../../enums/EPlayerState";
 import {NumericBoolean, SignedNumericBoolean} from "../../../types/GameTypes";
 import {UDPServerRequest, UDPServerResponse} from "../../../enums/UDPPacketTypes";
+import IncomingPacket from "../../../interfaces/IncomingPacket";
+import Player from "../../../components/Player";
+import UResPlayerGrapple from "../response/UResPlayerGrapple";
 
-export default class UReqPositionUpdate extends FormattedPacket {
+export default class UReqGrapplingPosition extends FormattedPacket implements IncomingPacket {
 
     channel = EPacketChannel.UDP;
     static override attributes = new FormattedPacketAttributeListBuilder()
@@ -20,5 +23,12 @@ export default class UReqPositionUpdate extends FormattedPacket {
     x: number;
     y: number;
     grappled: number;
+
+    handle(sender: Player) {
+        let grapple = new UResPlayerGrapple();
+        grapple.x = this.x; grapple.y = this.y;
+        grapple.grappled = this.grappled;
+        sender.game.broadcastExcept(grapple, sender);
+    }
 
 }

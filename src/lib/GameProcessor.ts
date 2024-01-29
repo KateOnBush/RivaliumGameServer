@@ -1,11 +1,7 @@
 import Lag from "./tools/Lag";
 import Game from "./components/Game";
-import {dataSize} from "./Macros";
-import EBufferType from "./enums/EBufferType";
-import {TCPServerResponse} from "./enums/TCPPacketTypes";
-import GMBuffer from "./tools/GMBuffer";
 import {EGameState} from "./enums/EGameData";
-import {UDPServerResponse} from "./enums/UDPPacketTypes";
+import UResPlayerUpdate from "./networking/udp/response/UResPlayerUpdate";
 
 export default class GameProcessor {
 
@@ -14,44 +10,37 @@ export default class GameProcessor {
 	static update(game: Game){
 
 		game.players.forEach(u => {
-
-			let bufferList : Buffer[] = [];
 	
 			game.players.forEach(pl=>{
+
+				let playerUpdate = new UResPlayerUpdate();
 	
 				let comp = Lag.compensateClose(u.ping.ms);
-	
 				if (pl.speed < 1) comp = 0;
 	
 				let pred = Lag.predictPosition(pl.pos, pl.mov, comp);
-	
-				let buff = GMBuffer.allocate(dataSize);
-				buff.write(UDPServerResponse.PLAYER_UPDATE, EBufferType.UInt8);
-				buff.write(pl.id, EBufferType.UInt16);
-				buff.write(pl.state.id, EBufferType.UInt8);
-				buff.write(Math.round((pred.pos.x) * 100), EBufferType.SInt32);
-				buff.write(Math.round((pl.state.on_ground ? pl.y : pred.pos.y) * 100), EBufferType.SInt32);
-				buff.write(Math.round(pred.mov.x * 100), EBufferType.SInt32);
-				buff.write(Math.round((pl.state.on_ground ? pl.my : pred.mov.y) * 100), EBufferType.SInt32);
-				buff.write(pl.state.on_ground, EBufferType.UInt8);
-				buff.write(pl.state.dir, EBufferType.SInt8);
-				buff.write(pl.state.slide, EBufferType.UInt8);
-				buff.write(pl.char.health, EBufferType.UInt16);
-				buff.write(pl.char.ultimateCharge, EBufferType.UInt16);
-				buff.write(pl.char.healthMax, EBufferType.UInt16);
-				buff.write(pl.char.ultimateChargeMax, EBufferType.UInt16);
-				buff.write(pl.char.id, EBufferType.UInt8);
-				buff.write(Math.round(pl.mouse.x * 100), EBufferType.SInt32);
-				buff.write(Math.round(pl.mouse.y * 100), EBufferType.SInt32);
 
-				bufferList.push(buff.getBuffer());
+				playerUpdate.playerId = pl.id;
+				playerUpdate.stateId = pl.state.id;
+				playerUpdate.x = pred.pos.x;
+				playerUpdate.y = pred.pos.y;
+				playerUpdate.movX = pred.mov.x;
+				playerUpdate.movY = pred.mov.y;
+				playerUpdate.onGround = pl.state.onGround;
+				playerUpdate.direction = pl.state.orientation == 1 ? 1 : 0;
+				playerUpdate.slide = pl.state.slide;
+				playerUpdate.characterId = pl.char.id;
+				playerUpdate.characterHealth = pl.char.health;
+				playerUpdate.characterUltimateCharge = pl.char.ultimateCharge;
+				playerUpdate.characterMaxHealth = pl.char.healthMax;
+				playerUpdate.characterMaxUltimateCharge = pl.char.ultimateChargeMax;
+				playerUpdate.mouseX = pl.mouse.x;
+				playerUpdate.mouseY = pl.mouse.y;
+
+				u.send(playerUpdate);
 
 			});
-	
-			let concatenatedBuffer = Buffer.concat(bufferList);
-	
-			u.TCPsocket.send(concatenatedBuffer);
-	
+
 		})
 
 	}

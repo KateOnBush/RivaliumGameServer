@@ -6,8 +6,11 @@ import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacke
 import EPlayerState from "../../../enums/EPlayerState";
 import {NumericBoolean, SignedNumericBoolean} from "../../../types/GameTypes";
 import {UDPServerRequest} from "../../../enums/UDPPacketTypes";
+import IncomingPacket from "../../../interfaces/IncomingPacket";
+import Player from "../../../components/Player";
+import Lag from "../../../tools/Lag";
 
-export default class UReqPositionUpdate extends FormattedPacket {
+export default class UReqPositionUpdate extends FormattedPacket implements IncomingPacket {
 
     channel = EPacketChannel.UDP;
     static override attributes = new FormattedPacketAttributeListBuilder()
@@ -36,5 +39,28 @@ export default class UReqPositionUpdate extends FormattedPacket {
     onGround: NumericBoolean;
     slide: NumericBoolean;
     orientation: SignedNumericBoolean;
+
+    handle(sender: Player) {
+
+        sender.pos.x = this.x;
+        sender.pos.y = this.y;
+        sender.mov.x = this.movX;
+        sender.mov.y = this.movY;
+        sender.state.id = this.stateId;
+        sender.state.onGround = this.onGround;
+        sender.state.slide = this.slide;
+        sender.state.orientation = this.orientation == 1 ? 1 : -1;
+        sender.mouse.x = this.mouseX;
+        sender.mouse.y = this.mouseY;
+
+        let pred = Lag.predictNextPosition(sender);
+        sender.pos.x = pred.pos.x;
+        sender.mov.x = pred.mov.x;
+        if (!sender.state.onGround){
+            sender.pos.y = pred.pos.y;
+            sender.mov.y = pred.mov.y;
+        }
+
+    }
 
 }

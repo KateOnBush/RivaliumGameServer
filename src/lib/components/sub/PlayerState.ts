@@ -5,8 +5,8 @@ export default class PlayerState {
 
     id: EPlayerState = EPlayerState.FREE;
 
-    on_ground: NumericBoolean;
-    dir: SignedNumericBoolean;
+    onGround: NumericBoolean;
+    orientation: SignedNumericBoolean;
     slide: NumericBoolean;
     dead: NumericBoolean;
 

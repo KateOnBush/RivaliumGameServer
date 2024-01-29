@@ -2,7 +2,7 @@ import CharacterRepository from "../gamedata/CharacterRepository";
 import {dataSize} from "../Macros";
 import {TCPServerResponse} from '../enums/TCPPacketTypes';
 import ICharacter from "../interfaces/ICharacter";
-import PlayerSocket from "../networking/TCPPlayerSocket";
+import TCPPlayerSocket from "../networking/TCPPlayerSocket";
 import GMBuffer from "../tools/GMBuffer";
 import GM from "../tools/GMLib";
 import Vector2 from "../tools/vector/Vector2";
@@ -20,6 +20,7 @@ import TResPlayerHit from "../networking/tcp/response/TResPlayerHit";
 import TResEffectAdd from "../networking/tcp/response/TResEffectAdd";
 import TResPlayerForcedDash from "../networking/tcp/response/TResPlayerForcedDash";
 import TResPlayerDeath from "../networking/tcp/response/TResPlayerDeath";
+import UDPPlayerSocket from "../networking/UDPPlayerSocket";
 
 export enum PlayerEffect {
 
@@ -34,7 +35,8 @@ export enum PlayerEffect {
 
 export default class Player extends GamePhysicalElement {
 
-    TCPsocket: PlayerSocket;
+    TCPsocket: TCPPlayerSocket;
+    UDPSocket: UDPPlayerSocket;
 
     mouse: Vector2 = new Vector2();
     state: PlayerState = new PlayerState();
@@ -53,7 +55,7 @@ export default class Player extends GamePhysicalElement {
     effectTimeouts: NodeJS.Timeout[] = [];
 
 
-    constructor(socket: PlayerSocket, id: number, charid: number, team: number = 0, position?: Vector2, state?: PlayerState){
+    constructor(socket: TCPPlayerSocket, id: number, charid: number, team: number = 0, position?: Vector2, state?: PlayerState){
 
         super();
         this.TCPsocket = socket;

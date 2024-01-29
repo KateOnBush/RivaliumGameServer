@@ -3,7 +3,7 @@ import Game from "../Game";
 
 export default abstract class GameElement {
 
-    game?: Game = undefined;
+    game: Game;
     id: number;
 
     [key: string]: any;
