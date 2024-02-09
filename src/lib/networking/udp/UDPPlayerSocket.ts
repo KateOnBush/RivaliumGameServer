@@ -1,5 +1,5 @@
-import Game from "../components/Game";
-import Player from "../components/Player";
+import Game from "../../components/Game";
+import Player from "../../components/Player";
 
 export default class UDPPlayerSocket {
 
@@ -11,9 +11,7 @@ export default class UDPPlayerSocket {
 
     get access() { return this.player.matchPlayer.access; }
 
-    constructor(player: Player, game: Game, address: string, port: number) {
-        this.player = player;
-        this.game = game;
+    constructor(address: string, port: number) {
         this.address = address;
         this.port = port;
     }

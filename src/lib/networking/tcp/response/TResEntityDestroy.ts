@@ -3,14 +3,14 @@ import EPacketChannel from "../../../enums/EPacketChannel";
 import EBufferType from "../../../enums/EBufferType";
 import {TCPServerResponse} from "../../../enums/TCPPacketTypes";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
+import TCPPacket from "../TCPPacket";
 
-export default class TResEntityDestroy extends FormattedPacket {
+export default class TResEntityDestroy extends TCPPacket {
 
-    channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("entityId", EBufferType.UInt16)
         .build();
-    index: TCPServerResponse.PROJECTILE_DESTROY;
+    static override index = TCPServerResponse.PROJECTILE_DESTROY;
 
     entityId: number;
 

@@ -7,14 +7,14 @@ import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacke
 import {PlayerID} from "../../../database/match/MatchTypes";
 import ProjectileList from "../../../gamedata/instancelist/ProjectileList";
 import {NumericBoolean} from "../../../types/GameTypes";
+import TCPPacket from "../TCPPacket";
 
-export default class TResProjectileDestroy extends FormattedPacket {
+export default class TResProjectileDestroy extends TCPPacket {
 
-    channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("projId", EBufferType.UInt16)
         .build();
-    index: TCPServerResponse.PROJECTILE_DESTROY;
+    static override index = TCPServerResponse.PROJECTILE_DESTROY;
 
     projId: number;
 

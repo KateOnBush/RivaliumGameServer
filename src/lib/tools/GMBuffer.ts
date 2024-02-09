@@ -106,10 +106,6 @@ export default class GMBuffer {
 
     }
 
-    consecutiveXOR() {
-
-    }
-
     read(type: EBufferType){
 
         switch(type){
@@ -183,6 +179,10 @@ export default class GMBuffer {
         this.seek(index);
         this.write(value, type);
         this.index = lastIndex;
+    }
+
+    size() {
+        return this.buffer.length;
     }
 
     getBuffer() {

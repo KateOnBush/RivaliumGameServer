@@ -7,10 +7,10 @@ import {PlayerID} from "../../../database/match/MatchTypes";
 import EPlayerState from "../../../enums/EPlayerState";
 import CharacterList from "../../../gamedata/CharacterList";
 import {NumericBoolean, SignedNumericBoolean} from "../../../types/GameTypes";
+import UDPPacket from "../UDPPacket";
 
-export default class UResPlayerUpdate extends FormattedPacket {
+export default class UResPlayerUpdate extends UDPPacket {
 
-    channel = EPacketChannel.UDP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("playerId", EBufferType.UInt16)
         .add("stateId", EBufferType.UInt8)
@@ -29,7 +29,7 @@ export default class UResPlayerUpdate extends FormattedPacket {
         .add("characterUltimateCharge", EBufferType.UInt16)
         .add("characterMaxUltimateCharge", EBufferType.UInt16)
         .build();
-    index: UDPServerResponse.PLAYER_UPDATE;
+    static override index = UDPServerResponse.PLAYER_UPDATE;
 
     playerId: PlayerID;
     x: number;

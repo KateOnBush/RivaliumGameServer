@@ -1,22 +1,22 @@
 import {dataSize} from "../Macros";
 import {TCPServerResponse} from "../enums/TCPPacketTypes";
-import TCPPlayerSocket from "../networking/TCPPlayerSocket";
+import TCPPlayerSocket from "../networking/tcp/TCPPlayerSocket";
 import GMBuffer from "./GMBuffer";
 import EBufferType from "../enums/EBufferType";
+import Player from "../components/Player";
+import UReqPing from "../networking/udp/request/UReqPing";
 
 
 export default class Ping {
 
-	static ping(clients: TCPPlayerSocket[]) {
+	static ping(clients: Player[]) {
 
-		let b = GMBuffer.allocate(dataSize);
-		b.write(TCPServerResponse.PING, EBufferType.UInt8);
-		b.write(0, EBufferType.UInt8);
+		let pingMessage = new UReqPing();
 
 		clients.forEach(c=>{
 			if (!c.player) return;
 			c.player.ping.lastSent = performance.now();
-			c.player.send(b);
+			c.player.send(pingMessage);
 		})
 	
 	}

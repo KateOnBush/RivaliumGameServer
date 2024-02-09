@@ -5,16 +5,16 @@ import {TCPServerRequest, TCPServerResponse} from "../../../enums/TCPPacketTypes
 import {EPreMatchState} from "../../../enums/EPreMatchState";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
 import {EGameState} from "../../../enums/EGameData";
+import TCPPacket from "../TCPPacket";
 
-export default class TResGameState extends FormattedPacket {
+export default class TResGameState extends TCPPacket {
 
-    channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("state", EBufferType.UInt8)
         .add("currentRound", EBufferType.UInt8)
         .add("timer", EBufferType.UInt8)
         .build();
-    index: TCPServerResponse.GAME_STATE;
+    static override index = TCPServerResponse.GAME_STATE;
 
     state: EGameState = 0;
     currentRound: number = 0;

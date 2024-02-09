@@ -4,16 +4,16 @@ import EBufferType from "../../../enums/EBufferType";
 import {TCPServerResponse} from "../../../enums/TCPPacketTypes";
 import {EPreMatchState} from "../../../enums/EPreMatchState";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
+import TCPPacket from "../TCPPacket";
 
-export default class TResPlayerAbilityCast extends FormattedPacket {
+export default class TResPlayerAbilityCast extends TCPPacket {
 
-    channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("id", EBufferType.UInt16)
         .add("ability", EBufferType.UInt8)
         .add("abilityN", EBufferType.UInt8)
         .build();
-    index: TCPServerResponse.PLAYER_HIT;
+    static override index = TCPServerResponse.PLAYER_HIT;
 
     state: EPreMatchState = 0;
 

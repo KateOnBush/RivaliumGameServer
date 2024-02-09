@@ -2,7 +2,7 @@ import Player from "./Player";
 import Projectile, {ProjectileEventMethod} from "./Projectile";
 import Entity from "./Entity";
 import Explosion from "./Explosion";
-import TCPPlayerSocket from "../networking/TCPPlayerSocket";
+import TCPPlayerSocket from "../networking/tcp/TCPPlayerSocket";
 import {NumericBoolean} from "../types/GameTypes";
 import {dataSize, defaultBounceFriction} from "../Macros";
 import Lag from "../tools/Lag";

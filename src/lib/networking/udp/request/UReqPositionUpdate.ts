@@ -6,13 +6,13 @@ import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacke
 import EPlayerState from "../../../enums/EPlayerState";
 import {NumericBoolean, SignedNumericBoolean} from "../../../types/GameTypes";
 import {UDPServerRequest} from "../../../enums/UDPPacketTypes";
-import IncomingPacket from "../../../interfaces/IncomingPacket";
 import Player from "../../../components/Player";
 import Lag from "../../../tools/Lag";
+import UDPIncomingPacket from "../UDPIncomingPacket";
+import UDPPlayerSocket from "../UDPPlayerSocket";
 
-export default class UReqPositionUpdate extends FormattedPacket implements IncomingPacket {
+export default class UReqPositionUpdate extends UDPIncomingPacket {
 
-    channel = EPacketChannel.UDP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("x", EBufferType.SInt32, 100)
         .add("y", EBufferType.SInt32, 100)
@@ -25,7 +25,7 @@ export default class UReqPositionUpdate extends FormattedPacket implements Incom
         .add("slide", EBufferType.UInt8).asBoolean()
         .add("orientation", EBufferType.UInt8).asBoolean()
         .build();
-    index: UDPServerRequest.POSITION_UPDATE;
+    static override index = UDPServerRequest.POSITION_UPDATE;
 
     x: number;
     y: number;
@@ -40,7 +40,10 @@ export default class UReqPositionUpdate extends FormattedPacket implements Incom
     slide: NumericBoolean;
     orientation: SignedNumericBoolean;
 
-    handle(sender: Player) {
+    handle(socket: UDPPlayerSocket) {
+
+        if (!socket.identified || !socket.player) return;
+        const sender = socket.player;
 
         sender.pos.x = this.x;
         sender.pos.y = this.y;

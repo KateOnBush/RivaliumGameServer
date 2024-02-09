@@ -1,7 +1,6 @@
 export enum TCPServerRequest {
 
     IDENTIFY,
-    PING,
     PLAYER_HIT,
     ABILITY_CAST,
     ENTITY_HIT
@@ -22,8 +21,6 @@ export enum TCPServerResponse {
     PLAYER_FORCED_DASH,
 
     EFFECT_ADD,
-
-    PING,
 
     PROJECTILE_CREATE,
     PROJECTILE_DESTROY,

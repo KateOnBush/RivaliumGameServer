@@ -7,10 +7,10 @@ import {ComponentID, PlayerID} from "../../../database/match/MatchTypes";
 import EPlayerState from "../../../enums/EPlayerState";
 import CharacterList from "../../../gamedata/CharacterList";
 import {NumericBoolean, SignedNumericBoolean} from "../../../types/GameTypes";
+import UDPPacket from "../UDPPacket";
 
-export default class UResEntityUpdate extends FormattedPacket {
+export default class UResEntityUpdate extends UDPPacket {
 
-    channel = EPacketChannel.UDP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("entityId", EBufferType.UInt16)
         .add("ownerId", EBufferType.UInt16)
@@ -26,7 +26,7 @@ export default class UResEntityUpdate extends FormattedPacket {
         .add("param4", EBufferType.SInt32, 100)
         .add("param5", EBufferType.SInt32, 100)
         .build();
-    index: UDPServerResponse.ENTITY_UPDATE;
+    static override index = UDPServerResponse.ENTITY_UPDATE;
 
     entityId: ComponentID;
     ownerId: ComponentID;

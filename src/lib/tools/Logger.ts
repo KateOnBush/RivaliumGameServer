@@ -84,14 +84,23 @@ export default class Logger {
         let str = color + message + LoggerColor.reset;
         args.forEach(e=>{
             str = str.replace("{}", LoggerColor.bright_white + e + color);
-        })
+        });
         args.forEach((e, i)=>{
             str = str.replace("{" + i + "}", LoggerColor.bright_white + e + color);
-        })
+        });
         str = str.replace(/(\r\n|\n|\r)/gm, "\n" + this.time() + color);
         console.log(this.time() + str);
     }
 
+    static clearLine() {
+        process.stdout.moveCursor(0, -1);
+        process.stdout.clearLine(1);
+    }
+
+    static clear() {
+        console.clear();
+    }
+
 }
 
-Logger.setDebugMode(LOG.NORMAL);
+Logger.setDebugMode(Logger.LOG.ALL);

@@ -4,12 +4,12 @@ import EBufferType from "../../../enums/EBufferType";
 import {TCPServerResponse} from "../../../enums/TCPPacketTypes";
 import {EPreMatchState} from "../../../enums/EPreMatchState";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
+import TCPPacket from "../TCPPacket";
 
-export default class TResPlayerConnection extends FormattedPacket {
+export default class TResPlayerConnection extends TCPPacket {
 
-    channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder().build();
-    index: TCPServerResponse.PLAYER_CONNECTION;
+    static override index = TCPServerResponse.PLAYER_CONNECTION;
 
     state: EPreMatchState = 0;
 

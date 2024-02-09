@@ -6,8 +6,8 @@ import FormattedPacketAttributeList from "./attributes/FormattedPacketAttributeL
 export abstract class FormattedPacket {
 
     static attributes: FormattedPacketAttributeList;
-    abstract channel: EPacketChannel;
-    abstract index: number;
+    static channel: EPacketChannel;
+    static index: number;
     [key: string]: any;
 
     size() {
@@ -27,15 +27,17 @@ export abstract class FormattedPacket {
     }
 
     bake(accumulator = 0x0): GMBuffer {
-        const attributes = (this.constructor as typeof FormattedPacket).attributes;
-        let size = this.size(), fullSize = size + (this.channel == EPacketChannel.UDP ? 5 : 2);
-        // ! UDP: Length<Data>(1 byte) + Accumulator(1 byte) + Index(1 byte) + Data + Checksum<Data>(2 byte)
+        const constructor = (this.constructor as typeof FormattedPacket);
+        const attributes = constructor.attributes;
+        const channel = constructor.channel, index = constructor.index;
+        let size = this.size(), fullSize = size + (channel == EPacketChannel.UDP ? 5 : 2);
+        // ! UDP: Index(1 byte) + Length<Data>(1 byte) + Accumulator(1 byte) + Data + Checksum<Data>(2 byte)
         // * Checksum = ConsecutiveXOR(1 byte) + Sum(1 byte)
-        // ! TCP: Length<Data>(1 byte) + Index(1 byte) + Data
+        // ! TCP: Index(1 byte) + Length<Data>(1 byte) + Data
         let buff = GMBuffer.allocate(fullSize);
         buff.write(size, EBufferType.UInt8);
-        if (this.channel == EPacketChannel.UDP) buff.write(accumulator, EBufferType.UInt8); //Writing the accumulator
-        buff.write(this.index, EBufferType.UInt8);
+        if (channel == EPacketChannel.UDP) buff.write(accumulator, EBufferType.UInt8); //Writing the accumulator
+        buff.write(index, EBufferType.UInt8);
         let booleanStreak = 0, builtBoolean = 0;
         let checksum = 0, returnedChecksum = 0;
         for(const attribute of attributes) {
@@ -56,12 +58,8 @@ export abstract class FormattedPacket {
                 booleanStreak = 0;
             }
         }
-        if (this.channel == EPacketChannel.UDP) buff.write(checksum & 0xFFFF, EBufferType.UInt16);
+        if (channel == EPacketChannel.UDP) buff.write(checksum & 0xFFFF, EBufferType.UInt16);
         return buff;
-    }
-
-    static from(channel: EPacketChannel, buffer: GMBuffer) {
-
     }
 
 }

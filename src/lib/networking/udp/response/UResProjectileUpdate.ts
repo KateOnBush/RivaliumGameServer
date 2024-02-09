@@ -7,10 +7,10 @@ import {PlayerID} from "../../../database/match/MatchTypes";
 import EPlayerState from "../../../enums/EPlayerState";
 import CharacterList from "../../../gamedata/CharacterList";
 import {NumericBoolean, SignedNumericBoolean} from "../../../types/GameTypes";
+import UDPPacket from "../UDPPacket";
 
-export default class UResProjectileUpdate extends FormattedPacket {
+export default class UResProjectileUpdate extends UDPPacket {
 
-    channel = EPacketChannel.UDP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("projectileId", EBufferType.UInt16)
         .add("x", EBufferType.SInt32, 100)
@@ -18,7 +18,7 @@ export default class UResProjectileUpdate extends FormattedPacket {
         .add("movX", EBufferType.SInt32, 100)
         .add("movY", EBufferType.SInt32, 100)
         .build();
-    index: UDPServerResponse.ENTITY_UPDATE;
+    static override index = UDPServerResponse.ENTITY_UPDATE;
 
     projectileId: PlayerID;
     x: number;

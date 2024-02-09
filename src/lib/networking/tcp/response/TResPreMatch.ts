@@ -4,15 +4,15 @@ import EBufferType from "../../../enums/EBufferType";
 import {TCPServerRequest, TCPServerResponse} from "../../../enums/TCPPacketTypes";
 import {EPreMatchState} from "../../../enums/EPreMatchState";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
+import TCPPacket from "../TCPPacket";
 
-export default class TResPreMatch extends FormattedPacket {
+export default class TResPreMatch extends TCPPacket {
 
-    channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("state", EBufferType.UInt8)
         .add("playerId", EBufferType.UInt8)
         .build();
-    index: TCPServerResponse.PRE_MATCH;
+    static override index = TCPServerResponse.PRE_MATCH;
 
     state: EPreMatchState = 0;
     playerId: number = 0;

@@ -7,10 +7,10 @@ import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacke
 import {PlayerID} from "../../../database/match/MatchTypes";
 import {NumericBoolean} from "../../../types/GameTypes";
 import CharacterList from "../../../gamedata/CharacterList";
+import TCPPacket from "../TCPPacket";
 
-export default class TResPlayerCreate extends FormattedPacket {
+export default class TResPlayerCreate extends TCPPacket {
 
-    channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("playerId", EBufferType.UInt16)
         .add("isYou", EBufferType.UInt8)
@@ -22,7 +22,7 @@ export default class TResPlayerCreate extends FormattedPacket {
         .add("x", EBufferType.SInt32, 100)
         .add("y", EBufferType.SInt32, 100)
         .build();
-    index: TCPServerResponse.PLAYER_CREATE;
+    static override index = TCPServerResponse.PLAYER_CREATE;
 
     playerId: PlayerID;
     isYou: NumericBoolean;

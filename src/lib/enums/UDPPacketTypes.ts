@@ -1,5 +1,7 @@
 export enum UDPServerRequest {
 
+    IDENTIFY,
+    PING,
     POSITION_UPDATE,
     GRAPPLING_POSITION,
     FLIP,
@@ -9,6 +11,8 @@ export enum UDPServerRequest {
 }
 
 export enum UDPServerResponse {
+
+    PING,
 
     PLAYER_UPDATE,
     PLAYER_GRAPPLE,

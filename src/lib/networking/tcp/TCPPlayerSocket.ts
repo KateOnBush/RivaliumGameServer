@@ -1,6 +1,6 @@
 import {WebSocket} from "ws";
-import Game from "../components/Game";
-import Player from "../components/Player";
+import Game from "../../components/Game";
+import Player from "../../components/Player";
 
 export default interface TCPPlayerSocket extends WebSocket {
 

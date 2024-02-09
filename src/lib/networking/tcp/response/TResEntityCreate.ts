@@ -3,10 +3,10 @@ import EPacketChannel from "../../../enums/EPacketChannel";
 import EBufferType from "../../../enums/EBufferType";
 import {TCPServerResponse} from "../../../enums/TCPPacketTypes";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
+import TCPPacket from "../TCPPacket";
 
-export default class TResEntityCreate extends FormattedPacket {
+export default class TResEntityCreate extends TCPPacket {
 
-    channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("entityIndex", EBufferType.UInt16)
         .add("entityId", EBufferType.UInt16)
@@ -24,7 +24,7 @@ export default class TResEntityCreate extends FormattedPacket {
         .add("param4", EBufferType.SInt32, 100)
         .add("param5", EBufferType.SInt32, 100)
         .build();
-    index: TCPServerResponse.PROJECTILE_DESTROY;
+    static override index = TCPServerResponse.PROJECTILE_DESTROY;
 
     entityIndex: number;
     entityId: number;

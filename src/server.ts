@@ -1,7 +1,7 @@
 import {WebSocketServer} from "ws"
 import Logger from "./lib/tools/Logger";
 import {dataSize, LOGO, serverPort} from "./lib/Macros";
-import PlayerSocket from "./lib/networking/TCPPlayerSocket";
+import PlayerSocket from "./lib/networking/tcp/TCPPlayerSocket";
 import GMBuffer from "./lib/tools/GMBuffer";
 import GameProcessor from "./lib/GameProcessor";
 import Ping from "./lib/tools/Ping";
@@ -10,6 +10,7 @@ import PacketHandler from "./lib/PacketHandler";
 import 'source-map-support/register'
 import Database from "./lib/database/Database";
 import dgram from 'dgram';
+import UDP from "./lib/networking/udp/UDP";
 
 let lastDelta = performance.now();
 
@@ -24,7 +25,7 @@ setInterval(() => {
 
 
 setInterval(()=>{
-	GameProcessor.GameList.forEach(game => Ping.ping(game.players.map(player => player.TCPsocket)));
+	GameProcessor.GameList.forEach(game => Ping.ping(game.players));
 }, 1000);
 setInterval(()=>Database.lookupUninitializedMatches(), 5000);
 
@@ -59,15 +60,8 @@ wsServer.on('connection', function(socket: PlayerSocket, req) {
 
 	socket.on('message', function(data) {
 
-		let buffer = data as Buffer;
-		let n = ~~(buffer.byteLength/dataSize);
-		for (let o = 0; o < n; o++) {
-
-			PacketHandler.handle(GMBuffer.from(buffer.subarray(o * n, (o + 1) * dataSize - 1)), socket).catch((err) => {
-				Logger.error("Error handling received packet from {}\nError: {}", req.socket.remoteAddress, (err as Error).stack);
-			});
-
-		}
+		let buffer = GMBuffer.from(data as Buffer);
+		PacketHandler.handleTCP(buffer, socket);
 
 	});
 
@@ -84,5 +78,12 @@ wsServer.on('connection', function(socket: PlayerSocket, req) {
 	});
 
 });
+
+udpServer.on("message", (msg, remoteInfo) => {
+
+	let buffer = GMBuffer.from(msg);
+	PacketHandler.handleUDP(buffer, UDP.getOrCreateSocket(remoteInfo.address, remoteInfo.port));
+
+})
 
 udpServer.bind(serverPort);

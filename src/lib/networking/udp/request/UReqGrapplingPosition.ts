@@ -6,25 +6,27 @@ import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacke
 import EPlayerState from "../../../enums/EPlayerState";
 import {NumericBoolean, SignedNumericBoolean} from "../../../types/GameTypes";
 import {UDPServerRequest, UDPServerResponse} from "../../../enums/UDPPacketTypes";
-import IncomingPacket from "../../../interfaces/IncomingPacket";
 import Player from "../../../components/Player";
 import UResPlayerGrapple from "../response/UResPlayerGrapple";
+import UDPIncomingPacket from "../UDPIncomingPacket";
+import UDPPlayerSocket from "../UDPPlayerSocket";
 
-export default class UReqGrapplingPosition extends FormattedPacket implements IncomingPacket {
+export default class UReqGrapplingPosition extends UDPIncomingPacket {
 
-    channel = EPacketChannel.UDP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("x", EBufferType.SInt32, 100)
         .add("y", EBufferType.SInt32, 100)
         .add("grappled", EBufferType.UInt8)
         .build();
-    index: UDPServerRequest.GRAPPLING_POSITION;
+    static override index = UDPServerRequest.GRAPPLING_POSITION;
 
     x: number;
     y: number;
     grappled: number;
 
-    handle(sender: Player) {
+    handle(socket: UDPPlayerSocket) {
+        if (!socket.identified || !socket.player) return;
+        const sender = socket.player;
         let grapple = new UResPlayerGrapple();
         grapple.x = this.x; grapple.y = this.y;
         grapple.grappled = this.grappled;

@@ -2,7 +2,7 @@ import CharacterRepository from "../gamedata/CharacterRepository";
 import {dataSize} from "../Macros";
 import {TCPServerResponse} from '../enums/TCPPacketTypes';
 import ICharacter from "../interfaces/ICharacter";
-import TCPPlayerSocket from "../networking/TCPPlayerSocket";
+import TCPPlayerSocket from "../networking/tcp/TCPPlayerSocket";
 import GMBuffer from "../tools/GMBuffer";
 import GM from "../tools/GMLib";
 import Vector2 from "../tools/vector/Vector2";
@@ -20,7 +20,7 @@ import TResPlayerHit from "../networking/tcp/response/TResPlayerHit";
 import TResEffectAdd from "../networking/tcp/response/TResEffectAdd";
 import TResPlayerForcedDash from "../networking/tcp/response/TResPlayerForcedDash";
 import TResPlayerDeath from "../networking/tcp/response/TResPlayerDeath";
-import UDPPlayerSocket from "../networking/UDPPlayerSocket";
+import UDPPlayerSocket from "../networking/udp/UDPPlayerSocket";
 
 export enum PlayerEffect {
 

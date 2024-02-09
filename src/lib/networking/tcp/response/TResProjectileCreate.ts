@@ -7,10 +7,10 @@ import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacke
 import {PlayerID} from "../../../database/match/MatchTypes";
 import ProjectileList from "../../../gamedata/instancelist/ProjectileList";
 import {NumericBoolean} from "../../../types/GameTypes";
+import TCPPacket from "../TCPPacket";
 
-export default class TResProjectileCreate extends FormattedPacket {
+export default class TResProjectileCreate extends TCPPacket {
 
-    channel = EPacketChannel.TCP;
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("ownerId", EBufferType.UInt16)
         .add("projId", EBufferType.UInt16)
@@ -31,7 +31,7 @@ export default class TResProjectileCreate extends FormattedPacket {
         .add("bleed", EBufferType.UInt16)
         .add("heal", EBufferType.UInt16)
         .build();
-    index =  TCPServerResponse.PROJECTILE_CREATE;
+    static override index = TCPServerResponse.PROJECTILE_CREATE;
 
     ownerId: PlayerID = 0;
     projIndex: ProjectileList;
