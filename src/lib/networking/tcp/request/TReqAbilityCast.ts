@@ -1,11 +1,7 @@
-import {FormattedPacket} from "../../FormattedPacket";
 import EPacketChannel from "../../../enums/EPacketChannel";
 import EBufferType from "../../../enums/EBufferType";
-import {TCPServerRequest, TCPServerResponse} from "../../../enums/TCPPacketTypes";
+import {TCPServerRequest} from "../../../enums/TCPPacketTypes";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
-import GMBuffer from "../../../tools/GMBuffer";
-import {dataSize} from "../../../Macros";
-import Player from "../../../components/Player";
 import TResPlayerAbilityCast from "../response/TResPlayerAbilityCast";
 import TCPIncomingPacket from "../TCPIncomingPacket";
 import TCPPlayerSocket from "../TCPPlayerSocket";

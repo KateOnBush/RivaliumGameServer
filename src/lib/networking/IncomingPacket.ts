@@ -1,4 +1,4 @@
-import { FormattedPacket } from "./FormattedPacket";
+import {FormattedPacket} from "./FormattedPacket";
 import UDPPlayerSocket from "./udp/UDPPlayerSocket";
 import TCPPlayerSocket from "./tcp/TCPPlayerSocket";
 

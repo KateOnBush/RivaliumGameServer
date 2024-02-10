@@ -1,9 +1,6 @@
-import {FormattedPacket} from "../../FormattedPacket";
-import EPacketChannel from "../../../enums/EPacketChannel";
 import EBufferType from "../../../enums/EBufferType";
 import {TCPServerRequest} from "../../../enums/TCPPacketTypes";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
-import Player from "../../../components/Player";
 import TCPIncomingPacket from "../TCPIncomingPacket";
 import TCPPlayerSocket from "../TCPPlayerSocket";
 

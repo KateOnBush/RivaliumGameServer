@@ -7,7 +7,6 @@ import {FormattedPacket} from "./networking/FormattedPacket";
 import {TCPServerRequest} from "./enums/TCPPacketTypes";
 import {UDPServerRequest} from "./enums/UDPPacketTypes";
 import EPacketChannel from "./enums/EPacketChannel";
-import Player from "./components/Player";
 import EBufferType from "./enums/EBufferType";
 import TCPIncomingPacket from "./networking/tcp/TCPIncomingPacket";
 import UDPIncomingPacket from "./networking/udp/UDPIncomingPacket";
@@ -40,11 +39,11 @@ export default class PacketHandler {
                     if (eventClass.prototype instanceof FormattedPacket) {
                         let packetType = eventClass as IncomingPacket;
                         Logger.clearLine();
-                        Logger.log("Registering channel {}, packet {}",
-                            packetType.channel == EPacketChannel.UDP ? UDPServerRequest[packetType.index] : TCPServerRequest[packetType.channel],
+                        Logger.info("Registering packet {}, channel {}",
+                            packetType.channel == EPacketChannel.UDP ? UDPServerRequest[packetType.index] : TCPServerRequest[packetType.index],
                             EPacketChannel[packetType.channel]);
                         this.registerEvent(packetType.channel, packetType.index, packetType);
-                        await Time.wait(50);
+                        await Time.wait(500);
                     }
                 }
             }

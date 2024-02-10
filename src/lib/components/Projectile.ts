@@ -1,16 +1,11 @@
 import Lag from "../tools/Lag";
-import {dataSize} from "../Macros";
-import BType from "../enums/EBufferType";
-import {TCPServerResponse} from "../enums/TCPPacketTypes";
 import ILifetimedElement from "../interfaces/ILifetimedElement";
 import IPlayerElement from "../interfaces/IPlayerElement";
-import GMBuffer from "../tools/GMBuffer";
 import GM from "../tools/GMLib";
 import Vector2 from "../tools/vector/Vector2";
 import {NumericBoolean} from "../types/GameTypes";
 import Player from "./Player";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
-import {UDPServerResponse} from "../enums/UDPPacketTypes";
 import TResProjectileDestroy from "../networking/tcp/response/TResProjectileDestroy";
 import UResProjectileUpdate from "../networking/udp/response/UResProjectileUpdate";
 

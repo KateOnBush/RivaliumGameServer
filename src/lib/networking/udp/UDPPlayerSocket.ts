@@ -11,6 +11,10 @@ export default class UDPPlayerSocket {
 
     get access() { return this.player.matchPlayer.access; }
 
+    send(message: Buffer) {
+
+    }
+
     constructor(address: string, port: number) {
         this.address = address;
         this.port = port;

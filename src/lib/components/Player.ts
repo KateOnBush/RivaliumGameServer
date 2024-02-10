@@ -1,6 +1,4 @@
 import CharacterRepository from "../gamedata/CharacterRepository";
-import {dataSize} from "../Macros";
-import {TCPServerResponse} from '../enums/TCPPacketTypes';
 import ICharacter from "../interfaces/ICharacter";
 import TCPPlayerSocket from "../networking/tcp/TCPPlayerSocket";
 import GMBuffer from "../tools/GMBuffer";
@@ -10,10 +8,8 @@ import {EffectData} from "../types/GameTypes";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
 import PlayerPing from "./sub/PlayerPing";
 import PlayerState from "./sub/PlayerState";
-import EBufferType from "../enums/EBufferType";
 import MatchPlayer from "../database/match/data/MatchPlayer";
 import EPlayerState from "../enums/EPlayerState";
-import {UDPServerResponse} from "../enums/UDPPacketTypes";
 import {FormattedPacket} from "../networking/FormattedPacket";
 import EPacketChannel from "../enums/EPacketChannel";
 import TResPlayerHit from "../networking/tcp/response/TResPlayerHit";

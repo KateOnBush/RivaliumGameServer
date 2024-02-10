@@ -1,5 +1,4 @@
 import UDPPlayerSocket from "./UDPPlayerSocket";
-import {createSocket} from "dgram";
 
 type UDPSocketAddress = string; //IP address + port
 

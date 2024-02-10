@@ -1,5 +1,3 @@
-import {FormattedPacket} from "../../FormattedPacket";
-import EPacketChannel from "../../../enums/EPacketChannel";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
 import EBufferType from "../../../enums/EBufferType";
 import {PlayerID} from "../../../database/match/MatchTypes";

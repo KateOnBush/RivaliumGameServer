@@ -1,10 +1,6 @@
-import {FormattedPacket} from "../../FormattedPacket";
-import EPacketChannel from "../../../enums/EPacketChannel";
 import EBufferType from "../../../enums/EBufferType";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
 import {UDPServerRequest} from "../../../enums/UDPPacketTypes";
-import Player from "../../../components/Player";
-import {entityParametersLimit} from "../../../Macros";
 import UDPIncomingPacket from "../UDPIncomingPacket";
 import UDPPlayerSocket from "../UDPPlayerSocket";
 

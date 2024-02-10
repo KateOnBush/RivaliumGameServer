@@ -1,6 +1,6 @@
 import {WebSocketServer} from "ws"
 import Logger from "./lib/tools/Logger";
-import {dataSize, LOGO, serverPort} from "./lib/Macros";
+import {LOGO, serverPort} from "./lib/Macros";
 import PlayerSocket from "./lib/networking/tcp/TCPPlayerSocket";
 import GMBuffer from "./lib/tools/GMBuffer";
 import GameProcessor from "./lib/GameProcessor";
@@ -11,8 +11,28 @@ import 'source-map-support/register'
 import Database from "./lib/database/Database";
 import dgram from 'dgram';
 import UDP from "./lib/networking/udp/UDP";
+import TCPServer from "./lib/networking/tcp/TCPServer";
+import UDPServer from "./lib/networking/udp/UDPServer";
+import path from "path";
 
 let lastDelta = performance.now();
+
+async function main() {
+
+	await PacketHandler.registerClasses(path.dirname(__filename) + "/lib/networking/tcp/request");
+	await PacketHandler.registerClasses(path.dirname(__filename) + "/lib/networking/udp/request");
+	Logger.important(LOGO);
+	TCPServer.start();
+	UDPServer.start();
+
+}
+
+main().catch(err => {
+	Logger.clear();
+	Logger.fatal("Couldn't start game server: {}", err);
+	process.exit(1);
+});
+
 
 setInterval(() => {
 	for(const game of GameProcessor.GameList) {
@@ -29,61 +49,5 @@ setInterval(()=>{
 }, 1000);
 setInterval(()=>Database.lookupUninitializedMatches(), 5000);
 
-const wsServer = new WebSocketServer({
-	port: serverPort
-});
-const udpServer = dgram.createSocket('udp6');
 
 
-wsServer.on('listening', function(){
-
-	Logger.important(LOGO);
-	Logger.info("Server listening at port: {}", serverPort);
-
-})
-
-udpServer.on('listening', function () {
-	Logger.info("UDP Channel listening at port: {}", serverPort);
-})
-
-wsServer.on('connection', function(socket: PlayerSocket, req) {
-
-	Logger.info("Client connected: {}", req.socket.remoteAddress);
-
-	socket.identified = false;
-
-	setTimeout(()=> {
-		if (!socket.identified) {
-			socket.close();
-		}
-	}, 5000);
-
-	socket.on('message', function(data) {
-
-		let buffer = GMBuffer.from(data as Buffer);
-		PacketHandler.handleTCP(buffer, socket);
-
-	});
-
-	socket.on('close', function() {
-		Logger.info("Closing connection with client: {}", req.socket.remoteAddress);
-		if (!socket.game || !socket.player) return;
-		socket.game.removePlayer(socket.player.id);
-	});
-
-	socket.on('error', function() {
-		Logger.error("Connection interrupted with client: {}", req.socket.remoteAddress);
-		if (!socket.game || !socket.player) return;
-		socket.game.removePlayer(socket.player.id);
-	});
-
-});
-
-udpServer.on("message", (msg, remoteInfo) => {
-
-	let buffer = GMBuffer.from(msg);
-	PacketHandler.handleUDP(buffer, UDP.getOrCreateSocket(remoteInfo.address, remoteInfo.port));
-
-})
-
-udpServer.bind(serverPort);

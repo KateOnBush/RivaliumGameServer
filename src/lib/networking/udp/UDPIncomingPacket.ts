@@ -1,9 +1,8 @@
 import TCPPacket from "../tcp/TCPPacket";
-import TCPPlayerSocket from "../tcp/TCPPlayerSocket";
 import UDPPlayerSocket from "./UDPPlayerSocket";
-import IncomingPacket from "../IncomingPacket";
+import UDPPacket from "./UDPPacket";
 
-export default abstract class UDPIncomingPacket extends TCPPacket {
+export default abstract class UDPIncomingPacket extends UDPPacket {
 
     abstract handle(socket: UDPPlayerSocket): void;
 

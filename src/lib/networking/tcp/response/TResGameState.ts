@@ -1,8 +1,5 @@
-import {FormattedPacket} from "../../FormattedPacket";
-import EPacketChannel from "../../../enums/EPacketChannel";
 import EBufferType from "../../../enums/EBufferType";
-import {TCPServerRequest, TCPServerResponse} from "../../../enums/TCPPacketTypes";
-import {EPreMatchState} from "../../../enums/EPreMatchState";
+import {TCPServerResponse} from "../../../enums/TCPPacketTypes";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
 import {EGameState} from "../../../enums/EGameData";
 import TCPPacket from "../TCPPacket";

@@ -1,12 +1,7 @@
-import {FormattedPacket} from "../../FormattedPacket";
-import EPacketChannel from "../../../enums/EPacketChannel";
 import EBufferType from "../../../enums/EBufferType";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
 import {UDPServerResponse} from "../../../enums/UDPPacketTypes";
-import {ComponentID, PlayerID} from "../../../database/match/MatchTypes";
-import EPlayerState from "../../../enums/EPlayerState";
-import CharacterList from "../../../gamedata/CharacterList";
-import {NumericBoolean, SignedNumericBoolean} from "../../../types/GameTypes";
+import {ComponentID} from "../../../database/match/MatchTypes";
 import UDPPacket from "../UDPPacket";
 
 export default class UResEntityUpdate extends UDPPacket {

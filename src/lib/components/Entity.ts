@@ -1,11 +1,6 @@
-import {dataSize} from "../Macros";
-import EBufferType from "../enums/EBufferType";
-import {TCPServerResponse} from "../enums/TCPPacketTypes";
 import ILifetimedElement from "../interfaces/ILifetimedElement";
-import GMBuffer from "../tools/GMBuffer";
 import Player from "./Player";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
-import {UDPServerRequest, UDPServerResponse} from "../enums/UDPPacketTypes";
 import UResEntityUpdate from "../networking/udp/response/UResEntityUpdate";
 import TResEntityDestroy from "../networking/tcp/response/TResEntityDestroy";
 
