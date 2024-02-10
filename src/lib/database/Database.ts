@@ -94,4 +94,8 @@ export default class Database {
 
     }
 
+    static startLookupLoop() {
+        setInterval(()=>this.lookupUninitializedMatches(), 5000);
+    }
+
 }
