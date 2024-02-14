@@ -78,3 +78,4 @@ database/
 
 # dotenv environment variables file
 .env
+/generated/

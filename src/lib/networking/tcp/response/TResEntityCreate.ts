@@ -22,7 +22,7 @@ export default class TResEntityCreate extends TCPPacket {
         .add("param4", EBufferType.SInt32, 100)
         .add("param5", EBufferType.SInt32, 100)
         .build();
-    static override index = TCPServerResponse.PROJECTILE_DESTROY;
+    static override index = TCPServerResponse.ENTITY_CREATE;
 
     entityIndex: number;
     entityId: number;

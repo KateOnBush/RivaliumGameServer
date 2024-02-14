@@ -13,7 +13,7 @@ export default class TResExplosionCreate extends TCPPacket {
         .add("radius", EBufferType.UInt16)
         .add("damage", EBufferType.UInt16)
         .build();
-    static override index = TCPServerResponse.PROJECTILE_DESTROY;
+    static override index = TCPServerResponse.EXPLOSION_CREATE;
 
     ownerId: number;
     explosionIndex: number;

@@ -31,9 +31,7 @@ export default class UDPServer {
     }
 
     static sendRaw(message: Buffer, address: string, port: number) {
-
         this.server.send(message, port, address);
-
     }
 
 }

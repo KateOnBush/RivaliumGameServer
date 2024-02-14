@@ -9,12 +9,14 @@ import TResPreMatch from "../response/TResPreMatch";
 import {EPreMatchState} from "../../../enums/EPreMatchState";
 import TCPIncomingPacket from "../TCPIncomingPacket";
 import TCPPlayerSocket from "../TCPPlayerSocket";
+import UReqIdentify from "../../udp/request/UReqIdentify";
+import TResUDPChannel from "../response/TResUDPChannel";
 
 export default class TReqIdentify extends TCPIncomingPacket {
 
     static override attributes = new FormattedPacketAttributeListBuilder()
-        .add("pass", EBufferType.UInt16)
-        .add("access", EBufferType.UInt16)
+        .add("pass", EBufferType.UInt32)
+        .add("access", EBufferType.UInt32)
         .build();
     static override index = TCPServerRequest.IDENTIFY;
 
@@ -28,42 +30,63 @@ export default class TReqIdentify extends TCPIncomingPacket {
 
         let response = new TResPreMatch();
 
-        Logger.info("Player attempting identification, verifying...");
+        Logger.info("Player attempting identification {} {}, verifying...", pass, access);
 
         let match = await Database.verifyPlayer(socket, pass, access);
         const sender = socket.player;
         if (!match) {
-            response.write(EPreMatchState.MATCH_NOT_FOUND, EBufferType.UInt8);
-        } else if (match.state == MatchState.FINISHED) {
-            response.write(EPreMatchState.MATCH_ENDED, EBufferType.UInt8);
+            response.state = EPreMatchState.MATCH_NOT_FOUND;
+            Logger.info("Match not found!");
+            socket.send(response.bake().getBuffer());
+            return;
+        }
+
+        if (match.state == MatchState.FINISHED) {
+            response.state = EPreMatchState.MATCH_ENDED;
         } else if (match.state == MatchState.STARTED || match.state == MatchState.LOADING) {
-            response.write(EPreMatchState.REJOINED, EBufferType.UInt8);
+            response.state = EPreMatchState.REJOINED;
             sender.TCPsocket.identified = true;
-            sender.UDPSocket.identified = false;
+            sender.UDPsocket.identified = false;
         } else {
 
             Logger.info("Player identified! Match id: {}", match.getID());
             sender.TCPsocket.identified = true;
-            sender.UDPSocket.identified = false;
-            response.write(EPreMatchState.IDENTIFIED, EBufferType.UInt8);
+            sender.UDPsocket.identified = false;
+            response.state = EPreMatchState.IDENTIFIED;
 
-            let msg = new TResPreMatch();
-            msg.playerId = sender.matchPlayer.playerId;
-            msg.state = EPreMatchState.PLAYER_LOADED;
+            let identifier = Math.floor(Math.random() * 0xFFFFFFFF);
+            UReqIdentify.identifierMap.set(identifier, sender);
 
-            sender.game.broadcast(msg);
+            let udpChannelIdentify = new TResUDPChannel();
+            udpChannelIdentify.identifier = identifier;
+            sender.send(udpChannelIdentify);
 
-            Logger.info("Sending IDENTIFIED");
+            Logger.info("Awaiting UDP identification...");
 
         }
 
         sender.send(response)
 
-        if (!match) return;
-
+        //If all players joined
         if (match.playerManager.players.every(team => team.every(mPlayer => mPlayer.joined)) && match.state == MatchState.AWAITING_PLAYERS) {
 
-            //start match
+            //Wait for all to be properly identified
+            let attempts = 10;
+            while(attempts >= 0) {
+                if (match.game.players.every(player => (player.TCPsocket && player.UDPsocket && player.TCPsocket.identified && player.UDPsocket.identified))) {
+                    break;
+                } else if (attempts == 0) {
+                    //Match failed to start
+                    let failMessage = new TResPreMatch();
+                    failMessage.state = EPreMatchState.MATCH_CANCELLED;
+                    sender.game.broadcast(failMessage);
+                    //sender.game.cancel();
+                    return;
+                }
+                await Time.wait(2000);
+                attempts--;
+            }
+
             match.state = MatchState.LOADING;
             Logger.info("All players joined, starting...");
 
@@ -71,7 +94,7 @@ export default class TReqIdentify extends TCPIncomingPacket {
             msg.state = EPreMatchState.MATCH_STARTING;
             sender.game.broadcast(msg);
 
-            await Time.wait(10000);
+            await Time.wait(5000);
 
             msg.state = EPreMatchState.MATCH_STARTED;
             match.state = MatchState.STARTED;
@@ -82,6 +105,7 @@ export default class TReqIdentify extends TCPIncomingPacket {
             match.game.start();
 
         }
+
     }
 
 }

@@ -8,7 +8,7 @@ export default class TResPreMatch extends TCPPacket {
 
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("state", EBufferType.UInt8)
-        .add("playerId", EBufferType.UInt8)
+        .add("playerId", EBufferType.UInt16)
         .build();
     static override index = TCPServerResponse.PRE_MATCH;
 

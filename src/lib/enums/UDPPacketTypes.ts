@@ -17,6 +17,7 @@ export enum UDPServerResponse {
     PLAYER_UPDATE,
     PLAYER_GRAPPLE,
     PLAYER_FLIP,
+    PLAYER_HIT,
 
     PROJECTILE_UPDATE,
 

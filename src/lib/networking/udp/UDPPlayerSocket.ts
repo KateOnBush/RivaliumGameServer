@@ -1,5 +1,6 @@
 import Game from "../../components/Game";
 import Player from "../../components/Player";
+import UDPServer from "./UDPServer";
 
 export default class UDPPlayerSocket {
 
@@ -12,7 +13,7 @@ export default class UDPPlayerSocket {
     get access() { return this.player.matchPlayer.access; }
 
     send(message: Buffer) {
-
+        if (this.address != "") UDPServer.sendRaw(message, this.address, this.port);
     }
 
     constructor(address: string, port: number) {

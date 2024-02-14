@@ -11,7 +11,7 @@ export default class TResPlayerAbilityCast extends TCPPacket {
         .add("ability", EBufferType.UInt8)
         .add("abilityN", EBufferType.UInt8)
         .build();
-    static override index = TCPServerResponse.PLAYER_HIT;
+    static override index = TCPServerResponse.PLAYER_ABILITY_CAST;
 
     state: EPreMatchState = 0;
 

@@ -17,6 +17,7 @@ import TResPlayerCreate from "../networking/tcp/response/TResPlayerCreate";
 import TResProjectileCreate from "../networking/tcp/response/TResProjectileCreate";
 import TResEntityCreate from "../networking/tcp/response/TResEntityCreate";
 import TResExplosionCreate from "../networking/tcp/response/TResExplosionCreate";
+import Match from "../database/match/Match";
 
 enum GameRoundPhase {
     PREPARATION,
@@ -25,7 +26,7 @@ enum GameRoundPhase {
 
 export default class Game {
 
-    matchId: string;
+    match: Match;
 
     type: MatchType;
     state: EGameState = EGameState.STARTING;
@@ -37,9 +38,9 @@ export default class Game {
 
     currentRound: number = 1;
 
-    constructor(type: MatchType, matchId: string) {
+    constructor(type: MatchType, match: Match) {
         this.type = type;
-        this.matchId = matchId;
+        this.match = match;
         GameProcessor.GameList.push(this);
     }
 
@@ -297,7 +298,7 @@ export default class Game {
 
     broadcast(packet: FormattedPacket){
         let bakedPacket = packet.bake();
-        if (packet.channel == EPacketChannel.TCP) {
+        if ((packet.constructor as typeof FormattedPacket).channel == EPacketChannel.TCP) {
             this.players.forEach(p=>p.sendRawTCP(bakedPacket));
             return;
         }

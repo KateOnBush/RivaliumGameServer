@@ -6,6 +6,7 @@ export enum EPreMatchState {
     IDENTIFIED,
     PLAYER_LOADED,
     MATCH_STARTING,
-    MATCH_STARTED
+    MATCH_STARTED,
+    MATCH_CANCELLED
 
 }

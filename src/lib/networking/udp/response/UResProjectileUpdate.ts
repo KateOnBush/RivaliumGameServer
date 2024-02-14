@@ -13,7 +13,7 @@ export default class UResProjectileUpdate extends UDPPacket {
         .add("movX", EBufferType.SInt32, 100)
         .add("movY", EBufferType.SInt32, 100)
         .build();
-    static override index = UDPServerResponse.ENTITY_UPDATE;
+    static override index = UDPServerResponse.PROJECTILE_UPDATE;
 
     projectileId: PlayerID;
     x: number;

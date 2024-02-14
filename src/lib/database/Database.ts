@@ -23,8 +23,6 @@ export default class Database {
 
         const filter = { state: MatchState.AWAITING_INITIATION };
 
-        Logger.log("Looking up uninitialized matches...");
-
         let matches = await MatchRepository.find(filter).toArray();
 
         for(const match of matches) {
@@ -38,7 +36,7 @@ export default class Database {
     }
 
     static registerGame(match: Match) {
-        let game = new Game(match.type, match.getID());
+        let game = new Game(match.type, match);
         match.game = game;
         this.games.push(game);
     }
@@ -63,6 +61,9 @@ export default class Database {
 
         let cached = DatabaseCache.matches.find(m => m.pass == pass && m.state != MatchState.FINISHED);
         if (cached) return cached;
+        else {
+
+        }
 
     }
 

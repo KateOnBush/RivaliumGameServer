@@ -10,12 +10,12 @@ export enum TCPServerRequest {
 export enum TCPServerResponse {
 
     PRE_MATCH,
+    UDP_CHANNEL_IDENTIFY,
 
     GAME_STATE,
 
     PLAYER_CREATE,
     PLAYER_CONNECTION,
-    PLAYER_HIT,
     PLAYER_ABILITY_CAST,
     PLAYER_DEATH,
     PLAYER_FORCED_DASH,

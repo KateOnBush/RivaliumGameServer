@@ -8,10 +8,9 @@ export default class Ping {
 
 		let pingMessage = new UReqPing();
 
-		clients.forEach(c=>{
-			if (!c.player) return;
-			c.player.ping.lastSent = performance.now();
-			c.player.send(pingMessage);
+		clients.forEach(player=>{
+			player.ping.lastSent = performance.now();
+			player.send(pingMessage);
 		})
 	
 	}

@@ -43,7 +43,7 @@ export default class PacketHandler {
                             packetType.channel == EPacketChannel.UDP ? UDPServerRequest[packetType.index] : TCPServerRequest[packetType.index],
                             EPacketChannel[packetType.channel]);
                         this.registerEvent(packetType.channel, packetType.index, packetType);
-                        await Time.wait(500);
+                        await Time.wait(50);
                     }
                 }
             }
@@ -63,9 +63,11 @@ export default class PacketHandler {
     static handleTCP(buffer: GMBuffer, socket: TCPPlayerSocket) {
         buffer.seek(0);
         if (buffer.size() == 0) Logger.warn("Empty packet.");
+        console.log(buffer.getBuffer());
         while(true) {
             if (buffer.tell() == buffer.size()) break;
             const index = buffer.read(EBufferType.UInt8) as TCPServerRequest;
+            Logger.info("Received {}", TCPServerRequest[index]);
             if (!socket.identified && index != TCPServerRequest.IDENTIFY) {
                 Logger.warn("Unidentified sender with non-identify packet on TCP channel.");
                 return;
@@ -82,6 +84,10 @@ export default class PacketHandler {
                 continue;
             }
             let constructedPacket = new packetType() as TCPIncomingPacket;
+            if (packetLength != constructedPacket.size()) {
+                Logger.warn("Packet length doesn't correspond to packet type length.");
+                return;
+            }
             const attributes = packetType.attributes;
             let booleanStreak = 0, readBoolean = 0;
             for(const attribute of attributes) {
@@ -91,9 +97,10 @@ export default class PacketHandler {
                     }
                     constructedPacket[attribute.name] = (readBoolean >> booleanStreak) & 1;
                     booleanStreak++;
-                    if (booleanStreak > 8) booleanStreak = 0;
+                    if (booleanStreak >= 8) booleanStreak = 0;
                     continue;
                 }
+                booleanStreak = 0;
                 constructedPacket[attribute.name] = buffer.read(attribute.type) / attribute.multiplier;
             }
             constructedPacket.handle(socket);
@@ -104,17 +111,16 @@ export default class PacketHandler {
 
         buffer.seek(0);
         if (buffer.size() < 2) return Logger.warn("Empty packet.");
-        // ! UDP: Index(1 byte) + Length<Data>(1 byte) + Accumulator(1 byte) + Data + Checksum<Data>(2 byte)
+        // ! UDP: Index(1 byte) + Length<Data>(1 byte) + Data + Checksum<Data>(2 byte)
         // * Checksum = ConsecutiveXOR(1 byte) + Sum(1 byte)
         const index = buffer.read(EBufferType.UInt8) as UDPServerRequest;
-        if (!socket.identified && index != UDPServerRequest.IDENTIFY) return Logger.log("Unidentified sender with non-identify packet on UDP channel.");
+        if (!socket.identified && index != UDPServerRequest.IDENTIFY) return Logger.warn("Unidentified sender with non-identify packet on UDP channel.");
         const length = buffer.read(EBufferType.UInt8);
-        if (buffer.size() != (length + 5)) return Logger.log("Invalid UDP packet, inaccurate length."); //!Corrupted
+        if (buffer.size() != (length + 4)) return Logger.warn("Invalid UDP packet, inaccurate length."); //!Corrupted
         let packetType = this.UDPPacketMap.get(index);
-        if (!packetType) return Logger.log("Invalid UDP packet, invalid index."); //!Corrupted
+        if (!packetType) return Logger.warn("Invalid UDP packet, invalid index."); //!Corrupted
         let constructedPacket = new packetType() as UDPIncomingPacket;
-        if (buffer.size() != constructedPacket.size() + 5) return Logger.log("Invalid UDP packet, invalid length."); //!Corrupted
-        const accumulator = buffer.read(EBufferType.UInt8);
+        if (buffer.size() != (constructedPacket.size() + 4)) return Logger.warn("Invalid UDP packet, invalid length. {} and {}, index {}", buffer.size(), constructedPacket.size() + 4, UDPServerRequest[index]); //!Corrupted
         const attributes = packetType.attributes;
         let checksum = 0, consecutiveXOR = 0;
         let booleanStreak = 0, readBoolean = 0;
@@ -131,9 +137,10 @@ export default class PacketHandler {
                 }
                 constructedPacket[attribute.name] = (readBoolean >> booleanStreak) & 1;
                 booleanStreak++;
-                if (booleanStreak > 8) booleanStreak = 0;
+                if (booleanStreak >= 8) booleanStreak = 0;
                 continue;
             }
+            booleanStreak = 0;
             let valueRead = buffer.read(attribute.type), valueSizeInBytes = attribute.type >> 4;
             while(valueSizeInBytes > 0) {
                 let integer = buffer.peek(EBufferType.UInt8, buffer.tell() - valueSizeInBytes);
@@ -146,9 +153,14 @@ export default class PacketHandler {
             }
             constructedPacket[attribute.name] = valueRead / attribute.multiplier;
         }
-        checksum %= 256;
-        let readChecksum = buffer.read(EBufferType.UInt8), readXOR = buffer.read(EBufferType.UInt8);
-        if (readChecksum != checksum || readXOR != consecutiveXOR) return Logger.log("Invalid checksum.");
+        checksum = checksum % 0xFF;
+        let readXOR = buffer.read(EBufferType.UInt8);
+        let readChecksum = buffer.read(EBufferType.UInt8);
+        if (readChecksum != checksum || readXOR != consecutiveXOR) {
+            return Logger.warn("Invalid checksum. Sum: {} vs {}, XOR: {} vs {}",
+                readChecksum, checksum,
+                readXOR.toString(2), consecutiveXOR.toString(2));
+        }
         constructedPacket.handle(socket);
     }
 

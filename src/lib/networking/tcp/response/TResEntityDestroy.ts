@@ -8,7 +8,7 @@ export default class TResEntityDestroy extends TCPPacket {
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("entityId", EBufferType.UInt16)
         .build();
-    static override index = TCPServerResponse.PROJECTILE_DESTROY;
+    static override index = TCPServerResponse.ENTITY_DESTROY;
 
     entityId: number;
 

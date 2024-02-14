@@ -12,7 +12,7 @@ import MatchPlayer from "../database/match/data/MatchPlayer";
 import EPlayerState from "../enums/EPlayerState";
 import {FormattedPacket} from "../networking/FormattedPacket";
 import EPacketChannel from "../enums/EPacketChannel";
-import TResPlayerHit from "../networking/tcp/response/TResPlayerHit";
+import UResPlayerHit from "../networking/udp/response/UResPlayerHit";
 import TResEffectAdd from "../networking/tcp/response/TResEffectAdd";
 import TResPlayerForcedDash from "../networking/tcp/response/TResPlayerForcedDash";
 import TResPlayerDeath from "../networking/tcp/response/TResPlayerDeath";
@@ -32,7 +32,7 @@ export enum PlayerEffect {
 export default class Player extends GamePhysicalElement {
 
     TCPsocket: TCPPlayerSocket;
-    UDPSocket: UDPPlayerSocket;
+    UDPsocket: UDPPlayerSocket = new UDPPlayerSocket("", 0);
 
     mouse: Vector2 = new Vector2();
     state: PlayerState = new PlayerState();
@@ -85,7 +85,7 @@ export default class Player extends GamePhysicalElement {
 
         }
 
-        let playerHit = new TResPlayerHit();
+        let playerHit = new UResPlayerHit();
         playerHit.playerId = this.id;
         playerHit.attackerId = attacker.id;
         playerHit.visual = visual;
@@ -165,7 +165,7 @@ export default class Player extends GamePhysicalElement {
     send(packet: FormattedPacket){
 
         let bakedPacket = packet.bake();
-        if (packet.channel == EPacketChannel.TCP) {
+        if ((packet.constructor as typeof FormattedPacket).channel == EPacketChannel.TCP) {
             this.TCPsocket.send(bakedPacket.getBuffer());
             return;
         }
