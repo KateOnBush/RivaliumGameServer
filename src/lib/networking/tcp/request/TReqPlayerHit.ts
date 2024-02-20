@@ -40,7 +40,7 @@ export default class TReqPlayerHit extends TCPIncomingPacket {
         if (playerHit) {
             playerHit.hit(proj.damage, sender);
             if (proj.bleed > 0)
-                playerHit.burn(proj.bleed, sender);
+                playerHit.burn(proj.bleed, sender, 3);
             if (proj.heal > 0)
                 sender.healInstantly(proj.heal);
         }

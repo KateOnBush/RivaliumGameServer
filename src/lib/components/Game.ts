@@ -18,6 +18,7 @@ import TResProjectileCreate from "../networking/tcp/response/TResProjectileCreat
 import TResEntityCreate from "../networking/tcp/response/TResEntityCreate";
 import TResExplosionCreate from "../networking/tcp/response/TResExplosionCreate";
 import Match from "../database/match/Match";
+import Time from "../tools/Time";
 
 enum GameRoundPhase {
     PREPARATION,
@@ -307,7 +308,7 @@ export default class Game {
 
     broadcastExcept(packet: FormattedPacket, except: Player){
         let bakedPacket = packet.bake();
-        if (packet.channel == EPacketChannel.TCP) {
+        if ((packet.constructor as typeof FormattedPacket).channel == EPacketChannel.TCP) {
             this.players.forEach(p=> { if (p.id !== except.id) p.sendRawTCP(bakedPacket) });
             return;
         }

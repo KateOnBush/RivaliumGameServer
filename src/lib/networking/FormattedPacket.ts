@@ -43,30 +43,36 @@ export abstract class FormattedPacket {
         buff.write(index, EBufferType.UInt8);
         buff.write(size, EBufferType.UInt8);
         let booleanStreak = 0, builtBoolean = 0;
-        let checksum = 0, returnedChecksum = 0, currentIndex = 0;
+        let checksum = 0, consecutiveXOR = 0, returned, currentIndex = 0;
         for(const attribute of attributes) {
             let value = this[attribute.name] ?? 0;
             if (!attribute.boolean) {
                 if (booleanStreak != 0) {
-                    returnedChecksum = buff.write(builtBoolean, EBufferType.UInt8);
-                    checksum = ((returnedChecksum ^ checksum) & 0xFF00) | ((returnedChecksum + checksum) & 0xFF);
+                    returned = buff.write(builtBoolean, EBufferType.UInt8);
+                    checksum += returned.bitSum;
+                    consecutiveXOR ^= returned.XOR;
                 }
-                if (attribute.multiplier == 1) returnedChecksum = buff.write(value, attribute.type);
-                else returnedChecksum = buff.write(Math.round(value * attribute.multiplier), attribute.type);
-                checksum = ((returnedChecksum ^ checksum) & 0xFF00) | ((returnedChecksum + checksum) & 0xFF);
+                if (attribute.multiplier == 1) returned = buff.write(value, attribute.type);
+                else returned = buff.write(Math.round(value * attribute.multiplier), attribute.type);
+                checksum += returned.bitSum;
+                consecutiveXOR ^= returned.XOR;
                 booleanStreak = 0;
                 currentIndex++;
                 continue;
             }
             builtBoolean |= ((value & 1) << booleanStreak++);
             if (booleanStreak == 8 || currentIndex == attributes.length - 1) {
-                returnedChecksum = buff.write(builtBoolean, EBufferType.UInt8);
-                checksum = ((returnedChecksum ^ checksum) & 0xFF00) | ((returnedChecksum + checksum) & 0xFF);
+                returned = buff.write(builtBoolean, EBufferType.UInt8);
+                checksum += returned.bitSum;
+                consecutiveXOR ^= returned.XOR;
                 booleanStreak = 0;
             }
             currentIndex++;
         }
-        if (channel == EPacketChannel.UDP) buff.write(checksum & 0xFFFF, EBufferType.UInt16);
+        if (channel == EPacketChannel.UDP) {
+            buff.write(consecutiveXOR & 0xFF, EBufferType.UInt8);
+            buff.write(checksum & 0xFF, EBufferType.UInt8);
+        }
         return buff;
     }
 

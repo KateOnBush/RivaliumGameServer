@@ -8,6 +8,7 @@ import Vector2 from '../../tools/vector/Vector2';
 import EntityList from "../instancelist/EntityList";
 import ExplosionList from "../instancelist/ExplosionList";
 import ProjectileList from "../instancelist/ProjectileList";
+import Time from "../../tools/Time";
 
 export default Character.builder(
     "Masr",
@@ -73,7 +74,12 @@ export default Character.builder(
             }
         
         }),
-        new Ability(EAbilityType.ACTIVE, [10], new ActiveAbilityData(20), EMPTY_METHOD)
+        new Ability(EAbilityType.ACTIVE, [10], new ActiveAbilityData(20), async function(n, player) {
+
+            await Time.wait((1/0.15) * 0.38 * 1000);
+            player.game.addExplosion(player, ExplosionList.MasrBolt, player.x, player.y, 500, 50);
+
+        })
 
     ]
 

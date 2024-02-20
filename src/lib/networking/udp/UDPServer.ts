@@ -21,7 +21,6 @@ export default class UDPServer {
         this.server.on("message", (msg, remoteInfo) => {
 
             let buffer = GMBuffer.from(msg);
-            Logger.info("Message received [{}]", buffer.size());
             PacketHandler.handleUDP(buffer, UDP.getOrCreateSocket(remoteInfo.address, remoteInfo.port));
 
         })

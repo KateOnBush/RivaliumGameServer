@@ -11,6 +11,8 @@ export default class GameProcessor {
 
 	static update(game: Game){
 
+		if (game.state == EGameState.STARTING) return;
+
 		game.players.forEach(u => {
 	
 			game.players.forEach(pl=>{

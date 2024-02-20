@@ -1,12 +1,13 @@
 import Player from "../components/Player";
-import UReqPing from "../networking/udp/request/UReqPing";
+import UResPing from "../networking/udp/response/UResPing";
 
 
 export default class Ping {
 
 	static ping(clients: Player[]) {
 
-		let pingMessage = new UReqPing();
+		let pingMessage = new UResPing();
+		pingMessage.requesting = 1;
 
 		clients.forEach(player=>{
 			player.ping.lastSent = performance.now();

@@ -20,13 +20,13 @@ export default Character.builder(
         new Ability(EAbilityType.ONETIME, [0.1, 0.1], NoAbilityData, function(n, player){
 
             if (!player.game) return;
-            var pred = Lag.predictNextPosition(player);
-            var proj = n == 0 ? ProjectileList.LenyaBlueBullet : ProjectileList.LenyaRedBullet;
+            let pred = Lag.predictNextPosition(player);
+            let proj = n == 0 ? ProjectileList.LenyaBlueBullet : ProjectileList.LenyaRedBullet;
             player.game.addProjectile(player,
                 proj,
                 pred.pos.x, pred.pos.y,
-                140, player.mouseDirection,
-                1, 0, 5, 
+                70, player.mouseDirection,
+                1, 1, 5,
                 n == 0 ? 5 : 25, 0, n == 0 ? 25 : 5
             );
 
@@ -88,10 +88,10 @@ export default Character.builder(
 
             setTimeout(()=>{
 
-                player.game?.addEntity(player, 
+                player.game.addEntity(player,
                 EntityList.LenyaUltimateRadius, 
                 player.x, player.y, 0, 0, 10,
-                [2200, 0.01]).step((entity, dt)=>{
+                [3500, 0.01]).step((entity, dt)=>{
                     entity.radius = GM.dtlerp(entity.radius ?? 0, entity.parameters[0], entity.parameters[1], dt);
                 });
 

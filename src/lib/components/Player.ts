@@ -21,12 +21,26 @@ import UDPPlayerSocket from "../networking/udp/UDPPlayerSocket";
 export enum PlayerEffect {
 
     NONE,
+
     HEAL,
     BURN,
-    ACCELERATE,
-    SLOW,
+
+    //buffs
+    AGILITY,
+    SWIFTNESS,
+    INVISIBILITY,
+    POWER,
+    REDEMPTION,
+    PROTECTION,
+
+    //nerfs
     VULNERABILITY,
-    INVISIBILITY
+    SLOWNESS,
+    SHATTERING,
+    IMPOTENCE,
+    LETHARGY, // -% haste
+    BLIND,
+
 }
 
 export default class Player extends GamePhysicalElement {
@@ -100,19 +114,17 @@ export default class Player extends GamePhysicalElement {
         
     }
 
-    burn(damage: number, attacker: Player){
+    burn(damage: number, attacker: Player, seconds: number){
 
-        let time = (damage/5) | 0;
+        this.addEffect(PlayerEffect.BURN, seconds);
 
-        this.addEffect(PlayerEffect.BURN, time * .25);
-
-        for(let i = 0; i < time; i++){
+        for(let i = 0; i < seconds; i++){
 
             this.effectTimeouts.push(setTimeout(()=>{
 
-                this.hit(damage / 5 | 0, attacker, false);
+                this.hit(damage / seconds, attacker, false);
                 
-            }, (i+1)*250));
+            }, (i+1)*1000));
 
         }
 
@@ -192,7 +204,7 @@ export default class Player extends GamePhysicalElement {
         forcedDash.time = time;
         forcedDash.mult = mult;
 
-        this.game?.broadcast(forcedDash);
+        this.game.broadcast(forcedDash);
 
     }
 

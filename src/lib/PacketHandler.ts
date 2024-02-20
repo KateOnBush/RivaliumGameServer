@@ -63,7 +63,6 @@ export default class PacketHandler {
     static handleTCP(buffer: GMBuffer, socket: TCPPlayerSocket) {
         buffer.seek(0);
         if (buffer.size() == 0) Logger.warn("Empty packet.");
-        console.log(buffer.getBuffer());
         while(true) {
             if (buffer.tell() == buffer.size()) break;
             const index = buffer.read(EBufferType.UInt8) as TCPServerRequest;
