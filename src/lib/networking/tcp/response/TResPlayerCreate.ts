@@ -11,6 +11,7 @@ export default class TResPlayerCreate extends TCPPacket {
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("playerId", EBufferType.UInt16)
         .add("isYou", EBufferType.UInt8)
+        .add("teamNumber", EBufferType.UInt8)
         .add("characterId", EBufferType.UInt8)
         .add("characterHealth", EBufferType.UInt16)
         .add("characterUltimateCharge", EBufferType.UInt16)
@@ -23,6 +24,7 @@ export default class TResPlayerCreate extends TCPPacket {
 
     playerId: PlayerID;
     isYou: NumericBoolean;
+    teamNumber: number;
     characterId: CharacterList;
     characterHealth: number;
     characterUltimateCharge: number;

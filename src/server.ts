@@ -10,8 +10,10 @@ import path from "path";
 
 async function main() {
 
+	Logger.clear();
 	await PacketHandler.registerClasses(path.dirname(__filename) + "/lib/networking/tcp/request");
 	await PacketHandler.registerClasses(path.dirname(__filename) + "/lib/networking/udp/request");
+	Logger.clear();
 	Logger.important(LOGO);
 	TCPServer.start();
 	UDPServer.start();

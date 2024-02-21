@@ -18,11 +18,16 @@ import TResProjectileCreate from "../networking/tcp/response/TResProjectileCreat
 import TResEntityCreate from "../networking/tcp/response/TResEntityCreate";
 import TResExplosionCreate from "../networking/tcp/response/TResExplosionCreate";
 import Match from "../database/match/Match";
-import Time from "../tools/Time";
+import ETimerType from "../enums/ETimerType";
 
-enum GameRoundPhase {
+
+enum RoundPhase {
     PREPARATION,
-    BATTLE
+    FIRST_BATTLE,
+    //shrine spawn
+    SECOND_BATTLE,
+    //shrine spawn
+    FINAL_BATTLE
 }
 
 export default class Game {
@@ -37,7 +42,8 @@ export default class Game {
     entities: Entity[] = [];
     explosions: Explosion[] = [];
 
-    currentRound: number = 1;
+    currentRound: number = 0;
+    currentRoundPhase: RoundPhase = RoundPhase.PREPARATION;
 
     constructor(type: MatchType, match: Match) {
         this.type = type;
@@ -50,30 +56,43 @@ export default class Game {
         let gameState = new TResGameState();
         gameState.state = newState;
         gameState.currentRound = this.currentRound;
-        gameState.timer = 5;
-        this.broadcast(gameState);
-        if (newState == EGameState.PREROUND) {
-            for(const i of [1, 2, 3, 4]) {
-                setTimeout(()=>{
-                    let gameState = new TResGameState();
-                    gameState.state = EGameState.PREROUND;
-                    gameState.currentRound = this.currentRound;
-                    gameState.timer = 5 - i;
-                    this.broadcast(gameState);
-                }, i * 1000);
-            }
-            setTimeout(()=>{
-                this.startRound();
+        if (newState == EGameState.PRE_ROUND) {
+            gameState.timer = 5;
+            gameState.timerType = ETimerType.PRE_ROUND;
+            setTimeout(()=> {
+                this.startBattle();
             }, 5000);
+        } else if (newState == EGameState.BATTLE){
+            this.currentRoundPhase++;
+            if (this.currentRoundPhase == RoundPhase.FINAL_BATTLE) {
+                gameState.timer = 60;
+                gameState.timerType = ETimerType.ROUND_END;
+                setTimeout(() => {
+                    this.startRound();
+                }, 60 * 1000);
+            } else {
+                gameState.timer = this.currentRoundPhase == RoundPhase.FIRST_BATTLE ? 30 : 60;
+                gameState.timerType = ETimerType.NEXT_SHRINE_SPAWNS;
+                setTimeout(() => {
+                    this.changeState(EGameState.BATTLE);
+                }, gameState.timer * 1000);
+            }
         }
+        this.broadcast(gameState);
     }
 
     startRound() {
-        if (this.currentRound == 15) this.changeState(EGameState.SUDDENDEATH);
+        this.currentRound++;
+        this.currentRoundPhase = RoundPhase.PREPARATION;
+        this.changeState(EGameState.PRE_ROUND);
+    }
+
+    startBattle() {
+        if (this.currentRound == 9) this.changeState(EGameState.SUDDENDEATH);
         else this.changeState(EGameState.BATTLE);
     }
     setup() {
-        this.changeState(EGameState.PREROUND);
+        this.startRound();
     }
 
     start() {

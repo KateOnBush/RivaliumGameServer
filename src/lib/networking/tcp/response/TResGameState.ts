@@ -10,11 +10,13 @@ export default class TResGameState extends TCPPacket {
         .add("state", EBufferType.UInt8)
         .add("currentRound", EBufferType.UInt8)
         .add("timer", EBufferType.UInt8)
+        .add("timerType", EBufferType.UInt8)
         .build();
     static override index = TCPServerResponse.GAME_STATE;
 
     state: EGameState = 0;
     currentRound: number = 0;
     timer: number = 0;
+    timerType: number = 0;
 
 }
