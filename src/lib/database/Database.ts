@@ -7,7 +7,7 @@ import Logger from "../tools/Logger";
 import TCPPlayerSocket from "../networking/tcp/TCPPlayerSocket";
 
 
-const uri = "mongodb://127.0.0.1:27017";
+const uri = `mongodb://production-server:${process.env["DATABASE_PASSWORD"]}@127.0.0.1:27017/?authMechanism=DEFAULT`;
 let DatabaseClient = new MongoClient(uri);
 let MatchRepository = new Repository<Match>(Match, DatabaseClient, "match", { databaseName: "epicgame" });
 
