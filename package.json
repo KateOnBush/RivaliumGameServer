@@ -17,6 +17,7 @@
     "start:dev": "npx nodemon",
     "compile": "rimraf ./build && tsc -sourcemap",
     "start": "npm run compile && node build/server.js",
+    "start:production": "npm run compile && node build/server.js --production",
     "build": "npm run compile && pkg ."
   },
   "pkg": {

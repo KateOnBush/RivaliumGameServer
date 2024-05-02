@@ -1,22 +1,24 @@
 import EBufferType from "../../../enums/EBufferType";
 import {TCPServerResponse} from "../../../enums/TCPPacketTypes";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
-import {EGameState} from "../../../enums/EGameData";
 import TCPPacket from "../TCPPacket";
+import {CasualGameState} from "../../../components/CasualGame";
 
-export default class TResGameState extends TCPPacket {
+export default class TResCasualGameState extends TCPPacket {
 
     static override attributes = new FormattedPacketAttributeListBuilder()
         .add("state", EBufferType.UInt8)
         .add("currentRound", EBufferType.UInt8)
-        .add("timer", EBufferType.UInt8)
-        .add("timerType", EBufferType.UInt8)
+        .add("defendingTeam", EBufferType.UInt8)
+        .add("firstTeamScore", EBufferType.UInt8)
+        .add("secondTeamScore", EBufferType.UInt8)
         .build();
-    static override index = TCPServerResponse.GAME_STATE;
+    static override index = TCPServerResponse.CASUAL_GAME_STATE;
 
-    state: EGameState = 0;
+    state: CasualGameState = 0;
     currentRound: number = 0;
-    timer: number = 0;
-    timerType: number = 0;
+    defendingTeam: number = 0;
+    firstTeamScore: number = 0;
+    secondTeamScore: number = 0;
 
 }

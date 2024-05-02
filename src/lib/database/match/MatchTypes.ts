@@ -2,7 +2,6 @@ export enum MatchType {
 
     CASUAL,
     RANKED,
-    EXCLUSIVE
 
 }
 

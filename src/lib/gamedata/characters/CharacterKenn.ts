@@ -41,7 +41,8 @@ export default Character.builder(
 
         new Ability(EAbilityType.ACTIVE, [10], new ActiveAbilityData(8), function(n: number, player: Player){
 
-            player.addEffect(PlayerEffect.SWIFTNESS, 8, {multiplier: 1.25});
+            player.addEffect(PlayerEffect.SWIFTNESS, 8);
+            player.applyBoost(1.25, 8);
 
         }),
 

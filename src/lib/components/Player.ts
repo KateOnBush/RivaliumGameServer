@@ -4,7 +4,7 @@ import TCPPlayerSocket from "../networking/tcp/TCPPlayerSocket";
 import GMBuffer from "../tools/GMBuffer";
 import GM from "../tools/GMLib";
 import Vector2 from "../tools/vector/Vector2";
-import {EffectData} from "../types/GameTypes";
+import {EffectData, NumericBoolean} from "../types/GameTypes";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
 import PlayerPing from "./sub/PlayerPing";
 import PlayerState from "./sub/PlayerState";
@@ -13,10 +13,13 @@ import EPlayerState from "../enums/EPlayerState";
 import {FormattedPacket} from "../networking/FormattedPacket";
 import EPacketChannel from "../enums/EPacketChannel";
 import UResPlayerHit from "../networking/udp/response/UResPlayerHit";
-import TResEffectAdd from "../networking/tcp/response/TResEffectAdd";
+import UResEffectAdd from "../networking/udp/response/UResEffectAdd";
 import TResPlayerForcedDash from "../networking/tcp/response/TResPlayerForcedDash";
 import TResPlayerDeath from "../networking/tcp/response/TResPlayerDeath";
 import UDPPlayerSocket from "../networking/udp/UDPPlayerSocket";
+import UResPlayerHeal from "../networking/udp/response/UResPlayerHeal";
+import {PlayerID} from "../database/match/MatchTypes";
+import TResPlayerStatsUpdate from "../networking/tcp/response/TResPlayerStatsUpdate";
 
 export enum PlayerEffect {
 
@@ -30,6 +33,7 @@ export enum PlayerEffect {
     SWIFTNESS,
     INVISIBILITY,
     POWER,
+    SHIELDING,
     REDEMPTION,
     PROTECTION,
 
@@ -41,6 +45,11 @@ export enum PlayerEffect {
     LETHARGY, // -% haste
     BLIND,
 
+}
+
+interface AttackData {
+    id: PlayerID,
+    time: number
 }
 
 export default class Player extends GamePhysicalElement {
@@ -58,12 +67,22 @@ export default class Player extends GamePhysicalElement {
     deaths: number = 0;
     assists: number = 0;
 
+    lethality: number = 0;
+    resistance: number = 0;
+    haste: number = 0;
+
+    boost: number = 1;
+
     matchPlayer: MatchPlayer;
 
     team: number = 0;
 
+    gemHolder: NumericBoolean = 0;
+    gemPlants: number = 0;
+
     effectTimeouts: NodeJS.Timeout[] = [];
 
+    lastAttacked: AttackData[] = [];
 
     constructor(socket: TCPPlayerSocket, id: number, charid: number, team: number = 0, position?: Vector2, state?: PlayerState){
 
@@ -77,16 +96,42 @@ export default class Player extends GamePhysicalElement {
 
     }
 
+    updateStats() {
+        let updatedStats = new TResPlayerStatsUpdate();
+        updatedStats.playerId = this.id;
+        updatedStats.kills = this.kills;
+        updatedStats.deaths = this.deaths;
+        updatedStats.assists = this.assists;
+        updatedStats.gemPlants = this.gemPlants;
+        this.game.broadcast(updatedStats);
+    }
+
+    applyBoost(multiplier: number, time: number) {
+        this.boost *= multiplier;
+        setTimeout(()=>{
+            this.boost /= multiplier;
+        }, time * 1000);
+    }
+
     reset(){
 
         this.char = CharacterRepository.get(this.char.id);
 
     }
 
-    hit(damage: number, attacker: Player, visual: boolean = true) {
+    get dead() { return this.state.id == EPlayerState.DEAD };
+
+    hit(damage: number, attacker: Player, visual: boolean = true, burn = false) {
 
         if (this.state.id == EPlayerState.DEAD) return;
         if (this.team == attacker.team) return;
+
+        this.lastAttacked = this.lastAttacked.filter(attackData => attackData.id != attacker.id);
+        if (this.lastAttacked.length > 4) this.lastAttacked.shift();
+        this.lastAttacked.push({id: attacker.id, time: Date.now()});
+
+        if (!burn) damage = Math.max(damage - 5 * this.resistance, 0.2 * damage);
+        damage += burn ? attacker.lethality : 8 * attacker.lethality;
 
         attacker.char.ultimateCharge += damage;
         if (attacker.char.ultimateCharge > attacker.char.ultimateChargeMax) attacker.char.ultimateCharge = attacker.char.ultimateChargeMax;
@@ -94,17 +139,17 @@ export default class Player extends GamePhysicalElement {
         this.char.health -= damage;
         if (this.char.health < 0) {
             this.char.health = 0;
-            this.dead = 1;
             this.kill(attacker);
 
         }
 
-        let playerHit = new UResPlayerHit();
-        playerHit.playerId = this.id;
-        playerHit.attackerId = attacker.id;
-        playerHit.visual = visual;
+        if (visual) {
+            let playerHit = new UResPlayerHit();
+            playerHit.playerId = this.id;
+            playerHit.attackerId = attacker.id;
+            this.game.broadcast(playerHit);
+        }
 
-        this.game?.broadcast(playerHit);
 
     }
 
@@ -122,7 +167,7 @@ export default class Player extends GamePhysicalElement {
 
             this.effectTimeouts.push(setTimeout(()=>{
 
-                this.hit(damage / seconds, attacker, false);
+                this.hit(damage / seconds, attacker, false, true);
                 
             }, (i+1)*1000));
 
@@ -130,20 +175,30 @@ export default class Player extends GamePhysicalElement {
 
     }
 
-    healInstantly(amt: number){
+    healInstantly(amt: number, visual = true, gradual = false){
 
-        if (this.state.dead == 1) return;
+        if (this.state.id == EPlayerState.DEAD) return;
+
+        if (!gradual) amt += this.resistance * 10;
 
         this.char.health += amt;
         if (this.char.health > this.char.healthMax){
             this.char.health = this.char.healthMax;
         }
 
+        if (visual) {
+            let playerHeal = new UResPlayerHeal();
+            playerHeal.playerId = this.id;
+            this.game.broadcast(playerHeal);
+        }
+
     }
 
     heal(amt: number, time: number){
 
-        if (this.state.id != EPlayerState.DEAD) return;
+        if (this.state.id == EPlayerState.DEAD) return;
+
+        amt += this.resistance * 10;
 
         let n = time * 4 | 0;
         let amtPr = amt/n | 0;
@@ -154,7 +209,7 @@ export default class Player extends GamePhysicalElement {
 
             this.effectTimeouts.push(setTimeout(()=>{
 
-                this.healInstantly(amtPr);
+                this.healInstantly(amtPr, false, true);
 
             }, (i+1)*250));
 
@@ -162,15 +217,14 @@ export default class Player extends GamePhysicalElement {
 
     }
 
-    addEffect(type: PlayerEffect, duration: number, data: EffectData = {}) {
+    addEffect(type: PlayerEffect, duration: number) {
 
-        let effectAdd = new TResEffectAdd();
+        let effectAdd = new UResEffectAdd();
         effectAdd.playerId = this.id;
         effectAdd.duration = duration;
         effectAdd.type = type;
-        if (data.multiplier) effectAdd.multiplier = data.multiplier;
 
-        this.game?.broadcast(effectAdd);
+        this.game.broadcast(effectAdd);
 
     }
 
@@ -210,12 +264,46 @@ export default class Player extends GamePhysicalElement {
 
     kill(killer: Player) {
 
+        this.game.onKill(this, killer);
+
+        this.deaths++;
+        killer.kills++;
+
+        this.gemHolder = 0;
+
+        this.updateStats();
+        killer.updateStats();
+
+        let respawnTime = Math.floor(15 + this.deaths * 0.6 - this.kills * 0.2);
+
         let playerDeath = new TResPlayerDeath();
         playerDeath.victim = this.id;
         playerDeath.killer = killer.id;
+        playerDeath.respawnTime = respawnTime;
+        let attackers = this.lastAttacked.filter(attackData => attackData.id != killer.id).map(attackData => attackData.id);
+        attackers.forEach(attackerId => {
+           let attacker = this.game.getPlayer(attackerId);
+           if (attacker) {
+               attacker.assists++;
+               attacker.updateStats();
+           }
+        });
+        if (attackers.length > 0) playerDeath.assist1 = attackers[0];
+        if (attackers.length > 1) playerDeath.assist2 = attackers[1];
+        if (attackers.length > 2) playerDeath.assist3 = attackers[3];
+        if (attackers.length > 3) playerDeath.assist4 = attackers[4];
 
-        this.game?.broadcast(playerDeath);
+        this.game.broadcast(playerDeath);
 
+        setTimeout(() => {
+            this.respawn();
+        }, respawnTime * 1000);
+
+    }
+
+    respawn() {
+        this.state.id = EPlayerState.FREE;
+        //TELEPORT TO A NEW SPOT
     }
 
 

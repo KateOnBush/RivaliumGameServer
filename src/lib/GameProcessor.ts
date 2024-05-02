@@ -1,8 +1,8 @@
 import Lag from "./tools/Lag";
 import Game from "./components/Game";
-import {EGameState} from "./enums/EGameData";
 import UResPlayerUpdate from "./networking/udp/response/UResPlayerUpdate";
 import Ping from "./tools/Ping";
+import {NumericBoolean} from "./types/GameTypes";
 
 export default class GameProcessor {
 
@@ -11,7 +11,7 @@ export default class GameProcessor {
 
 	static update(game: Game){
 
-		if (game.state == EGameState.STARTING) return;
+		if (!game.started) return;
 
 		game.players.forEach(u => {
 	
@@ -33,6 +33,7 @@ export default class GameProcessor {
 				playerUpdate.onGround = pl.state.onGround;
 				playerUpdate.direction = pl.state.orientation == 1 ? 1 : 0;
 				playerUpdate.slide = pl.state.slide;
+				playerUpdate.gemHolder = pl.gemHolder;
 				playerUpdate.characterId = pl.char.id;
 				playerUpdate.characterHealth = pl.char.health;
 				playerUpdate.characterUltimateCharge = pl.char.ultimateCharge;
@@ -40,6 +41,9 @@ export default class GameProcessor {
 				playerUpdate.characterMaxUltimateCharge = pl.char.ultimateChargeMax;
 				playerUpdate.mouseX = pl.mouse.x;
 				playerUpdate.mouseY = pl.mouse.y;
+				playerUpdate.ping = pl.ping.ms;
+				playerUpdate.lethalityAndResistance = pl.lethality + pl.haste * 11;
+				playerUpdate.haste = pl.haste;
 
 				u.send(playerUpdate);
 
@@ -51,9 +55,7 @@ export default class GameProcessor {
 
 	static process(game: Game, deltaTime: number){
 
-		if (game.state == EGameState.STARTING) {
-			return;
-		}
+		if (!game.started) return;
 
 		game.projectiles.forEach(projectile=>{
 

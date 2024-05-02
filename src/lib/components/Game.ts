@@ -6,44 +6,29 @@ import TCPPlayerSocket from "../networking/tcp/TCPPlayerSocket";
 import {NumericBoolean} from "../types/GameTypes";
 import {defaultBounceFriction} from "../Macros";
 import Lag from "../tools/Lag";
-import {EGameState} from "../enums/EGameData";
 import ProjectileList from "../gamedata/instancelist/ProjectileList";
-import {MatchType} from "../database/match/MatchTypes";
+import {MatchType, PlayerID} from "../database/match/MatchTypes";
 import GameProcessor from "../GameProcessor";
 import {FormattedPacket} from "../networking/FormattedPacket";
 import EPacketChannel from "../enums/EPacketChannel";
-import TResGameState from "../networking/tcp/response/TResGameState";
 import TResPlayerCreate from "../networking/tcp/response/TResPlayerCreate";
 import TResProjectileCreate from "../networking/tcp/response/TResProjectileCreate";
 import TResEntityCreate from "../networking/tcp/response/TResEntityCreate";
 import TResExplosionCreate from "../networking/tcp/response/TResExplosionCreate";
 import Match from "../database/match/Match";
-import ETimerType from "../enums/ETimerType";
-
-
-enum RoundPhase {
-    PREPARATION,
-    FIRST_BATTLE,
-    //shrine spawn
-    SECOND_BATTLE,
-    //shrine spawn
-    FINAL_BATTLE
-}
 
 export default class Game {
+
+    started = false;
 
     match: Match;
 
     type: MatchType;
-    state: EGameState = EGameState.STARTING;
 
     players: Player[] = [];
     projectiles: Projectile[] = [];
     entities: Entity[] = [];
     explosions: Explosion[] = [];
-
-    currentRound: number = 0;
-    currentRoundPhase: RoundPhase = RoundPhase.PREPARATION;
 
     constructor(type: MatchType, match: Match) {
         this.type = type;
@@ -51,55 +36,9 @@ export default class Game {
         GameProcessor.GameList.push(this);
     }
 
-    changeState(newState: EGameState) {
-        this.state = newState;
-        let gameState = new TResGameState();
-        gameState.state = newState;
-        gameState.currentRound = this.currentRound;
-        if (newState == EGameState.PRE_ROUND) {
-            gameState.timer = 5;
-            gameState.timerType = ETimerType.PRE_ROUND;
-            setTimeout(()=> {
-                this.startBattle();
-            }, 5000);
-        } else if (newState == EGameState.BATTLE){
-            this.currentRoundPhase++;
-            if (this.currentRoundPhase == RoundPhase.FINAL_BATTLE) {
-                gameState.timer = 60;
-                gameState.timerType = ETimerType.ROUND_END;
-                setTimeout(() => {
-                    this.startRound();
-                }, 60 * 1000);
-            } else {
-                gameState.timer = this.currentRoundPhase == RoundPhase.FIRST_BATTLE ? 30 : 60;
-                gameState.timerType = ETimerType.NEXT_SHRINE_SPAWNS;
-                setTimeout(() => {
-                    this.changeState(EGameState.BATTLE);
-                }, gameState.timer * 1000);
-            }
-        }
-        this.broadcast(gameState);
-    }
-
-    startRound() {
-        this.currentRound++;
-        this.currentRoundPhase = RoundPhase.PREPARATION;
-        this.changeState(EGameState.PRE_ROUND);
-    }
-
-    startBattle() {
-        if (this.currentRound == 9) this.changeState(EGameState.SUDDENDEATH);
-        else this.changeState(EGameState.BATTLE);
-    }
-    setup() {
-        this.startRound();
-    }
-
     start() {
-
         this.announceAllPlayers();
-        this.setup();
-
+        this.started = true;
     }
 
     announceAllPlayers() {
@@ -115,6 +54,7 @@ export default class Game {
         playerCreate.isYou = 0;
         playerCreate.x = player.x;
         playerCreate.y = player.y;
+        playerCreate.teamNumber = player.team;
         playerCreate.characterId = player.char.id;
         playerCreate.characterHealth = player.char.health;
         playerCreate.characterMaxHealth = player.char.healthMax;
@@ -128,13 +68,16 @@ export default class Game {
 
     }
 
+    //CALLBACKS
+    onKill(victim: Player, killer: Player) {};
+
     addPlayer(socket: TCPPlayerSocket, charId: number, playerId: number, team: number){
 
         let nPlayer = new Player(socket, playerId, charId, team);
 
         nPlayer.game = this;
         nPlayer.pos.x = 512;
-        nPlayer.pos.y = 1170;
+        nPlayer.pos.y = 1000;
         socket.player = nPlayer;
         socket.game = this;
 

@@ -65,9 +65,7 @@ export default Character.builder(
         }),
 
         new Ability(EAbilityType.ONETIME, [5], NoAbilityData, function(n, player){
-
             player.heal(100, 3);
-
         }),
 
         

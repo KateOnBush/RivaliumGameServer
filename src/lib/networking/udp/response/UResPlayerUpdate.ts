@@ -21,11 +21,15 @@ export default class UResPlayerUpdate extends UDPPacket {
         .add("onGround", EBufferType.UInt8).asBoolean()
         .add("slide", EBufferType.UInt8).asBoolean()
         .add("direction", EBufferType.UInt8).asBoolean()
+        .add("gemHolder", EBufferType.UInt8).asBoolean()
         .add("characterId", EBufferType.UInt8)
         .add("characterHealth", EBufferType.UInt16)
         .add("characterMaxHealth", EBufferType.UInt16)
         .add("characterUltimateCharge", EBufferType.UInt16)
         .add("characterMaxUltimateCharge", EBufferType.UInt16)
+        .add("ping", EBufferType.UInt16)
+        .add("lethalityAndResistance", EBufferType.UInt8)
+        .add("haste", EBufferType.UInt8)
         .build();
     static override index = UDPServerResponse.PLAYER_UPDATE;
 
@@ -48,5 +52,11 @@ export default class UResPlayerUpdate extends UDPPacket {
     onGround: NumericBoolean;
     slide: NumericBoolean;
     direction: NumericBoolean;
+    gemHolder: NumericBoolean;
+
+    ping: number;
+
+    lethalityAndResistance: number;
+    haste: number;
 
 }

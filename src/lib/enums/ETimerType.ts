@@ -2,7 +2,7 @@ enum ETimerType {
 
     NONE,
     PRE_ROUND,
-    NEXT_SHRINE_SPAWNS,
+    NEXT_ORBSTONE_SPAWNS,
     ROUND_END,
     UNLIMITED_TIME
 

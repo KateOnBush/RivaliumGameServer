@@ -1,13 +1,16 @@
 import {Repository} from "mongodb-typescript";
 import {MongoClient, ObjectId} from "mongodb";
 import Match from "./match/Match";
-import {MatchState} from "./match/MatchTypes";
+import {MatchState, MatchType} from "./match/MatchTypes";
 import Game from "../components/Game";
 import Logger from "../tools/Logger";
 import TCPPlayerSocket from "../networking/tcp/TCPPlayerSocket";
+import CasualGame from "../components/CasualGame";
 
 
-const uri = `mongodb://production-server:${process.env["DATABASE_PASSWORD"]}@127.0.0.1:27017/?authMechanism=DEFAULT`;
+const uri = process.argv.includes("--production") ?
+    `mongodb://production-server:${process.env["DATABASE_PASSWORD"]}@127.0.0.1:27017/?authMechanism=DEFAULT` :
+    "mongodb://127.0.0.1:27017";
 let DatabaseClient = new MongoClient(uri);
 let MatchRepository = new Repository<Match>(Match, DatabaseClient, "match", { databaseName: "epicgame" });
 
@@ -36,9 +39,18 @@ export default class Database {
     }
 
     static registerGame(match: Match) {
-        let game = new Game(match.type, match);
+        let game = this.gameFromMatch(match);
         match.game = game;
         this.games.push(game);
+    }
+
+    static gameFromMatch(match: Match) {
+        switch (match.type) {
+            case MatchType.CASUAL:
+                return new CasualGame(match.type, match);
+            default:
+                return new Game(match.type, match);
+        }
     }
 
     static async saveMatch(match: Match) {

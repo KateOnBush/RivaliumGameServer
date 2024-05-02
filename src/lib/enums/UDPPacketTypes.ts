@@ -18,6 +18,8 @@ export enum UDPServerResponse {
     PLAYER_GRAPPLE,
     PLAYER_FLIP,
     PLAYER_HIT,
+    PLAYER_HEAL,
+    PLAYER_EFFECT_ADD,
 
     PROJECTILE_UPDATE,
 
