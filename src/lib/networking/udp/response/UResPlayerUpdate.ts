@@ -23,10 +23,11 @@ export default class UResPlayerUpdate extends UDPPacket {
         .add("direction", EBufferType.UInt8).asBoolean()
         .add("gemHolder", EBufferType.UInt8).asBoolean()
         .add("characterId", EBufferType.UInt8)
-        .add("characterHealth", EBufferType.UInt16)
-        .add("characterMaxHealth", EBufferType.UInt16)
-        .add("characterUltimateCharge", EBufferType.UInt16)
-        .add("characterMaxUltimateCharge", EBufferType.UInt16)
+        .add("health", EBufferType.UInt16)
+        .add("maxHealth", EBufferType.UInt16)
+        .add("ultimateCharge", EBufferType.UInt16)
+        .add("maxUltimateCharge", EBufferType.UInt16)
+        .add("movementBoost", EBufferType.UInt16, 100)
         .add("ping", EBufferType.UInt16)
         .add("lethalityAndResistance", EBufferType.UInt8)
         .add("haste", EBufferType.UInt8)
@@ -44,15 +45,17 @@ export default class UResPlayerUpdate extends UDPPacket {
     stateId: EPlayerState;
 
     characterId: CharacterList;
-    characterHealth: number;
-    characterUltimateCharge: number;
-    characterMaxHealth: number;
-    characterMaxUltimateCharge: number;
+    health: number;
+    ultimateCharge: number;
+    maxHealth: number;
+    maxUltimateCharge: number;
 
     onGround: NumericBoolean;
     slide: NumericBoolean;
     direction: NumericBoolean;
     gemHolder: NumericBoolean;
+
+    movementBoost: number = 0;
 
     ping: number;
 

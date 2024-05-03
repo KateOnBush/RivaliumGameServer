@@ -1,10 +1,11 @@
-import Ability from "../components/Ability";
+import Ability from "../components/abstract/Ability";
+import Player from "../components/Player";
 
 export type NumericBoolean = 0 | 1;
 export type SignedNumericBoolean = -1 | 0 | 1;
 
-export type AbilitySet = [Ability, Ability, Ability, Ability];
-export type AbilitySetInitializer = () => AbilitySet;
+export type AbilityInitializer = {new(player: Player): Ability};
+export type AbilitySet = Array<AbilityInitializer>;
 
 export type EffectData = {
     multiplier?: number;

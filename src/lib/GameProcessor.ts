@@ -2,7 +2,6 @@ import Lag from "./tools/Lag";
 import Game from "./components/Game";
 import UResPlayerUpdate from "./networking/udp/response/UResPlayerUpdate";
 import Ping from "./tools/Ping";
-import {NumericBoolean} from "./types/GameTypes";
 
 export default class GameProcessor {
 
@@ -34,13 +33,14 @@ export default class GameProcessor {
 				playerUpdate.direction = pl.state.orientation == 1 ? 1 : 0;
 				playerUpdate.slide = pl.state.slide;
 				playerUpdate.gemHolder = pl.gemHolder;
-				playerUpdate.characterId = pl.char.id;
-				playerUpdate.characterHealth = pl.char.health;
-				playerUpdate.characterUltimateCharge = pl.char.ultimateCharge;
-				playerUpdate.characterMaxHealth = pl.char.healthMax;
-				playerUpdate.characterMaxUltimateCharge = pl.char.ultimateChargeMax;
+				playerUpdate.characterId = pl.character.id;
+				playerUpdate.health = pl.health;
+				playerUpdate.ultimateCharge = pl.ultimateCharge;
+				playerUpdate.maxHealth = pl.maxHealth;
+				playerUpdate.maxUltimateCharge = pl.maxUltimateCharge;
 				playerUpdate.mouseX = pl.mouse.x;
 				playerUpdate.mouseY = pl.mouse.y;
+				playerUpdate.movementBoost = pl.boost;
 				playerUpdate.ping = pl.ping.ms;
 				playerUpdate.lethalityAndResistance = pl.lethality + pl.haste * 11;
 				playerUpdate.haste = pl.haste;

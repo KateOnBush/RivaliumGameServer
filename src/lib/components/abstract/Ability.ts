@@ -1,27 +1,28 @@
-import EAbilityType from "../enums/EAbilityType";
-import Player from "./Player";
-import Projectile from "./Projectile";
-import {AbilityData} from "./sub/AbilityData";
+import EAbilityType from "../../enums/EAbilityType";
+import Player from "../Player";
+import Projectile from "../Projectile";
+import {AbilityData} from "../sub/AbilityData";
 
-export default class Ability {
+export default abstract class Ability {
 
-    type: EAbilityType;
-    maxCooldown: number[];
-    cannotCast: boolean;
-    data: AbilityData;
-    castMethod: (n: number, p: Player, a: Ability) => void;
+    abstract type: EAbilityType;
+    abstract maxCooldown: number[];
+    abstract data: AbilityData;
+
     activeTimeout: NodeJS.Timeout | undefined;
     cooldownTimeout: NodeJS.Timeout | undefined;
+    cannotCast: boolean = false;
 
+    player: Player;
     createdProjectile?: Projectile;
 
-    constructor(type: EAbilityType, cooldowns: number[], abilityData: AbilityData, castMethod: (n: number, p: Player, a: Ability) => void) {
-        
-        this.type = type;
-        this.maxCooldown = cooldowns;
+    ultimate: boolean = false;
+
+    abstract onCast(n: number): void;
+
+    constructor(player: Player) {
+        this.player = player;
         this.cannotCast = false;
-        this.data = abilityData;
-        this.castMethod = castMethod;
         this.activeTimeout = undefined;
         this.cooldownTimeout = undefined;
     }
@@ -41,15 +42,17 @@ export default class Ability {
 
     }
 
-    cast(n: number, player: Player){
+    cast(n: number){
 
         if (this.cannotCast) return false;
+        if (this.ultimate && this.player.ultimateCharge < this.player.maxUltimateCharge) return false;
 
         switch(this.type){
             
             case EAbilityType.ONETIME: //one time
             {
-                this.castMethod(n, player, this);
+                if (this.ultimate) this.player.ultimateCharge = 0;
+                this.onCast(n);
                 this.cannotCast = true
                 setTimeout(()=>{
                     this.cannotCast = false;
@@ -60,7 +63,8 @@ export default class Ability {
             case EAbilityType.ACTIVE: //Active
             {
                 if (!this.data.active) {
-                    this.castMethod(n, player, this);
+                    if (this.ultimate) this.player.ultimateCharge = 0;
+                    this.onCast(n);
                     this.cannotCast = true;
                     this.data.active = true;
                     var activeTime = this.data.activeTime,
@@ -79,11 +83,11 @@ export default class Ability {
                 
             }
 
-            case EAbilityType.CHARGES: //Charges
+            case EAbilityType.CHARGES: //! Cannot Be an ULTIMATE
             {
                 if (this.data.charges > 1) {
 
-                    this.castMethod(n, player, this);
+                    this.onCast(n);
                     this.data.charges -= 1;
                     this.cannotCast = true;
                     clearTimeout(this.cooldownTimeout);
@@ -103,7 +107,7 @@ export default class Ability {
 
                 } else if (this.data.charges == 1) {
 
-                    this.castMethod(n, player, this);
+                    this.onCast(n);
                     this.data.charges = 0;
                     this.cannotCast = true;
                     if (this.data.recharger) clearTimeout(this.data.recharger);
@@ -122,7 +126,8 @@ export default class Ability {
             {
                 if (!this.data.active) {
 
-                    this.castMethod(n, player, this);
+                    if (this.ultimate) this.player.ultimateCharge = 0;
+                    this.onCast(n);
                     this.data.active = true;
                     clearTimeout(this.activeTimeout);
                     this.activeTimeout = setTimeout(()=>{
@@ -138,7 +143,7 @@ export default class Ability {
 
                 } else if (this.data.charges > 0) {
 
-                    this.castMethod(n, player, this);
+                    this.onCast(n);
                     this.data.charges -= 1;
                     this.cannotCast = true;
                     if (this.data.charges > 0) setTimeout(()=>{

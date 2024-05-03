@@ -1,13 +1,12 @@
 import Player from "./Player";
-import Projectile, {ProjectileEventMethod} from "./Projectile";
+import Projectile from "./Projectile";
 import Entity from "./Entity";
 import Explosion from "./Explosion";
 import TCPPlayerSocket from "../networking/tcp/TCPPlayerSocket";
 import {NumericBoolean} from "../types/GameTypes";
 import {defaultBounceFriction} from "../Macros";
 import Lag from "../tools/Lag";
-import ProjectileList from "../gamedata/instancelist/ProjectileList";
-import {MatchType, PlayerID} from "../database/match/MatchTypes";
+import {MatchType} from "../database/match/MatchTypes";
 import GameProcessor from "../GameProcessor";
 import {FormattedPacket} from "../networking/FormattedPacket";
 import EPacketChannel from "../enums/EPacketChannel";
@@ -55,11 +54,11 @@ export default class Game {
         playerCreate.x = player.x;
         playerCreate.y = player.y;
         playerCreate.teamNumber = player.team;
-        playerCreate.characterId = player.char.id;
-        playerCreate.characterHealth = player.char.health;
-        playerCreate.characterMaxHealth = player.char.healthMax;
-        playerCreate.characterUltimateCharge = player.char.ultimateCharge;
-        playerCreate.characterMaxUltimateCharge = player.char.ultimateChargeMax;
+        playerCreate.characterId = player.character.id;
+        playerCreate.characterHealth = player.health;
+        playerCreate.characterMaxHealth = player.maxHealth;
+        playerCreate.characterUltimateCharge = player.ultimateCharge;
+        playerCreate.characterMaxUltimateCharge = player.maxUltimateCharge;
 
         this.broadcastExcept(playerCreate, player);
 
@@ -88,8 +87,8 @@ export default class Game {
     }
 
     addProjectile(
+        projectileType: typeof Projectile,
         owner: Player,
-        index: ProjectileList,
         x: number, y: number,
         speed: number, 
         direction: number, 
@@ -99,14 +98,12 @@ export default class Game {
         damage: number,
         bleed: number, 
         heal: number, 
-        bounce: NumericBoolean = 0, 
-        onBounce: ProjectileEventMethod = () => null,
-        onDestroy: ProjectileEventMethod = () => null,
+        bounce: NumericBoolean = 0,
         bounceFriction: number = defaultBounceFriction,
         hasWeight: NumericBoolean = 1
     ){
 
-        let nProjectile = new Projectile(owner, this.generateProjectileID(), index, x, y, speed, direction, collision, dieOnCol, lifespan, damage, bleed, heal, bounce, onBounce, onDestroy, bounceFriction, hasWeight);
+        let nProjectile = new projectileType(owner, this.generateProjectileID(), x, y, speed, direction, collision, dieOnCol, lifespan, damage, bleed, heal, bounce, bounceFriction, hasWeight);
 
         nProjectile.game = this;
         this.projectiles.push(nProjectile);

@@ -1,0 +1,23 @@
+import Ability from "../../../components/abstract/Ability";
+import {ActiveAbilityData} from "../../../components/sub/AbilityData";
+import EAbilityType from "../../../enums/EAbilityType";
+import ExplosionList from "../../instancelist/ExplosionList";
+import Time from "../../../tools/Time";
+import {PlayerEffect} from "../../../components/Player";
+
+export default class MasrUltimate extends Ability {
+
+    data = new ActiveAbilityData(20);
+    maxCooldown = [80];
+    type = EAbilityType.ACTIVE;
+
+    override ultimate = true;
+
+    async onCast(n: number) {
+        let player = this.player;
+        await Time.wait((1/0.15) * 0.38 * 1000);
+        player.addEffect(PlayerEffect.STORMWRATH, 20);
+        player.game.addExplosion(player, ExplosionList.MasrBolt, player.x, player.y, 500, 50);
+    }
+
+}

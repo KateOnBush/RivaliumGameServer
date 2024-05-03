@@ -8,13 +8,14 @@ import Player from "./Player";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
 import TResProjectileDestroy from "../networking/tcp/response/TResProjectileDestroy";
 import UResProjectileUpdate from "../networking/udp/response/UResProjectileUpdate";
+import ProjectileList from "../gamedata/instancelist/ProjectileList";
 
 export type ProjectileEventMethod = (proj: Projectile) => void;
 
 export default class Projectile extends GamePhysicalElement implements ILifetimedElement, IPlayerElement {
 
     owner: Player;
-    index: number;
+    index: ProjectileList;
     collision: NumericBoolean;
     dieOnCol: NumericBoolean;
     lifespan: number;
@@ -23,8 +24,6 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
     bleed: number;
     heal: number;
     bounce: NumericBoolean;
-    bounceMethod: ProjectileEventMethod;
-    destroyMethod: ProjectileEventMethod;
     bounceFriction: number;
     hasWeight: NumericBoolean;
 
@@ -35,7 +34,6 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
     constructor(
         owner: Player,
         id: number,
-        index: number,
         x: number, y: number,
         speed: number, 
         direction: number, 
@@ -45,9 +43,7 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
         damage: number,
         bleed: number, 
         heal: number, 
-        bounce: NumericBoolean, 
-        bounceMethod: ProjectileEventMethod,
-        destroyMethod: ProjectileEventMethod,
+        bounce: NumericBoolean,
         bounceFriction: number,
         hasWeight: NumericBoolean
     ){
@@ -55,7 +51,6 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
         super();
         this.id = id;
         this.owner = owner;
-        this.index = index;
         this.pos = Vector2.cartesian(x, y);
         this.mov = Vector2.cartesian(
             GM.lengthdir_x(speed, direction),
@@ -68,8 +63,6 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
         this.bleed = bleed;
         this.heal = heal;
         this.bounce = bounce;
-        this.bounceMethod = bounceMethod;
-        this.destroyMethod = destroyMethod;
         this.bounceFriction = bounceFriction;
         this.hasWeight = hasWeight;
 
@@ -116,11 +109,7 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
         
     }
 
-    onBounce(){
-        this.bounceMethod(this);
-    }
+    onBounce(){}
 
-    onDestroy(){
-        this.destroyMethod(this);
-    }
+    onDestroy(){}
 }

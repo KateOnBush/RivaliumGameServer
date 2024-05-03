@@ -20,6 +20,7 @@ export enum UDPServerResponse {
     PLAYER_HIT,
     PLAYER_HEAL,
     PLAYER_EFFECT_ADD,
+    PLAYER_EFFECT_REMOVE,
 
     PROJECTILE_UPDATE,
 

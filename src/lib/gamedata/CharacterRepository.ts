@@ -1,36 +1,35 @@
-import CharacterGramin from "./characters/CharacterGramin";
-import CharacterKenn from "./characters/CharacterKenn";
-import CharacterLenya from "./characters/CharacterLenya";
 import CharacterList from "./CharacterList";
-import CharacterMasr from "./characters/CharacterMasr";
+import CharacterMasr from "./characters/Masr/CharacterMasr";
+import CharacterKenn from "./characters/Kenn/CharacterKenn";
+import Character from "../components/abstract/Character";
+import CharacterGramin from "./characters/Gramin/CharacterGramin";
 
 export default class CharacterRepository {
 
-    static get(id: CharacterList){
+    static get(id: CharacterList): typeof Character{
 
         switch(id){
 
             case CharacterList.Kenn: //Kenn
             {
-                return CharacterKenn(id);
+                return CharacterKenn;
             }
             case CharacterList.Gramin: 
             {
-                return CharacterGramin(id);
+                return CharacterGramin;
                 
             }
             case CharacterList.Lenya: 
             {
-                return CharacterLenya(id);
+                return CharacterGramin
             }
 
             case CharacterList.Masr:
             {
-                return CharacterMasr(id);
+                return CharacterMasr;
             }
-
             default:
-                return CharacterKenn(1);
+                return CharacterKenn;
     
         }
 

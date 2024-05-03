@@ -23,7 +23,7 @@ export default class TReqAbilityCast extends TCPIncomingPacket {
         if(!socket.identified || !socket.player) return;
         const sender = socket.player;
 
-        if (sender.char.abilities[this.ability].cast(this.abilityN, sender)) {
+        if (sender.abilities[this.ability].cast(this.abilityN)) {
 
             let casted = new TResPlayerAbilityCast();
             casted.id = sender.id;

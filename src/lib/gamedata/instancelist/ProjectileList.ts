@@ -4,7 +4,7 @@ enum ProjectileList {
     KennDaggerTransformed,
 
     GraminGunBullet,
-    GraminUltButtet,
+    GraminUltBullet,
     GraminGrenade,
     GraminUltRocket,
     GraminUltDebris,

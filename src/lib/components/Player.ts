@@ -1,10 +1,9 @@
 import CharacterRepository from "../gamedata/CharacterRepository";
-import ICharacter from "../interfaces/ICharacter";
 import TCPPlayerSocket from "../networking/tcp/TCPPlayerSocket";
 import GMBuffer from "../tools/GMBuffer";
 import GM from "../tools/GMLib";
 import Vector2 from "../tools/vector/Vector2";
-import {EffectData, NumericBoolean} from "../types/GameTypes";
+import {NumericBoolean} from "../types/GameTypes";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
 import PlayerPing from "./sub/PlayerPing";
 import PlayerState from "./sub/PlayerState";
@@ -20,6 +19,9 @@ import UDPPlayerSocket from "../networking/udp/UDPPlayerSocket";
 import UResPlayerHeal from "../networking/udp/response/UResPlayerHeal";
 import {PlayerID} from "../database/match/MatchTypes";
 import TResPlayerStatsUpdate from "../networking/tcp/response/TResPlayerStatsUpdate";
+import Character, {CharacterUltimateChargeType} from "./abstract/Character";
+import Ability from "./abstract/Ability";
+import UResEffectRemove from "../networking/udp/response/UResEffectRemove";
 
 export enum PlayerEffect {
 
@@ -45,6 +47,9 @@ export enum PlayerEffect {
     LETHARGY, // -% haste
     BLIND,
 
+    SPECTRE,
+    STORMWRATH
+
 }
 
 interface AttackData {
@@ -60,8 +65,14 @@ export default class Player extends GamePhysicalElement {
     mouse: Vector2 = new Vector2();
     state: PlayerState = new PlayerState();
 
-    char: ICharacter;
+    character: typeof Character;
     ping: PlayerPing = new PlayerPing();
+    abilities: Ability[] = [];
+
+    health: number = 0;
+    ultimateCharge: number = 0;
+    get maxHealth() {return this.character.maxHealth;}
+    get maxUltimateCharge() {return this.character.maxUltimateCharge;}
 
     kills: number = 0;
     deaths: number = 0;
@@ -72,6 +83,7 @@ export default class Player extends GamePhysicalElement {
     haste: number = 0;
 
     boost: number = 1;
+    boostTimeouts: NodeJS.Timeout[] = [];
 
     matchPlayer: MatchPlayer;
 
@@ -81,17 +93,28 @@ export default class Player extends GamePhysicalElement {
     gemPlants: number = 0;
 
     effectTimeouts: NodeJS.Timeout[] = [];
+    actionTimeouts: NodeJS.Timeout[] = []; //TODO: Add all actions in here
 
     lastAttacked: AttackData[] = [];
 
-    constructor(socket: TCPPlayerSocket, id: number, charid: number, team: number = 0, position?: Vector2, state?: PlayerState){
+    redemptiveUntil: number = 0;
+    protectedUntil: number = 0;
+    get redemptive() { return this.redemptiveUntil > Date.now(); }
+    get protected() { return this.protectedUntil > Date.now(); }
+    setRedemptive(duration: number) { this.redemptiveUntil = Math.max(this.redemptiveUntil, Date.now() + duration); }
+    setProtected(duration: number) { this.protectedUntil = Math.max(this.protectedUntil, Date.now() + duration); }
+    removeProtection() {this.protectedUntil = 0;}
+
+    constructor(socket: TCPPlayerSocket, id: number, charId: number, team: number = 0, position?: Vector2, state?: PlayerState){
 
         super();
         this.TCPsocket = socket;
         this.id = id;
         if (position) this.pos = position;
         if (state) this.state = state;
-        this.char = CharacterRepository.get(charid);
+        this.character = CharacterRepository.get(charId);
+        this.abilities = this.character.abilities.map(abilityInitializer => new abilityInitializer(this));
+        this.health = this.maxHealth;
         this.team = team;
 
     }
@@ -108,15 +131,10 @@ export default class Player extends GamePhysicalElement {
 
     applyBoost(multiplier: number, time: number) {
         this.boost *= multiplier;
-        setTimeout(()=>{
+        let timeout = setTimeout(()=>{
             this.boost /= multiplier;
         }, time * 1000);
-    }
-
-    reset(){
-
-        this.char = CharacterRepository.get(this.char.id);
-
+        this.boostTimeouts.push(timeout);
     }
 
     get dead() { return this.state.id == EPlayerState.DEAD };
@@ -126,6 +144,12 @@ export default class Player extends GamePhysicalElement {
         if (this.state.id == EPlayerState.DEAD) return;
         if (this.team == attacker.team) return;
 
+        if (!burn && this.protected) {
+            this.removeEffect(PlayerEffect.PROTECTION);
+            this.removeProtection();
+        }
+        if (this.redemptive) return;
+
         this.lastAttacked = this.lastAttacked.filter(attackData => attackData.id != attacker.id);
         if (this.lastAttacked.length > 4) this.lastAttacked.shift();
         this.lastAttacked.push({id: attacker.id, time: Date.now()});
@@ -133,12 +157,14 @@ export default class Player extends GamePhysicalElement {
         if (!burn) damage = Math.max(damage - 5 * this.resistance, 0.2 * damage);
         damage += burn ? attacker.lethality : 8 * attacker.lethality;
 
-        attacker.char.ultimateCharge += damage;
-        if (attacker.char.ultimateCharge > attacker.char.ultimateChargeMax) attacker.char.ultimateCharge = attacker.char.ultimateChargeMax;
+        if (attacker.character.ultimateChargeType == CharacterUltimateChargeType.DAMAGE) {
+            attacker.char.ultimateCharge += damage;
+            if (attacker.char.ultimateCharge > attacker.char.ultimateChargeMax) attacker.char.ultimateCharge = attacker.char.ultimateChargeMax;
+        }
 
-        this.char.health -= damage;
-        if (this.char.health < 0) {
-            this.char.health = 0;
+        this.health -= damage;
+        if (this.maxHealth < 0) {
+            this.health = 0;
             this.kill(attacker);
 
         }
@@ -175,15 +201,20 @@ export default class Player extends GamePhysicalElement {
 
     }
 
-    healInstantly(amt: number, visual = true, gradual = false){
+    healInstantly(amt: number, healer: Player = this, visual = true, gradual = false){
 
         if (this.state.id == EPlayerState.DEAD) return;
 
         if (!gradual) amt += this.resistance * 10;
 
-        this.char.health += amt;
-        if (this.char.health > this.char.healthMax){
-            this.char.health = this.char.healthMax;
+        if (healer.character.ultimateChargeType == CharacterUltimateChargeType.HEAL) {
+            healer.ultimateCharge += amt;
+            healer.ultimateCharge = Math.min(healer.ultimateCharge, healer.maxUltimateCharge);
+        }
+
+        this.health += amt;
+        if (this.health > this.maxHealth){
+            this.health = this.maxHealth;
         }
 
         if (visual) {
@@ -194,7 +225,7 @@ export default class Player extends GamePhysicalElement {
 
     }
 
-    heal(amt: number, time: number){
+    heal(amt: number, time: number, healer: Player = this){
 
         if (this.state.id == EPlayerState.DEAD) return;
 
@@ -209,7 +240,7 @@ export default class Player extends GamePhysicalElement {
 
             this.effectTimeouts.push(setTimeout(()=>{
 
-                this.healInstantly(amtPr, false, true);
+                this.healInstantly(amtPr, this, false, true);
 
             }, (i+1)*250));
 
@@ -226,6 +257,13 @@ export default class Player extends GamePhysicalElement {
 
         this.game.broadcast(effectAdd);
 
+    }
+
+    removeEffect(type: PlayerEffect) {
+        let effectAdd = new UResEffectRemove();
+        effectAdd.playerId = this.id;
+        effectAdd.type = type;
+        this.game.broadcast(effectAdd);
     }
 
     send(packet: FormattedPacket){
@@ -265,6 +303,8 @@ export default class Player extends GamePhysicalElement {
     kill(killer: Player) {
 
         this.game.onKill(this, killer);
+        this.character.onDeath(this, killer);
+        killer.character.onKill(killer, this);
 
         this.deaths++;
         killer.kills++;
