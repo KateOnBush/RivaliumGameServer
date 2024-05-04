@@ -3,6 +3,7 @@ import CharacterMasr from "./characters/Masr/CharacterMasr";
 import CharacterKenn from "./characters/Kenn/CharacterKenn";
 import Character from "../components/abstract/Character";
 import CharacterGramin from "./characters/Gramin/CharacterGramin";
+import CharacterLenya from "./characters/Lenya/CharacterLenya";
 
 export default class CharacterRepository {
 
@@ -21,7 +22,7 @@ export default class CharacterRepository {
             }
             case CharacterList.Lenya: 
             {
-                return CharacterGramin
+                return CharacterLenya;
             }
 
             case CharacterList.Masr:

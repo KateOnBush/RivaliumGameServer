@@ -30,6 +30,7 @@ export enum TCPServerResponse {
 	ENTITY_CREATE,
     ENTITY_DESTROY,
 
-    TEAM_DATA
+    ORB_CREATE,
+    ORB_PICKUP
 
 }

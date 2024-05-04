@@ -78,9 +78,9 @@ export default class Player extends GamePhysicalElement {
     deaths: number = 0;
     assists: number = 0;
 
-    lethality: number = 0;
-    resistance: number = 0;
-    haste: number = 0;
+    lethality: number = 5;
+    resistance: number = 8;
+    haste: number = 3;
 
     boost: number = 1;
     boostTimeouts: NodeJS.Timeout[] = [];
@@ -115,6 +115,7 @@ export default class Player extends GamePhysicalElement {
         this.character = CharacterRepository.get(charId);
         this.abilities = this.character.abilities.map(abilityInitializer => new abilityInitializer(this));
         this.health = this.maxHealth;
+        this.ultimateCharge = this.maxUltimateCharge;
         this.team = team;
 
     }
@@ -154,19 +155,21 @@ export default class Player extends GamePhysicalElement {
         if (this.lastAttacked.length > 4) this.lastAttacked.shift();
         this.lastAttacked.push({id: attacker.id, time: Date.now()});
 
-        if (!burn) damage = Math.max(damage - 5 * this.resistance, 0.2 * damage);
-        damage += burn ? attacker.lethality : 8 * attacker.lethality;
+        damage += damage * (0.02 * attacker.lethality);
+        damage -= damage * (0.025 * this.resistance);
+        damage = Math.round(damage);
+
+        damage = Math.min(damage, this.health);
 
         if (attacker.character.ultimateChargeType == CharacterUltimateChargeType.DAMAGE) {
-            attacker.char.ultimateCharge += damage;
-            if (attacker.char.ultimateCharge > attacker.char.ultimateChargeMax) attacker.char.ultimateCharge = attacker.char.ultimateChargeMax;
+            attacker.ultimateCharge += damage;
+            if (attacker.ultimateCharge > attacker.maxUltimateCharge) attacker.ultimateCharge = attacker.maxUltimateCharge;
         }
 
         this.health -= damage;
-        if (this.maxHealth < 0) {
+        if (this.health <= 0) {
             this.health = 0;
             this.kill(attacker);
-
         }
 
         if (visual) {
@@ -205,7 +208,9 @@ export default class Player extends GamePhysicalElement {
 
         if (this.state.id == EPlayerState.DEAD) return;
 
-        if (!gradual) amt += this.resistance * 10;
+        if (!gradual) amt += this.resistance * 2;
+
+        amt = Math.min(amt, this.maxHealth - this.health);
 
         if (healer.character.ultimateChargeType == CharacterUltimateChargeType.HEAL) {
             healer.ultimateCharge += amt;
@@ -213,9 +218,6 @@ export default class Player extends GamePhysicalElement {
         }
 
         this.health += amt;
-        if (this.health > this.maxHealth){
-            this.health = this.maxHealth;
-        }
 
         if (visual) {
             let playerHeal = new UResPlayerHeal();

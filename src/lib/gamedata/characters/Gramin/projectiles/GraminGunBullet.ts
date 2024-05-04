@@ -3,6 +3,6 @@ import ProjectileList from "../../../instancelist/ProjectileList";
 
 export default class GraminGunBullet extends Projectile {
 
-    override id = ProjectileList.GraminGunBullet;
+    override index = ProjectileList.GraminGunBullet;
 
 }

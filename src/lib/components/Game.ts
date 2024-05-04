@@ -15,6 +15,8 @@ import TResProjectileCreate from "../networking/tcp/response/TResProjectileCreat
 import TResEntityCreate from "../networking/tcp/response/TResEntityCreate";
 import TResExplosionCreate from "../networking/tcp/response/TResExplosionCreate";
 import Match from "../database/match/Match";
+import ElementalOrb, {OrbType} from "../gamedata/general/ElementalOrb";
+import TResOrbCreate from "../networking/tcp/response/TResOrbCreate";
 
 export default class Game {
 
@@ -147,14 +149,30 @@ export default class Game {
 
     }
 
-    addEntity(owner: Player, index: number, x: number, y: number, health: number, armor: number, lifespan = 10, entityParameters: number[] = []){
+    addEntity(entityType: typeof Entity, owner: Player, x: number, y: number, health: number, armor: number, lifespan = 10, entityParameters: number[] = []){
 
-        let nEntity = new Entity(owner, this.generateEntityID(), index, x, y, health, armor, lifespan, entityParameters);
+        let nEntity = new entityType(owner, this.generateEntityID(), x, y, health, armor, lifespan, entityParameters);
         nEntity.game = this;
         this.entities.push(nEntity);
         this.declareEntity(nEntity);
         return nEntity;
 
+    }
+
+    addOrb(type: OrbType, x: number, y: number, meantFor: Player, lifespan: number = 15) {
+        let nEntity = new ElementalOrb(meantFor, this.generateEntityID(), x, y, 100, 1, lifespan, []);
+        nEntity.game = this;
+        nEntity.type = type;
+        this.entities.push(nEntity);
+        let orbCreatePacket = new TResOrbCreate();
+        orbCreatePacket.x = x;
+        orbCreatePacket.y = y;
+        orbCreatePacket.entityId = nEntity.id;
+        orbCreatePacket.ownerId = meantFor.id;
+        orbCreatePacket.orbType = type;
+        orbCreatePacket.lifespan = lifespan;
+        this.broadcast(orbCreatePacket);
+        return nEntity;
     }
 
     declareEntity(entity: Entity){
@@ -178,14 +196,16 @@ export default class Game {
         this.broadcast(declareEntity);
     }
 
-    addExplosion(owner: Player, index: number, x: number, y: number, radius: number, damage: number){
+    addExplosion(explosionType: typeof Explosion, owner: Player, x: number, y: number, radius: number, damage: number){
 
-        let nExplosion = new Explosion(owner, this.generateExplosionID(), index, x, y, radius, damage);
+        let nExplosion = new explosionType(owner, this.generateExplosionID(), x, y, radius, damage);
 
         nExplosion.game = this;
         this.explosions.push(nExplosion);
 
         this.declareExplosion(nExplosion);
+
+        nExplosion.trigger();
 
     }
 

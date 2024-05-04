@@ -3,6 +3,6 @@ import ProjectileList from "../../../instancelist/ProjectileList";
 
 export default class MasrBolt extends Projectile {
 
-    override id = ProjectileList.MasrBolt;
+    override index = ProjectileList.MasrBolt;
 
 }

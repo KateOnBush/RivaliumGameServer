@@ -2,7 +2,7 @@ import EBufferType from "../../../enums/EBufferType";
 import {TCPServerResponse} from "../../../enums/TCPPacketTypes";
 import FormattedPacketAttributeListBuilder from "../../attributes/FormattedPacketAttributeListBuilder";
 import TCPPacket from "../TCPPacket";
-import {CasualGameState} from "../../../components/CasualGame";
+import {CasualGameState} from "../../../components/games/CasualGame";
 
 export default class TResCasualGameState extends TCPPacket {
 

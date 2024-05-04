@@ -1,8 +1,8 @@
-import TResCasualGameState from "../networking/tcp/response/TResCasualGameState";
-import ETimerType from "../enums/ETimerType";
-import Game from "./Game";
-import TResTimerUpdate from "../networking/tcp/response/TResTimerUpdate";
-import Player from "./Player";
+import TResCasualGameState from "../../networking/tcp/response/TResCasualGameState";
+import ETimerType from "../../enums/ETimerType";
+import Game from "../Game";
+import TResTimerUpdate from "../../networking/tcp/response/TResTimerUpdate";
+import Player from "../Player";
 
 export enum CasualGameState {
 

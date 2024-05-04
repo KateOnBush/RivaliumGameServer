@@ -3,6 +3,6 @@ import ProjectileList from "../../../instancelist/ProjectileList";
 
 export default class LenyaRedBullet extends Projectile {
 
-    override id = ProjectileList.LenyaRedBullet;
+    override index = ProjectileList.LenyaRedBullet;
 
 }

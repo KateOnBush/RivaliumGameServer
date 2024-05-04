@@ -42,7 +42,7 @@ export default class GameProcessor {
 				playerUpdate.mouseY = pl.mouse.y;
 				playerUpdate.movementBoost = pl.boost;
 				playerUpdate.ping = pl.ping.ms;
-				playerUpdate.lethalityAndResistance = pl.lethality + pl.haste * 11;
+				playerUpdate.lethalityAndResistance = pl.lethality + pl.resistance * 11;
 				playerUpdate.haste = pl.haste;
 
 				u.send(playerUpdate);

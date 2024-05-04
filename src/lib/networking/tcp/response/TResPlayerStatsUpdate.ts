@@ -6,11 +6,11 @@ import TCPPacket from "../TCPPacket";
 export default class TResPlayerStatsUpdate extends TCPPacket {
 
     static override attributes = new FormattedPacketAttributeListBuilder()
-        .add("playerId", EBufferType.UInt8)
+        .add("playerId", EBufferType.UInt16)
         .add("kills", EBufferType.UInt16)
         .add("deaths", EBufferType.UInt16)
         .add("assists", EBufferType.UInt16)
-        .add("gemPlants", EBufferType.UInt8)
+        .add("gemPlants", EBufferType.UInt16)
         .build();
     static override index = TCPServerResponse.PLAYER_STATS_UPDATE;
 

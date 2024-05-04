@@ -1,6 +1,7 @@
 import Ability from "../../../components/abstract/Ability";
 import {NoAbilityData} from "../../../components/sub/AbilityData";
 import EAbilityType from "../../../enums/EAbilityType";
+import LenyaWall from "./entities/LenyaWall";
 
 export default class LenyaSignature1 extends Ability {
 
@@ -15,9 +16,8 @@ export default class LenyaSignature1 extends Ability {
         let createdX = x + (Math.sign(mousex - x) == Math.sign(movvec.x) ? 16*movvec.x : Math.sign(mousex - x)*60),
             createdY = y + 100;
         let d = player.mouseDirection;
-        player.game.addEntity(
+        player.game.addEntity(LenyaWall,
             player,
-            0,
             createdX, createdY,
             100, .1,
             10,

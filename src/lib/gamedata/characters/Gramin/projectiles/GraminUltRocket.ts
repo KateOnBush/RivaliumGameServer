@@ -3,15 +3,15 @@ import ProjectileList from "../../../instancelist/ProjectileList";
 import ExplosionList from "../../../instancelist/ExplosionList";
 import GM from "../../../../tools/GMLib";
 import GraminUltDebris from "./GraminUltDebris";
+import GraminUltExplosion from "../explosions/GraminUltExplosion";
 
 export default class GraminUltRocket extends Projectile {
 
-    override id = ProjectileList.GraminUltRocket;
+    override index = ProjectileList.GraminUltRocket;
 
     override onDestroy() {
         let player = this.owner;
-        player.game.addExplosion(player,
-            ExplosionList.GraminUlt,
+        player.game.addExplosion(GraminUltExplosion, player,
             this.x, this.y,
             600, 250
         )

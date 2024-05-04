@@ -3,25 +3,28 @@ import Player from "./Player";
 import GamePhysicalElement from "./abstract/GamePhysicalElement";
 import UResEntityUpdate from "../networking/udp/response/UResEntityUpdate";
 import TResEntityDestroy from "../networking/tcp/response/TResEntityDestroy";
+import EntityList from "../gamedata/instancelist/EntityList";
+import IPlayerElement from "../interfaces/IPlayerElement";
 
 
-export default class Entity extends GamePhysicalElement implements ILifetimedElement {
+export default class Entity extends GamePhysicalElement implements ILifetimedElement, IPlayerElement {
+
+    index: EntityList;
 
     owner: Player;
-    index: number;
     health: number;
     armor: number;
     parameters: number[] = [0, 0, 0, 0, 0];
+
     lifespan: number;
     lifespanTimeout: NodeJS.Timeout;
 
-    constructor(owner: Player, id: number, index: number, x: number, y: number, health: number, armor: number, lifespan: number = 10, entityParameters: number[] = []){
+    constructor(owner: Player, id: number, x: number, y: number, health: number, armor: number, lifespan: number = 10, entityParameters: number[] = []){
 
         super();
         this.owner = owner;
         this.id = id;
         this.pos.set(x, y);
-        this.index = index;
         this.health = health;
         this.armor = armor;
         this.parameters = entityParameters;
@@ -60,13 +63,11 @@ export default class Entity extends GamePhysicalElement implements ILifetimedEle
         updateEntity.param4 = this.parameters[3];
         updateEntity.param5 = this.parameters[4];
 
-        this.game?.broadcast(updateEntity);
+        this.game.broadcast(updateEntity);
 
     }
 
     destroy(){
-
-        if (!this.game) return;
 
         let entityDestroy = new TResEntityDestroy();
         entityDestroy.entityId = this.id;

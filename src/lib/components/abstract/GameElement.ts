@@ -10,17 +10,10 @@ export default abstract class GameElement {
 
     pos: Vector2 = new Vector2();
 
-    stepMethods: ((t: this, dt: number) => void)[] = [];
-
-    step(method: (t: this, dt: number) => void): this{
-        this.stepMethods.push(method);
-        return this;
-    }
+    step(dt: number){}
 
     process(dt: number){
-        for(const m of this.stepMethods){
-            m(this, dt);
-        }
+        this.step(dt);
     }
 
     get x() {

@@ -5,7 +5,7 @@ import {MatchState, MatchType} from "./match/MatchTypes";
 import Game from "../components/Game";
 import Logger from "../tools/Logger";
 import TCPPlayerSocket from "../networking/tcp/TCPPlayerSocket";
-import CasualGame from "../components/CasualGame";
+import CasualGame from "../components/games/CasualGame";
 
 
 const uri = process.argv.includes("--production") ?

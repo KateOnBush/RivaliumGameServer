@@ -1,4 +1,4 @@
-import Character from "../../../components/abstract/Character";
+import Character, {CharacterUltimateChargeType} from "../../../components/abstract/Character";
 import CharacterList from "../../CharacterList";
 import {AbilitySet} from "../../../types/GameTypes";
 import LenyaBasicAttack from "./LenyaBasicAttack";
@@ -13,7 +13,9 @@ export default class CharacterLenya extends Character {
     static override characterName = "Lenya";
 
     static override maxHealth = 640;
-    static override maxUltimateCharge = 700;
+    static override maxUltimateCharge = 1500;
+
+    static override ultimateChargeType = CharacterUltimateChargeType.HEAL;
 
     static override abilities: AbilitySet = [
         LenyaBasicAttack,

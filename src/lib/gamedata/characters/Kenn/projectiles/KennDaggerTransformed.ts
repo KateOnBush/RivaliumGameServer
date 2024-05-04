@@ -3,6 +3,6 @@ import ProjectileList from "../../../instancelist/ProjectileList";
 
 export default class KennDaggerTransformed extends Projectile {
 
-    override id = ProjectileList.KennDaggerTransformed;
+    override index = ProjectileList.KennDaggerTransformed;
 
 }

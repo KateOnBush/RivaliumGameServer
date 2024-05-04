@@ -45,7 +45,8 @@ export default abstract class Ability {
     cast(n: number){
 
         if (this.cannotCast) return false;
-        if (this.ultimate && this.player.ultimateCharge < this.player.maxUltimateCharge) return false;
+        if (this.ultimate && this.player.ultimateCharge < this.player.maxUltimateCharge
+        && !(this.type == EAbilityType.ACTIVECHARGES && this.data.active)) return false;
 
         switch(this.type){
             
