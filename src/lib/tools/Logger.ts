@@ -93,8 +93,8 @@ export default class Logger {
     }
 
     static clearLine() {
-        process.stdout.moveCursor(0, -1);
-        process.stdout.clearLine(1);
+        if (process.stdout.moveCursor) process.stdout.moveCursor(0, -1);
+        if (process.stdout.clearLine) process.stdout.clearLine(1);
     }
 
     static clear() {
