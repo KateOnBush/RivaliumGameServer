@@ -1,0 +1,40 @@
+name: Deployment
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH Deployment
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+            export PM2_HOME="$HOME/.pm2"
+            export PATH="$PM2_HOME/bin:$PATH"
+            
+            nvm use 18.18
+            
+            pm2 stop GameServer || true
+            
+            cd ~/production/game-server/
+            
+            git pull origin production
+            git status
+            
+            npm install
+            
+            mkdir -p ./logs
+            
+            pm2 start --name GameServer --log ./logs/%YYYY-MM-DD%.log npm -- run start:production
