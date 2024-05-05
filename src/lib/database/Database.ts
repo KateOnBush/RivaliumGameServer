@@ -9,7 +9,7 @@ import CasualGame from "../components/games/CasualGame";
 
 
 const uri = process.argv.includes("--production") ?
-    `mongodb://production-server:${process.env["DATABASE_PASSWORD"]}@127.0.0.1:27017/?authMechanism=DEFAULT` :
+    `mongodb://myUserAdmin:${process.env["DATABASE_PASSWORD"]}@127.0.0.1:27017/?authMechanism=DEFAULT` :
     "mongodb://127.0.0.1:27017";
 let DatabaseClient = new MongoClient(uri);
 let MatchRepository = new Repository<Match>(Match, DatabaseClient, "match", { databaseName: "epicgame" });
