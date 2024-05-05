@@ -22,6 +22,7 @@ import TResPlayerStatsUpdate from "../networking/tcp/response/TResPlayerStatsUpd
 import Character, {CharacterUltimateChargeType} from "./abstract/Character";
 import Ability from "./abstract/Ability";
 import UResEffectRemove from "../networking/udp/response/UResEffectRemove";
+import TResPlayerRespawn from "../networking/tcp/response/TResPlayerRespawn";
 
 export enum PlayerEffect {
 
@@ -61,6 +62,8 @@ export default class Player extends GamePhysicalElement {
 
     TCPsocket: TCPPlayerSocket;
     UDPsocket: UDPPlayerSocket = new UDPPlayerSocket("", 0);
+    receivingCounter: number = 0;
+    sendingCounter: number = 0;
 
     mouse: Vector2 = new Vector2();
     state: PlayerState = new PlayerState();
@@ -118,6 +121,10 @@ export default class Player extends GamePhysicalElement {
         this.ultimateCharge = this.maxUltimateCharge;
         this.team = team;
 
+    }
+
+    override step(dt: number) {
+        this.applyGravity = (this.state.onGround == 1);
     }
 
     updateStats() {
@@ -345,7 +352,13 @@ export default class Player extends GamePhysicalElement {
 
     respawn() {
         this.state.id = EPlayerState.FREE;
-        //TELEPORT TO A NEW SPOT
+        this.health = this.maxHealth;
+
+        let respawnPacket = new TResPlayerRespawn();
+        respawnPacket.playerId = this.id;
+
+        this.game.broadcast(respawnPacket);
+
     }
 
 

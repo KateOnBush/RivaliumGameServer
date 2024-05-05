@@ -12,45 +12,6 @@ export default class GameProcessor {
 
 		if (!game.started) return;
 
-		game.players.forEach(u => {
-	
-			game.players.forEach(pl=>{
-
-				let playerUpdate = new UResPlayerUpdate();
-	
-				let comp = Lag.compensateClose(u.ping.ms);
-				if (pl.speed < 1) comp = 0;
-	
-				let pred = Lag.predictPosition(pl.pos, pl.mov, comp);
-
-				playerUpdate.playerId = pl.id;
-				playerUpdate.stateId = pl.state.id;
-				playerUpdate.x = pred.pos.x;
-				playerUpdate.y = pred.pos.y;
-				playerUpdate.movX = pred.mov.x;
-				playerUpdate.movY = pred.mov.y;
-				playerUpdate.onGround = pl.state.onGround;
-				playerUpdate.direction = pl.state.orientation == 1 ? 1 : 0;
-				playerUpdate.slide = pl.state.slide;
-				playerUpdate.gemHolder = pl.gemHolder;
-				playerUpdate.characterId = pl.character.id;
-				playerUpdate.health = pl.health;
-				playerUpdate.ultimateCharge = pl.ultimateCharge;
-				playerUpdate.maxHealth = pl.maxHealth;
-				playerUpdate.maxUltimateCharge = pl.maxUltimateCharge;
-				playerUpdate.mouseX = pl.mouse.x;
-				playerUpdate.mouseY = pl.mouse.y;
-				playerUpdate.movementBoost = pl.boost;
-				playerUpdate.ping = pl.ping.ms;
-				playerUpdate.lethalityAndResistance = pl.lethality + pl.resistance * 11;
-				playerUpdate.haste = pl.haste;
-
-				u.send(playerUpdate);
-
-			});
-
-		})
-
 	}
 
 	static process(game: Game, deltaTime: number){

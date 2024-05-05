@@ -107,6 +107,7 @@ export default class CasualGame extends Game {
 
     override onKill(victim: Player, killer: Player) {
         if (victim.gemHolder) this.assignNewGemHolder();
+        this.addOrb(Math.floor(Math.random() * 3), victim.x, victim.y, killer);
     };
 
 }

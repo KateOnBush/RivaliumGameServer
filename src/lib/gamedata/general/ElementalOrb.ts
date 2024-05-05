@@ -42,7 +42,7 @@ export default class ElementalOrb extends Entity {
             this.justSpawned -= dt/60;
             if (this.justSpawned > 0) return;
             for(const player of this.game.players){
-                if (Vector2.subtract(player.pos, this.pos).magnitude() < 400) {
+                if (!player.dead && Vector2.subtract(player.pos, this.pos).magnitude() < 400) {
                     if ((this.type == OrbType.LETHALITY && player.lethality == 10) ||
                         (this.type == OrbType.RESISTANCE && player.resistance == 10) ||
                         (this.type == OrbType.HASTE && player.haste == 10)) continue;
