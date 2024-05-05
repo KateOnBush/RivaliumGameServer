@@ -27,7 +27,7 @@ jobs:
             nvm use 18.18
             
             pm2 stop GameServer || true
-            pm2 remove GameServer || true
+            pm2 delete GameServer || true
             
             cd ~/production/game-server/
             
