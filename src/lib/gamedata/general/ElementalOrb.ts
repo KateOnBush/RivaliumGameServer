@@ -19,7 +19,7 @@ export default class ElementalOrb extends Entity {
     pickedUpBy: Player;
     pickupBlend: number = 0;
 
-    justSpawned: number = 0.5;
+    justSpawned: number = 1.5;
 
     override step(dt: number) {
         if (this.pickedUp) {

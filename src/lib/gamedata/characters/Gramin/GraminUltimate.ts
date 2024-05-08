@@ -7,7 +7,7 @@ import GraminUltRocket from "./projectiles/GraminUltRocket";
 
 export default class GraminUltimate extends Ability {
 
-    data = new ActiveChargesAbilityData(30, 3, 0, 5);
+    data = new ActiveChargesAbilityData(40, 3, 0, 5);
     maxCooldown = [120];
     type = EAbilityType.ACTIVECHARGES;
 

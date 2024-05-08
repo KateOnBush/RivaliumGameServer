@@ -5,14 +5,14 @@ import {PlayerEffect} from "../../../components/Player";
 
 export default class KennUltimate extends Ability {
 
-    data = new ActiveAbilityData(25);
+    data = new ActiveAbilityData(45);
     maxCooldown = [80];
     type = EAbilityType.ACTIVE;
 
     override ultimate = true;
 
     onCast(n: number) {
-        this.player.addEffect(PlayerEffect.SPECTRE, 25);
+        this.player.addEffect(PlayerEffect.SPECTRE, 45);
     };
 
 }

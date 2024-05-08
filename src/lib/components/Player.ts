@@ -81,9 +81,9 @@ export default class Player extends GamePhysicalElement {
     deaths: number = 0;
     assists: number = 0;
 
-    lethality: number = 5;
-    resistance: number = 8;
-    haste: number = 3;
+    lethality: number = 0;
+    resistance: number = 0;
+    haste: number = 0;
 
     boost: number = 1;
     boostTimeouts: NodeJS.Timeout[] = [];
