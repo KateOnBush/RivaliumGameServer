@@ -104,8 +104,8 @@ export default class Player extends GamePhysicalElement {
     protectedUntil: number = 0;
     get redemptive() { return this.redemptiveUntil > Date.now(); }
     get protected() { return this.protectedUntil > Date.now(); }
-    setRedemptive(duration: number) { this.redemptiveUntil = Math.max(this.redemptiveUntil, Date.now() + duration); }
-    setProtected(duration: number) { this.protectedUntil = Math.max(this.protectedUntil, Date.now() + duration); }
+    setRedemptive(duration: number) { this.redemptiveUntil = Math.max(this.redemptiveUntil, Date.now() + duration * 1000); }
+    setProtected(duration: number) { this.protectedUntil = Math.max(this.protectedUntil, Date.now() + duration * 1000); }
     removeProtection() {this.protectedUntil = 0;}
 
     constructor(socket: TCPPlayerSocket, id: number, charId: number, team: number = 0, position?: Vector2, state?: PlayerState){
