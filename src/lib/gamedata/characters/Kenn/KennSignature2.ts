@@ -18,6 +18,7 @@ export default class KennSignature2 extends Ability {
 
         let player = this.player;
         player.addEffect(PlayerEffect.REDEMPTION, 3);
+        player.setRedemptive(3);
         await Time.wait(1000);
         const delays = new Array(10);
         let inUlt = player.abilities[3].data.active;
