@@ -17,6 +17,7 @@ export default class UReqProjectileUpdate extends UDPIncomingPacket {
         .build();
     static override index = UDPServerRequest.PROJECTILE_UPDATE;
 
+    collidedEntity: number;
     projId: number;
     x: number;
     y: number;
@@ -41,6 +42,8 @@ export default class UReqProjectileUpdate extends UDPIncomingPacket {
 
         proj.mov = prediction.mov;
         proj.pos = prediction.pos;
+
+        if (proj.cancelled) return;
 
         if (proj.dieOnCol){
             proj.destroy();

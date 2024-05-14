@@ -9,7 +9,7 @@ export default class GraminSignature2 extends Ability {
     type = EAbilityType.ONETIME;
 
     onCast(n: number): void {
-        this.player.healInstantly(100);
+        this.player.healInstantly(50);
     }
 
 }

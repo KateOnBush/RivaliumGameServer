@@ -18,7 +18,7 @@ export default class LenyaUltimate extends Ability {
         setTimeout(()=>{
 
             player.game.addEntity(LenyaUltimateRadius, player,
-                player.x, player.y, 0, 0, 10,
+                player.x, player.y, 0, 0, 30,
                 [3500, 0.01]);
 
         }, 10/3 * 1000 * .5 | 0)

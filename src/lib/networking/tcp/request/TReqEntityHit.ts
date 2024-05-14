@@ -25,7 +25,8 @@ export default class TReqEntityHit extends TCPIncomingPacket {
         if (!damagedEntity) return;
         if (!damagingProjectile) return;
 
-        damagedEntity.hit(damagingProjectile.damage, sender.player);
+        damagedEntity.onHit(damagingProjectile);
+        if (!damagingProjectile.cancelled) damagedEntity.hit(damagingProjectile.damage, sender.player);
         if (damagingProjectile.dieOnCol) damagingProjectile.destroy();
 
     }

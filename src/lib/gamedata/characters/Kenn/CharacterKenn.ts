@@ -25,8 +25,8 @@ export default class CharacterKenn extends Character {
 
     static override onKill(player: Player, victim: Player) {
         if (player.abilities[3].data.active) {
-            player.addEffect(PlayerEffect.INVISIBILITY, 3);
-            player.heal(100, 3);
+            player.addEffect(PlayerEffect.INVISIBILITY, 4);
+            player.heal(player.maxHealth - player.health, 4);
         }
     }
 

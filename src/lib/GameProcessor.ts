@@ -16,8 +16,6 @@ export default class GameProcessor {
 
 	static process(game: Game, deltaTime: number){
 
-		if (!game.started) return;
-
 		game.projectiles.forEach(projectile=>{
 
 			if (projectile.collided) return;

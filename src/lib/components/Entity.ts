@@ -5,6 +5,7 @@ import UResEntityUpdate from "../networking/udp/response/UResEntityUpdate";
 import TResEntityDestroy from "../networking/tcp/response/TResEntityDestroy";
 import EntityList from "../gamedata/instancelist/EntityList";
 import IPlayerElement from "../interfaces/IPlayerElement";
+import Projectile from "./Projectile";
 
 
 export default class Entity extends GamePhysicalElement implements ILifetimedElement, IPlayerElement {
@@ -39,6 +40,7 @@ export default class Entity extends GamePhysicalElement implements ILifetimedEle
 
         this.health -= damage * (1 - this.armor);
         if (this.health <= 0) {
+            this.health = 0;
             this.destroy();
         } else {
             this.update();
@@ -78,5 +80,7 @@ export default class Entity extends GamePhysicalElement implements ILifetimedEle
         clearTimeout(this.lifespanTimeout);
 
     }
+
+    onHit(projectile: Projectile) {};
 
 }

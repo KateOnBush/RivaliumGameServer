@@ -62,12 +62,17 @@ export default class CasualGame extends Game {
         this.updateState();
         let timerUpdate = new TResTimerUpdate();
         if (newState == CasualGameState.PREROUND) {
+            this.players.forEach(player => {
+                if (player.dead) player.respawn();
+                player.state.blocked = 1;
+            });
             timerUpdate.timer = 5;
             timerUpdate.timerType = ETimerType.PRE_ROUND;
             setTimeout(()=> {
                 this.startBattle();
             }, 5000);
         } else if (newState == CasualGameState.BATTLE){
+            this.players.forEach(player => player.state.blocked = 0);
             this.currentRoundPhase++;
             if (this.currentRoundPhase == RoundPhase.FINAL_BATTLE) {
                 timerUpdate.timer = 150;

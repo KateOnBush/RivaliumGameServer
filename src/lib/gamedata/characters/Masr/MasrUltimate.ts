@@ -18,7 +18,7 @@ export default class MasrUltimate extends Ability {
         let player = this.player;
         await Time.wait((1/0.15) * 0.38 * 1000);
         player.addEffect(PlayerEffect.STORMWRATH, 50);
-        player.game.addExplosion(MasrBoltExplosion, player, player.x, player.y, 1000, 50);
+        player.game.addExplosion(MasrBoltExplosion, player, player.x, player.y, 1000, 150);
     }
 
 }

@@ -23,6 +23,7 @@ import Character, {CharacterUltimateChargeType} from "./abstract/Character";
 import Ability from "./abstract/Ability";
 import UResEffectRemove from "../networking/udp/response/UResEffectRemove";
 import TResPlayerRespawn from "../networking/tcp/response/TResPlayerRespawn";
+import CasualGame from "./games/CasualGame";
 
 export enum PlayerEffect {
 
@@ -145,11 +146,11 @@ export default class Player extends GamePhysicalElement {
         this.boostTimeouts.push(timeout);
     }
 
-    get dead() { return this.state.id == EPlayerState.DEAD };
+    get dead() { return this.state.dead == 1; }
 
     hit(damage: number, attacker: Player, visual: boolean = true, burn = false) {
 
-        if (this.state.id == EPlayerState.DEAD) return;
+        if (this.dead) return;
         if (this.team == attacker.team) return;
 
         if (!burn && this.protected) {
@@ -213,7 +214,7 @@ export default class Player extends GamePhysicalElement {
 
     healInstantly(amt: number, healer: Player = this, visual = true, gradual = false){
 
-        if (this.state.id == EPlayerState.DEAD) return;
+        if (this.dead) return;
 
         if (!gradual) amt += this.resistance * 2;
 
@@ -236,7 +237,7 @@ export default class Player extends GamePhysicalElement {
 
     heal(amt: number, time: number, healer: Player = this){
 
-        if (this.state.id == EPlayerState.DEAD) return;
+        if (this.dead) return;
 
         amt += this.resistance * 10;
 
@@ -311,6 +312,8 @@ export default class Player extends GamePhysicalElement {
 
     kill(killer: Player) {
 
+        this.state.dead = 1;
+
         this.game.onKill(this, killer);
         this.character.onDeath(this, killer);
         killer.character.onKill(killer, this);
@@ -351,14 +354,14 @@ export default class Player extends GamePhysicalElement {
     }
 
     respawn() {
-        this.state.id = EPlayerState.FREE;
+
+        this.state.dead = 0;
         this.health = this.maxHealth;
 
         let respawnPacket = new TResPlayerRespawn();
         respawnPacket.playerId = this.id;
 
         this.game.broadcast(respawnPacket);
-
     }
 
 

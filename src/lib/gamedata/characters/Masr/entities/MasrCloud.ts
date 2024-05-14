@@ -6,4 +6,8 @@ export default class MasrCloud extends Entity {
 
     override index = EntityList.MasrCloud;
 
+    override onHit(projectile: Projectile) {
+        projectile.cancel();
+    }
+
 }

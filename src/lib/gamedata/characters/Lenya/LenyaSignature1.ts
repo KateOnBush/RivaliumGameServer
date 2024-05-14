@@ -19,7 +19,7 @@ export default class LenyaSignature1 extends Ability {
         player.game.addEntity(LenyaWall,
             player,
             createdX, createdY,
-            100, .1,
+            100, .2,
             10,
             [d, d, d, d]
         )

@@ -87,6 +87,8 @@ export default class UReqPositionUpdate extends UDPIncomingPacket {
             playerUpdate.direction = sender.state.orientation == 1 ? 1 : 0;
             playerUpdate.slide = sender.state.slide;
             playerUpdate.gemHolder = sender.gemHolder;
+            playerUpdate.dead = sender.state.dead;
+            playerUpdate.blocked = sender.state.blocked;
             playerUpdate.characterId = sender.character.id;
             playerUpdate.health = sender.health;
             playerUpdate.ultimateCharge = sender.ultimateCharge;

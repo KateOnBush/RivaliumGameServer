@@ -22,6 +22,8 @@ export default class UResPlayerUpdate extends UDPPacket {
         .add("onGround", EBufferType.UInt8).asBoolean()
         .add("slide", EBufferType.UInt8).asBoolean()
         .add("direction", EBufferType.UInt8).asBoolean()
+        .add("dead", EBufferType.UInt8).asBoolean()
+        .add("blocked", EBufferType.UInt8).asBoolean()
         .add("gemHolder", EBufferType.UInt8).asBoolean()
         .add("characterId", EBufferType.UInt8)
         .add("health", EBufferType.UInt16)
@@ -56,6 +58,8 @@ export default class UResPlayerUpdate extends UDPPacket {
     onGround: NumericBoolean;
     slide: NumericBoolean;
     direction: NumericBoolean;
+    dead: NumericBoolean;
+    blocked: NumericBoolean;
     gemHolder: NumericBoolean;
 
     movementBoost: number = 0;

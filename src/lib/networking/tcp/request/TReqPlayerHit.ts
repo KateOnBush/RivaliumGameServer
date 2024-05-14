@@ -38,6 +38,7 @@ export default class TReqPlayerHit extends TCPIncomingPacket {
 
         let playerHit = sender.game.getPlayer(this.hitId);
         if (playerHit) {
+            if (playerHit.dead) return;
             playerHit.hit(proj.damage, sender);
             if (proj.bleed > 0)
                 playerHit.burn(proj.bleed, sender, 3);

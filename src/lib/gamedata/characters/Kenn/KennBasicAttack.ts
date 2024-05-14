@@ -8,7 +8,7 @@ import KennDaggerTransformed from "./projectiles/KennDaggerTransformed";
 export default class KennBasicAttack extends Ability {
 
     data = NoAbilityData;
-    maxCooldown = [0.3, 1];
+    maxCooldown = [0.2, 1];
     type = EAbilityType.ONETIME;
 
     onCast(n: number): void {
@@ -27,8 +27,8 @@ export default class KennBasicAttack extends Ability {
                 pred.pos.y,
                 70,
                 player.mouseDirection + (n == 1 ? Math.random() * 40 - 20 : 0),
-                1, 0, 10,
-                inUlt ? 35 : 25,
+                1, 1, 10,
+                inUlt ? 50 : 25,
                 bleeds ? 10 : 0,
                 inUlt ? 10 : 0,
             );

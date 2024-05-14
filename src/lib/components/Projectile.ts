@@ -31,6 +31,8 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
     destroyed: boolean = false;
     bounceCount: number = 0;
 
+    cancelled = false;
+
     constructor(
         owner: Player,
         id: number,
@@ -70,12 +72,17 @@ export default class Projectile extends GamePhysicalElement implements ILifetime
 
     }
 
+    cancel() {
+        this.cancelled = true;
+        this.destroy();
+    }
+
     destroy(){
 
         if (this.game == undefined) return;
         if (this.destroyed) return;
         this.destroyed = true;
-        this.onDestroy();
+        if (!this.cancelled) this.onDestroy();
 
         let projectileDestroy = new TResProjectileDestroy();
         projectileDestroy.projId = this.id;

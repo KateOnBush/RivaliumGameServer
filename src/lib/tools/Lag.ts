@@ -19,7 +19,7 @@ export default class Lag {
 
     static compensateClose(ping: number){
 
-        return Math.min(ping, 250)/(2.1*fpsms);
+        return Math.min(ping, 200)/(2.5*fpsms);
 
     }
 
