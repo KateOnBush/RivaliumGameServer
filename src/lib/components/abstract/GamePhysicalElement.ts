@@ -4,6 +4,7 @@ import GameElement from "./GameElement";
 
 export default abstract class GamePhysicalElement extends GameElement {
 
+    applyGravity: boolean = true;
     mov: Vector2 = new Vector2();
 
     get direction() {
@@ -24,7 +25,7 @@ export default abstract class GamePhysicalElement extends GameElement {
 
     move(dt: number){
 
-        this.mov.add(Vector2.multiply(gravityVec, dt));
+        if (this.applyGravity) this.mov.add(Vector2.multiply(gravityVec, dt));
         this.pos.add(this.mov);
 
     }

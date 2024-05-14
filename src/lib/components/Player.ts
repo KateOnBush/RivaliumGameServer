@@ -22,6 +22,8 @@ import TResPlayerStatsUpdate from "../networking/tcp/response/TResPlayerStatsUpd
 import Character, {CharacterUltimateChargeType} from "./abstract/Character";
 import Ability from "./abstract/Ability";
 import UResEffectRemove from "../networking/udp/response/UResEffectRemove";
+import TResPlayerRespawn from "../networking/tcp/response/TResPlayerRespawn";
+import CasualGame from "./games/CasualGame";
 
 export enum PlayerEffect {
 
@@ -61,6 +63,8 @@ export default class Player extends GamePhysicalElement {
 
     TCPsocket: TCPPlayerSocket;
     UDPsocket: UDPPlayerSocket = new UDPPlayerSocket("", 0);
+    receivingCounter: number = 0;
+    sendingCounter: number = 0;
 
     mouse: Vector2 = new Vector2();
     state: PlayerState = new PlayerState();
@@ -78,9 +82,9 @@ export default class Player extends GamePhysicalElement {
     deaths: number = 0;
     assists: number = 0;
 
-    lethality: number = 5;
-    resistance: number = 8;
-    haste: number = 3;
+    lethality: number = 0;
+    resistance: number = 0;
+    haste: number = 0;
 
     boost: number = 1;
     boostTimeouts: NodeJS.Timeout[] = [];
@@ -101,8 +105,8 @@ export default class Player extends GamePhysicalElement {
     protectedUntil: number = 0;
     get redemptive() { return this.redemptiveUntil > Date.now(); }
     get protected() { return this.protectedUntil > Date.now(); }
-    setRedemptive(duration: number) { this.redemptiveUntil = Math.max(this.redemptiveUntil, Date.now() + duration); }
-    setProtected(duration: number) { this.protectedUntil = Math.max(this.protectedUntil, Date.now() + duration); }
+    setRedemptive(duration: number) { this.redemptiveUntil = Math.max(this.redemptiveUntil, Date.now() + duration * 1000); }
+    setProtected(duration: number) { this.protectedUntil = Math.max(this.protectedUntil, Date.now() + duration * 1000); }
     removeProtection() {this.protectedUntil = 0;}
 
     constructor(socket: TCPPlayerSocket, id: number, charId: number, team: number = 0, position?: Vector2, state?: PlayerState){
@@ -118,6 +122,10 @@ export default class Player extends GamePhysicalElement {
         this.ultimateCharge = this.maxUltimateCharge;
         this.team = team;
 
+    }
+
+    override step(dt: number) {
+        this.applyGravity = (this.state.onGround == 1);
     }
 
     updateStats() {
@@ -138,11 +146,11 @@ export default class Player extends GamePhysicalElement {
         this.boostTimeouts.push(timeout);
     }
 
-    get dead() { return this.state.id == EPlayerState.DEAD };
+    get dead() { return this.state.dead == 1; }
 
     hit(damage: number, attacker: Player, visual: boolean = true, burn = false) {
 
-        if (this.state.id == EPlayerState.DEAD) return;
+        if (this.dead) return;
         if (this.team == attacker.team) return;
 
         if (!burn && this.protected) {
@@ -206,7 +214,7 @@ export default class Player extends GamePhysicalElement {
 
     healInstantly(amt: number, healer: Player = this, visual = true, gradual = false){
 
-        if (this.state.id == EPlayerState.DEAD) return;
+        if (this.dead) return;
 
         if (!gradual) amt += this.resistance * 2;
 
@@ -229,7 +237,7 @@ export default class Player extends GamePhysicalElement {
 
     heal(amt: number, time: number, healer: Player = this){
 
-        if (this.state.id == EPlayerState.DEAD) return;
+        if (this.dead) return;
 
         amt += this.resistance * 10;
 
@@ -304,6 +312,8 @@ export default class Player extends GamePhysicalElement {
 
     kill(killer: Player) {
 
+        this.state.dead = 1;
+
         this.game.onKill(this, killer);
         this.character.onDeath(this, killer);
         killer.character.onKill(killer, this);
@@ -344,8 +354,14 @@ export default class Player extends GamePhysicalElement {
     }
 
     respawn() {
-        this.state.id = EPlayerState.FREE;
-        //TELEPORT TO A NEW SPOT
+
+        this.state.dead = 0;
+        this.health = this.maxHealth;
+
+        let respawnPacket = new TResPlayerRespawn();
+        respawnPacket.playerId = this.id;
+
+        this.game.broadcast(respawnPacket);
     }
 
 

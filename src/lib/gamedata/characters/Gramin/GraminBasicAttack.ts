@@ -34,7 +34,7 @@ export default class GraminBasicAttack extends Ability {
     onCast(n: number): void {
 
         this.shootFunc();
-        if (n == 1) [.1, .2, .3, .4, .5, .6, .7, .8, .9, 1].forEach(time=>{
+        if (n == 1) [.1, .2, .3, .4, .5, .6, .7].forEach(time=>{
             setTimeout(() => this.shootFunc(), time * 1000)
         })
 

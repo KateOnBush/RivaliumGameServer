@@ -17,7 +17,8 @@ export default class KennSignature2 extends Ability {
     async onCast(n: number) {
 
         let player = this.player;
-        player.addEffect(PlayerEffect.PROTECTION, 3);
+        player.addEffect(PlayerEffect.REDEMPTION, 3);
+        player.setRedemptive(3);
         await Time.wait(1000);
         const delays = new Array(10);
         let inUlt = player.abilities[3].data.active;
@@ -33,7 +34,7 @@ export default class KennSignature2 extends Ability {
                 70,
                 player.mouseDirection,
                 1, 0, 5,
-                inUlt ? 35 : 25,
+                inUlt ? 50 : 25,
                 bleeds ? 10 : 0,
                 inUlt ? 10 : 0,
             );
@@ -45,7 +46,7 @@ export default class KennSignature2 extends Ability {
                 70,
                 GM.point_direction(0, 0, player.x - player.mouse.x , player.mouse.y - player.y),
                 1, 0, 5,
-                inUlt ? 35 : 25,
+                inUlt ? 50 : 25,
                 bleeds ? 10 : 0,
                 inUlt ? 10 : 0,
             );

@@ -8,5 +8,7 @@ export default class PlayerState {
     onGround: NumericBoolean;
     orientation: SignedNumericBoolean;
     slide: NumericBoolean;
+    dead: NumericBoolean;
+    blocked: NumericBoolean;
 
 }

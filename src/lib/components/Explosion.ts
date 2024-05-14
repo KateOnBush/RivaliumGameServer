@@ -4,6 +4,8 @@ import Player from "./Player";
 import GameElement from "./abstract/GameElement";
 import ExplosionList from "../gamedata/instancelist/ExplosionList";
 import Vector2 from "../tools/vector/Vector2";
+import {Encoding} from "crypto";
+import Entity from "./Entity";
 
 export default class Explosion extends GameElement implements ILifetimedElement, IPlayerElement {
 
@@ -19,6 +21,8 @@ export default class Explosion extends GameElement implements ILifetimedElement,
     playersInDamageRadius: Player[] = [];
     playersInShockwaveRadius: Player[] = [];
 
+    entitiesInDamageRadius: Entity[] = [];
+
     constructor(owner: Player, id: number, x: number, y: number, radius: number, damage: number){
      
         super();
@@ -33,6 +37,10 @@ export default class Explosion extends GameElement implements ILifetimedElement,
     }
 
     trigger() {
+        this.entitiesInDamageRadius = this.game.entities.filter(entity => Vector2.subtract(entity.pos, this.pos).magnitude() < this.radius);
+        this.entitiesInDamageRadius.forEach(entity => {
+            entity.hit(this.damage, this.owner);
+        });
         this.playersInDamageRadius = this.game.players.filter(player => Vector2.subtract(player.pos, this.pos).magnitude() < this.radius);
         this.playersInShockwaveRadius = this.game.players.filter(player => Vector2.subtract(player.pos, this.pos).magnitude() < this.radius * 2);
         this.playersInDamageRadius.forEach(player => {

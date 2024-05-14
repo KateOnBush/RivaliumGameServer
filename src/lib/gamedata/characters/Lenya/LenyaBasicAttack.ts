@@ -19,7 +19,7 @@ export default class LenyaBasicAttack extends Ability {
             pred.pos.x, pred.pos.y,
             70, player.mouseDirection,
             1, 1, 5,
-            n == 0 ? 2 : 25, 0, n == 0 ? 25 : 0
+            n == 0 ? 5 : 15, 0, n == 0 ? 5 : 0
         );
     }
 

@@ -19,7 +19,7 @@ export default class Lag {
 
     static compensateClose(ping: number){
 
-        return Math.min(ping, 250)/(2.1*fpsms);
+        return Math.min(ping, 200)/(2.5*fpsms);
 
     }
 
@@ -29,21 +29,22 @@ export default class Lag {
 
     }
 
-    static predictPosition(posVec: Vector2, movVec: Vector2, amt: number): Prediction {
+    static predictPosition(posVec: Vector2, movVec: Vector2, amt: number, gravity = true): Prediction {
 
         posVec.add(Vector2.multiply(movVec, amt));
-        movVec.add(Vector2.multiply(gravityVec, amt));
+        if (gravity) movVec.add(Vector2.multiply(gravityVec, amt));
         
         return {pos: posVec, mov: movVec};
     
     }
 
-    static predictNextPosition(player: Player){
+    static predictNextPosition(player: Player, gravity = true){
 
         return this.predictPosition(
             player.pos,
             player.mov,
-            this.compensateClose(player.ping.ms)
+            this.compensateClose(player.ping.ms),
+            gravity
         );
 
     }

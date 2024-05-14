@@ -10,6 +10,7 @@ import UDPPacket from "../UDPPacket";
 export default class UResPlayerUpdate extends UDPPacket {
 
     static override attributes = new FormattedPacketAttributeListBuilder()
+        .add("counter", EBufferType.UInt32)
         .add("playerId", EBufferType.UInt16)
         .add("stateId", EBufferType.UInt8)
         .add("x", EBufferType.SInt32, 100)
@@ -21,6 +22,8 @@ export default class UResPlayerUpdate extends UDPPacket {
         .add("onGround", EBufferType.UInt8).asBoolean()
         .add("slide", EBufferType.UInt8).asBoolean()
         .add("direction", EBufferType.UInt8).asBoolean()
+        .add("dead", EBufferType.UInt8).asBoolean()
+        .add("blocked", EBufferType.UInt8).asBoolean()
         .add("gemHolder", EBufferType.UInt8).asBoolean()
         .add("characterId", EBufferType.UInt8)
         .add("health", EBufferType.UInt16)
@@ -33,6 +36,8 @@ export default class UResPlayerUpdate extends UDPPacket {
         .add("haste", EBufferType.UInt8)
         .build();
     static override index = UDPServerResponse.PLAYER_UPDATE;
+
+    counter: number = 0;
 
     playerId: PlayerID;
     x: number;
@@ -53,6 +58,8 @@ export default class UResPlayerUpdate extends UDPPacket {
     onGround: NumericBoolean;
     slide: NumericBoolean;
     direction: NumericBoolean;
+    dead: NumericBoolean;
+    blocked: NumericBoolean;
     gemHolder: NumericBoolean;
 
     movementBoost: number = 0;

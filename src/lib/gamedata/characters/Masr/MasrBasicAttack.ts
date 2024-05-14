@@ -15,7 +15,7 @@ export default class MasrBasicAttack extends Ability {
         let isUlt = player.abilities[3].data.active;
         if (n == 0) {
             player.game.addProjectile(MasrBolt, player,
-                player.x, player.y, 80, player.mouseDirection, 1, 1, 10, isUlt ? 30 : 25, 0, 0, 1, 1, 0)
+                player.x, player.y, 80, player.mouseDirection, 1, 1, 10, isUlt ? 40 : 30, 0, 0, 1, 1, 0)
         } else {
             if (isUlt) {
                 setTimeout(() => {
